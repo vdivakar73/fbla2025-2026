@@ -133,7 +133,7 @@
 										localStorage.setItem('lostItems', JSON.stringify(items));
 								}
 								localStorage.removeItem('selectedItem');
-								window.location.href = 'page3.html';
+								window.location.href = 'Find Your Missing Item.html';
 						});
 
 						// Email buttons
@@ -154,7 +154,7 @@
 		function renderChooser(items){
 			const container = document.getElementById('content');
 			if (!items || items.length === 0) {
-				container.innerHTML = '<div class="card">No items available. Go to <a href="page2.html">File Missing Item</a> to add one.</div>';
+				container.innerHTML = '<div class="card">No items available. Go to <a href="File A Complaint.html">File Missing Item</a> to add one.</div>';
 				return;
 			}
 			container.innerHTML = '<h2>Select an item to coordinate pickup</h2>' + items.map((it, idx) => `\
