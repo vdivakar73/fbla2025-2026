@@ -21,7 +21,7 @@
         <!--
             IMPORTANT: This page reads `localStorage.lostItems` and renders the list.
             - `datePosted` is used to sort and to determine the 7-day pruning cutoff.
-            - `localStorage.selectedItem` is set when a user clicks "Coordinate Pickup" and is read by `page4.html`.
+            - `localStorage.selectedItem` is set when a user clicks "Coordinate Pickup" and is read by `Coordinate Pickup.html`.
         -->
     <header>
         <h1>Find Your Missing Item</h1>
@@ -143,7 +143,7 @@
                     </div>
                     
                     <div style="color: #999; font-size: 0.85rem; margin-top: 0.75rem;">Posted: ${escapeHtml(item.datePosted)}</div>
-                    <button onclick="viewItem('${item.datePosted}')" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Coordinate Pickup</button>
+                    <button onclick="viewItem(${index})" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Coordinate Pickup</button>
                 </div>
             `).join('');
         }
@@ -195,18 +195,23 @@
             displayItems(allItems);
         }
 
-        // When a user wants to coordinate pickup, save the selected item and go to page4
-        // - Saves selected item to `localStorage.selectedItem` so `page4.html` can render it
-        function viewItem(datePosted) {
-            const selected = allItems.find(item => item.datePosted === datePosted);
+        // When a user wants to coordinate pickup, save the selected item and go to Coordinate Pickup.html
+        // - Saves selected item to `localStorage.selectedItem` so `Coordinate Pickup.html` can render it
+        // When a user wants to coordinate pickup, save the selected item and go to Coordinate Pickup.html
+// The function now uses the item's unique array index for reliable selection.
+        function viewItem(index) {
+            const selected = allItems[index]; // <-- CORRECT WAY: Select item directly by index
+            
             if (!selected) {
-                alert('Item not found');
+                alert('Item not found. Please refresh the page.');
                 return;
             }
-            // store selected item for page4 to read
+            
+            // store selected item for Coordinate Pickup.html to read
             localStorage.setItem('selectedItem', JSON.stringify(selected));
-            // navigate to page4 where pickup coordination can occur
-            window.location.href = 'page4.html';
+            
+            // navigate to Coordinate Pickup.html where pickup coordination can occur
+            window.location.href = 'Coordinate Pickup.html';
         }
 
         function escapeHtml(s) {
