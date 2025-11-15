@@ -30,8 +30,14 @@
 	</main>
 
 	<script>
+		/* IMPORTANT: This page reads `localStorage.selectedItem` to render a selected item.
+		     Pickup requests are saved to `localStorage.pickupRequests` and collected items are removed
+		     from `localStorage.lostItems` when marked as collected.
+		*/
+		// Escape text before rendering into HTML
 		function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
 
+		// Find item index helper (used when marking collected)
 		function findItemIndex(items, item) {
 			return items.findIndex(i => i.datePosted === item.datePosted && i.item_name === item.item_name && i.email === item.email);
 		}
@@ -48,6 +54,7 @@
 			const container = document.getElementById('content');
 						container.innerHTML = `
 								<div class="card">
+									${selected.image ? `<img src="${selected.image}" style="width: 100%; height: 250px; object-fit: cover; border-radius: 6px; margin-bottom: 1rem;" alt="Item" />` : ''}
 									<h2 style="margin-top:0;">${escapeHtml(selected.item_name)}</h2>
 									<div class="muted">Category: ${escapeHtml(selected.category)} • Date lost: ${escapeHtml(selected.date_lost)}</div>
 									<p style="margin-top:1rem;">${escapeHtml(selected.description)}</p>
@@ -66,6 +73,16 @@
 
 										<label for="note">Note / pickup instructions (optional)</label>
 										<textarea id="note" rows="3" placeholder="Where to meet, locker number, etc."></textarea>
+
+										${selected.category.toLowerCase() === 'electronics' ? `
+											<div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+												<label style="margin-top: 0;">Verification Required (Electronics)</label>
+												<p style="margin: 0.5rem 0 0 0; color: #856404; font-size: 0.9rem;">Since this is an electronics item, please provide verification that you are the rightful owner:</p>
+												
+												<label for="verification" style="margin-top: 0.75rem;">Verification (serial number, IMEI, description of damage, etc.)</label>
+												<textarea id="verification" rows="3" placeholder="Provide details that prove ownership..." required></textarea>
+											</div>
+										` : ''}
 
 										<div class="actions">
 											<button type="submit" class="btn btn-primary">Request Pickup</button>
@@ -87,7 +104,19 @@
 								const pref = document.getElementById('preferred').value;
 								const phone = document.getElementById('phone').value;
 								const note = document.getElementById('note').value;
-								const req = { item: selected, preferred: pref, phone, note, requestedAt: new Date().toLocaleString() };
+								
+								// Check if verification is required and filled
+								let verification = '';
+								if (selected.category.toLowerCase() === 'electronics') {
+									const verField = document.getElementById('verification');
+									if (!verField.value.trim()) {
+										alert('Please provide verification details for this electronics item.');
+										return;
+									}
+									verification = verField.value;
+								}
+								
+								const req = { item: selected, preferred: pref, phone, note, verification, requestedAt: new Date().toLocaleString() };
 								const arr = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
 								arr.push(req);
 								localStorage.setItem('pickupRequests', JSON.stringify(arr));
