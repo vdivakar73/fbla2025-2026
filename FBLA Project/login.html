@@ -1,0 +1,44 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKHS Lost & Found Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .box { width: 320px; padding: 24px; border: 1px solid #ccc; border-radius: 12px; }
+    input { width: 100%; padding: 10px; margin: 10px 0; }
+    button { width: 100%; padding: 10px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>AKHS Lost & Found Services</h2>
+    <p>Enter Verification Code</p>
+    <input type="text" id="code" placeholder="Verification Code" />
+    <button onclick="login()">Login</button>
+    <p id="err" style="color:red"></p>
+  </div>
+
+  <script>
+    function login() {
+      const code = document.getElementById('code').value;
+      if (code === 'AKHS2025') { // critical: simple check only for demo
+        window.location.href = 'index.html';
+      } else {
+        document.getElementById('err').textContent = 'Invalid code.';
+      }
+    }
+  </script>
+</body>
+</html>
+
+<!-- main.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKHS Lost & Found Main</title>
+</head>
