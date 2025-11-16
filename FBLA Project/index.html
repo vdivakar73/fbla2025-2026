@@ -200,62 +200,6 @@
       z-index: 1;
     }
 
-    .user-section {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-greeting {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 10px 20px;
-      border-radius: 25px;
-      color: white;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-      display: none;
-    }
-
-    .login-btn-header {
-      background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
-      color: white;
-      text-decoration: none;
-      padding: 10px 25px;
-      border-radius: 25px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .login-btn-header:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    }
-
-    .logout-btn {
-      background: rgba(231, 76, 60, 0.9);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      display: none;
-    }
-
-    .logout-btn:hover {
-      background: rgba(192, 57, 43, 1);
-      transform: translateY(-2px);
-    }
-
     /* Responsive Design */
     @media (max-width: 768px) {
       .hero-header h1 {
@@ -275,12 +219,6 @@
       p1 strong {
         font-size: 24px;
       }
-
-      .user-section {
-        position: static;
-        justify-content: center;
-        margin-top: 20px;
-      }
     }
   </style>
 </head>
@@ -290,11 +228,6 @@
        - The `.hero-header` CSS sets the background image and overlay used for the header.
   -->
   <header class="hero-header">
-    <div class="user-section">
-      <div id="user-greeting" class="user-greeting"></div>
-      <a href="login.html" id="login-btn" class="login-btn-header">🔐 Login</a>
-      <button id="logout-btn" class="logout-btn" onclick="logout()">Logout</button>
-    </div>
     <h1>Ardrey Kell Lost and Found Services</h1>
     <nav>
       <a href="find-your-missing-item.html">🔍 Find Your Missing Item</a>
@@ -316,32 +249,5 @@
     </p1>
   </div>
 
-  <script>
-    // Check if user is logged in
-    function checkLoginStatus() {
-      const user = localStorage.getItem('lostFoundUser') || sessionStorage.getItem('lostFoundUser');
-      
-      if (user) {
-        const userData = JSON.parse(user);
-        const greeting = document.getElementById('user-greeting');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        
-        // Show user greeting and logout button
-        greeting.textContent = `👋 Welcome, ${userData.username} (${userData.userType})`;
-        greeting.style.display = 'block';
-        logoutBtn.style.display = 'block';
-        loginBtn.style.display = 'none';
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('lostFoundUser');
-      sessionStorage.removeItem('lostFoundUser');
-      window.location.reload();
-    }
-
-    // Check login status when page loads
-    window.addEventListener('load', checkLoginStatus);
-  </script>
 </body>
+</html>
