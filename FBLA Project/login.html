@@ -326,9 +326,10 @@
 
         showSuccess('Login successful! Redirecting...');
         
-        // Redirect to home page after 1 second
+        // Redirect to home page after 1 second with cache busting
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'index.html?t=' + Date.now();
+          window.location.reload(true);
         }, 1000);
       } else {
         showError('Invalid username or password. Please try again.');
@@ -359,7 +360,8 @@
         const userData = JSON.parse(user);
         showSuccess(`Already logged in as ${userData.username}. Redirecting...`);
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'index.html?t=' + Date.now();
+          window.location.reload(true);
         }, 1500);
       }
     });
