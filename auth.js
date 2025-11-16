@@ -81,7 +81,7 @@ function handleLogin(e) {
   }));
   
   showSuccess(`Welcome back, ${user.name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'Homepage.html', 1000);
+  setTimeout(() => window.location.href = 'index.html', 1000);
 }
 
 function handleSignup(e) {
@@ -124,7 +124,7 @@ function handleSignup(e) {
   }));
   
   showSuccess(`Account created! Welcome, ${name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'Homepage.html', 1500);
+  setTimeout(() => window.location.href = 'index.html', 1500);
 }
 
 function showError(id, msg) {
