@@ -4,14 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Feedback - Ardrey Kell Lost & Found</title>
-  <script>
-    // Authentication check - redirect to login if not logged in
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
-      alert('Please login to submit feedback');
-      window.location.href = 'login.html';
-    }
-  </script>
+  <script src="auth.js"></script>
+  <script>checkAuth();</script>
   <style>
     * {
       margin: 0;

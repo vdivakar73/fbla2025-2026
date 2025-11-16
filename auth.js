@@ -81,7 +81,7 @@ function handleLogin(e) {
   }));
   
   showSuccess(`Welcome back, ${user.name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'index.html', 1000);
+  setTimeout(() => window.location.href = 'Homepage.html', 1000);
 }
 
 function handleSignup(e) {
@@ -124,7 +124,7 @@ function handleSignup(e) {
   }));
   
   showSuccess(`Account created! Welcome, ${name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'index.html', 1500);
+  setTimeout(() => window.location.href = 'Homepage.html', 1500);
 }
 
 function showError(id, msg) {
@@ -141,12 +141,23 @@ function showSuccess(msg) {
 }
 
 // FAQ Toggle
-function toggleFAQ(el) {
-  const item = el.parentElement;
-  const isActive = item.classList.contains('active');
+function toggleFaq(element) {
+  const answer = element.nextElementSibling;
+  const isActive = answer.classList.contains('active');
   
-  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-  if (!isActive) item.classList.add('active');
+  // Close all other FAQs
+  document.querySelectorAll('.faq-answer').forEach(ans => {
+    ans.classList.remove('active');
+  });
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.classList.remove('active');
+  });
+  
+  // Toggle current FAQ
+  if (!isActive) {
+    answer.classList.add('active');
+    element.classList.add('active');
+  }
 }
 
 // Stats Update

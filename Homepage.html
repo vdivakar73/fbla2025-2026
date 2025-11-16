@@ -417,43 +417,8 @@
   
   </header>
 
-  <script>
-    // Check login status and update UI
-    function updateAuthButton() {
-      const userData = JSON.parse(localStorage.getItem('currentUser') || 'null');
-      const authButton = document.getElementById('auth-button');
-      const welcomeMessage = document.getElementById('welcome-message');
-      
-      if (userData) {
-        authButton.textContent = 'Logout';
-        authButton.classList.add('logout-button');
-        welcomeMessage.textContent = `Welcome back, ${userData.name}! 👋`;
-      } else {
-        authButton.textContent = 'Login';
-        authButton.classList.remove('logout-button');
-        welcomeMessage.textContent = '';
-      }
-    }
-
-    function handleAuth(event) {
-      event.preventDefault();
-      const userData = JSON.parse(localStorage.getItem('currentUser') || 'null');
-      
-      if (userData) {
-        // Logout
-        if (confirm('Are you sure you want to logout?')) {
-          localStorage.removeItem('currentUser');
-          updateAuthButton();
-        }
-      } else {
-        // Redirect to login
-        window.location.href = 'login.html';
-      }
-    }
-
-    // Initialize on page load
-    updateAuthButton();
-  </script>
+  <script src="auth.js"></script>
+  <script>updateAuthButton();</script>
 
   <div class="about-section">
     <h2>About Our Lost & Found</h2>
@@ -552,42 +517,6 @@
   </div>
 
   <script>
-    // Toggle FAQ dropdown
-    function toggleFaq(element) {
-      const answer = element.nextElementSibling;
-      const isActive = answer.classList.contains('active');
-      
-      // Close all other FAQs
-      document.querySelectorAll('.faq-answer').forEach(ans => {
-        ans.classList.remove('active');
-      });
-      document.querySelectorAll('.faq-question').forEach(q => {
-        q.classList.remove('active');
-      });
-      
-      // Toggle current FAQ
-      if (!isActive) {
-        answer.classList.add('active');
-        element.classList.add('active');
-      }
-    }
-
-    // Calculate and display statistics
-    function updateStats() {
-      const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
-      const pickupRequests = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
-      
-      const totalReports = items.length;
-      const reunited = pickupRequests.length;
-      const pending = totalReports - reunited;
-      const successRate = totalReports > 0 ? Math.round((reunited / totalReports) * 100) : 0;
-      
-      document.getElementById('totalReports').textContent = totalReports;
-      document.getElementById('reunited').textContent = reunited;
-      document.getElementById('pending').textContent = pending;
-      document.getElementById('successRate').textContent = successRate + '%';
-    }
-    
     // Create category pie chart
     function createCategoryChart() {
       const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
