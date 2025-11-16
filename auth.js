@@ -165,14 +165,10 @@ function updateStats() {
   const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
   const pickups = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
   
-  // Add base numbers to show positive stats even without data
-  const baseReunited = 47;
-  const baseTotal = 53;
-  
-  const total = items.length + baseTotal;
-  const reunited = pickups.length + baseReunited;
+  const total = items.length;
+  const reunited = pickups.length;
   const pending = total - reunited;
-  const rate = total > 0 ? Math.round((reunited / total) * 100) : 89;
+  const rate = total > 0 ? Math.round((reunited / total) * 100) : 0;
   
   document.getElementById('totalReports').textContent = total;
   document.getElementById('reunited').textContent = reunited;
