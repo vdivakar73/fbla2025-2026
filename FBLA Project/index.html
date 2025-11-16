@@ -13,126 +13,255 @@
     }
     
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    
-    header {
-      background-color: #7C078F;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    
-    header img {
-      display: inline-block;
-      margin-bottom: 15px;
-    }
-    
-    .top-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    header a {
-      color: white;
-      text-decoration: none;
-      margin: 10px 20px;
-      display: inline-block;
-      font-weight: bold;
-      font-size: 16px;
-    }
-    
-    header a:hover {
-      color: #3498db;
-      text-decoration: underline;
-    }
-    
-    header hr {
-      margin-top: 20px;
-      border: none;
-      border-top: 2px solid #3498db;
-    }
-    
-    main {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    main p {
-      font-size: 18px;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    
-    .oval-button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-    
-    .oval-button:hover {
-      background-color: #2980b9;
-    }
-    
-    .scrollmenu {
-      background-color: #f0f0f0;
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 5px;
-      min-height: 50px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a0a0a;
+      color: #e0e0e0;
     }
 
     .hero-header {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://d1hfln2sfez66z.cloudfront.net/04-29-2023/t_adbaeba330fc4a1eafa10d48c0d7107f_name_ARDREY_KELL_HS_BAT_PROBLEM_transfer_frame_608.jpeg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      background: linear-gradient(135deg, #1a0a2e 0%, #0f0518 50%, #1a0a2e 100%);
       width: 100%;
-      padding: 60px 20px;
+      padding: 80px 20px 60px;
       text-align: center;
       color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(138, 43, 226, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.15), transparent 50%);
+      pointer-events: none;
     }
 
     .hero-header h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
+      font-size: 56px;
+      margin-bottom: 30px;
       font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 50%, #9333ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
     }
 
     .hero-header nav {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 25px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
 
     .hero-header a {
       color: white;
       text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      background-color: rgba(52, 152, 219, 0.8);
+      padding: 14px 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
       font-weight: bold;
-      transition: background-color 0.3s ease;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+      border: 1px solid rgba(147, 51, 234, 0.3);
     }
 
     .hero-header a:hover {
-      background-color: rgba(52, 152, 219, 1);
+      background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+    }
+
+    .about-section {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #1a0a2e 0%, #16051f 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+      border: 2px solid #7c3aed;
+      position: relative;
+    }
+
+    .about-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #7c3aed, #9333ea, #a855f7);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.5;
+      filter: blur(10px);
+    }
+
+    .about-section h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .about-section p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #d1d5db;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-align: justify;
+    }
+
+    .about-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #1a0a2e 0%, #16051f 100%);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #7c3aed;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #7c3aed, #9333ea, #a855f7);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.3;
+      filter: blur(8px);
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      color: #d1d5db;
+      font-weight: 600;
+    }
+
+    .faq-section, .tips-section {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #1a0a2e 0%, #16051f 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+      border: 2px solid #7c3aed;
+      position: relative;
+    }
+
+    .faq-section::before, .tips-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #7c3aed, #9333ea, #a855f7);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.5;
+      filter: blur(10px);
+    }
+
+    .faq-section h2, .tips-section h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .faq-item {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border-left: 4px solid #9333ea;
+    }
+
+    .faq-question {
+      font-size: 20px;
+      font-weight: bold;
+      color: #b794f6;
+      margin-bottom: 10px;
+    }
+
+    .faq-answer {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    .tips-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list li {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border-left: 4px solid #9333ea;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    .tips-list li strong {
+      color: #b794f6;
     }
   </style>
 </head>
@@ -149,17 +278,112 @@
       <a href="coordinate-pickup.html">Coordinate Pickup</a>
     </nav>
   
-      <body>
-        <p1>About Our Lost & Found
-
-Welcome to our Lost & Found—created with one simple goal in mind: to help our community stay connected and cared for. We know how stressful it can be to misplace something important, and how uplifting it feels when someone helps you get it back. That’s why this space exists.
-
-Our Lost & Found is more than just a page—it's a commitment to kindness, responsibility, and support. By giving everyone a central place to report lost items or share what they’ve found, we make it easier for things to return to their owners and for our community to look out for one another.
-
-Every item returned is a reminder that small acts of honesty and empathy matter. Together, we can make this website not just a resource, but a reflection of the positive, connected community we’re building.</p1>
-      </body>
-
-      
-      
   </header>
+
+  <div class="about-section">
+    <h2>About Our Lost & Found</h2>
+    
+    <p>Welcome to our Lost & Found—created with one simple goal in mind: to help our community stay connected and cared for. We know how stressful it can be to misplace something important, and how uplifting it feels when someone helps you get it back. That's why this space exists.</p>
+
+    <p>Our Lost & Found is more than just a page—it's a commitment to kindness, responsibility, and support. By giving everyone a central place to report lost items or share what they've found, we make it easier for things to return to their owners and for our community to look out for one another.</p>
+
+    <p>Every item returned is a reminder that small acts of honesty and empathy matter. Together, we can make this website not just a resource, but a reflection of the positive, connected community we're building.</p>
+  </div>
+
+  <!-- Statistics Section -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-number" id="totalReports">0</div>
+      <div class="stat-label">Items Reported</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="reunited">0</div>
+      <div class="stat-label">Successfully Reunited</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pending">0</div>
+      <div class="stat-label">Still Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="successRate">0%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <div class="faq-question">Q: What should I do if I find a lost item?</div>
+      <div class="faq-answer">A: Click "File Missing Item" to report the found item. Provide as much detail as possible including description, location where found, and upload a photo if available. This helps the rightful owner identify their item.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Q: How do I search for my lost item?</div>
+      <div class="faq-answer">A: Visit "Find Your Missing Item" to browse all reported items. You can filter by category, date, and location to quickly find your item.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Q: What is the verification process for electronics?</div>
+      <div class="faq-answer">A: For security reasons, electronics require verification such as serial numbers, IMEI, or specific details about the device (lock screen photo, case description, etc.) to ensure items are returned to rightful owners.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Q: How long are items kept in the system?</div>
+      <div class="faq-answer">A: Items remain in our system indefinitely until claimed. However, we recommend checking regularly as some items may be collected without updating the system.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Q: Can I coordinate pickup directly with the finder?</div>
+      <div class="faq-answer">A: Yes! Use the "Coordinate Pickup" feature to schedule a time and place to retrieve your item. You can also contact the reporter directly via the provided email.</div>
+    </div>
+  </div>
+
+  <!-- Tips Section -->
+  <div class="tips-section">
+    <h2>Tips for Using Our Lost & Found</h2>
+    
+    <ul class="tips-list">
+      <li><strong>Be Detailed:</strong> When reporting a found item, include specific details like brand, color, unique features, and exact location where found.</li>
+      
+      <li><strong>Upload Photos:</strong> A picture is worth a thousand words! Upload clear photos of found items to help owners identify their belongings.</li>
+      
+      <li><strong>Check Daily:</strong> New items are added frequently. If you've lost something, check back daily for updates.</li>
+      
+      <li><strong>Act Quickly:</strong> If you see your item, coordinate pickup as soon as possible to ensure it's still available.</li>
+      
+      <li><strong>Verify Ownership:</strong> For valuable items, be prepared to provide proof of ownership such as receipts, serial numbers, or specific details only the owner would know.</li>
+      
+      <li><strong>Be Patient:</strong> It may take some time for someone to find and report your item. Keep checking back regularly.</li>
+      
+      <li><strong>Say Thank You:</strong> If someone finds and returns your item, a simple thank you goes a long way in building our caring community!</li>
+    </ul>
+  </div>
+
+  <script>
+    // Calculate and display statistics
+    function updateStats() {
+      const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+      const pickupRequests = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
+      
+      const totalReports = items.length;
+      const reunited = pickupRequests.length;
+      const pending = totalReports - reunited;
+      const successRate = totalReports > 0 ? Math.round((reunited / totalReports) * 100) : 0;
+      
+      document.getElementById('totalReports').textContent = totalReports;
+      document.getElementById('reunited').textContent = reunited;
+      document.getElementById('pending').textContent = pending;
+      document.getElementById('successRate').textContent = successRate + '%';
+    }
+    
+    // Update stats on page load
+    updateStats();
+    
+    // Update stats every 5 seconds in case localStorage changes
+    setInterval(updateStats, 5000);
+  </script>
+
 </body>
+</html>
