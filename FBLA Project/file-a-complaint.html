@@ -63,6 +63,27 @@
         a:hover {
             text-decoration: underline;
         }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .success-banner {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        input.error, textarea.error, select.error {
+            border-color: #dc3545;
+        }
+        input.success, textarea.success, select.success {
+            border-color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -71,11 +92,13 @@
          The image (if provided) is stored as a Base64 data URL in `image`.
     -->
     <h1>File a Missing Item</h1>
+    <div id="success-banner" class="success-banner"></div>
     <form id="reportForm">
-        <label for="item_name">Item Name:</label>
-        <input type="text" id="item_name" placeholder="Name of the item (eg. backpack, phone)" required>
+        <label for="item_name">Item Name: <span style="color: red;">*</span></label>
+        <input type="text" id="item_name" placeholder="Name of the item (eg. backpack, phone)" required minlength="3">
+        <div id="item_name_error" class="error-message">Please enter at least 3 characters</div>
 
-        <label for="category">Category:</label>
+        <label for="category">Category: <span style="color: red;">*</span></label>
         <select id="category" required>
             <option value="">Select a category</option>
             <option value="electronics">Electronics</option>
@@ -84,24 +107,34 @@
             <option value="documents">Documents</option>
             <option value="other">Other</option>
         </select>
+        <div id="category_error" class="error-message">Please select a category</div>
 
-        <label for="description">Description:</label>
-        <textarea id="description" placeholder="Describe the item in detail..." required></textarea>
+        <label for="description">Description: <span style="color: red;">*</span></label>
+        <textarea id="description" placeholder="Describe the item in detail..." required minlength="10" maxlength="500"></textarea>
+        <div id="description_error" class="error-message">Please enter at least 10 characters</div>
+        <div style="text-align: right; font-size: 12px; color: #666; margin-top: -10px;">
+            <span id="char_count">0</span>/500 characters
+        </div>
 
-        <label for="location">Last Known Location:</label>
-        <input type="text" id="location" placeholder="Describe the last known location of the item..." required>
+        <label for="location">Last Known Location: <span style="color: red;">*</span></label>
+        <input type="text" id="location" placeholder="Describe the last known location of the item..." required minlength="3">
+        <div id="location_error" class="error-message">Please enter at least 3 characters</div>
 
-        <label for="date_lost">Date Lost:</label>
+        <label for="date_lost">Date Lost: <span style="color: red;">*</span></label>
         <input type="date" id="date_lost" required>
+        <div id="date_error" class="error-message">Please select a valid date</div>
 
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" placeholder="Enter your full name" required>
+        <label for="name">Your Name: <span style="color: red;">*</span></label>
+        <input type="text" id="name" placeholder="Enter your full name" required minlength="2">
+        <div id="name_error" class="error-message">Please enter at least 2 characters</div>
 
-        <label for="email">Email:</label>
+        <label for="email">Email: <span style="color: red;">*</span></label>
         <input type="email" id="email" placeholder="Enter your email address" required>
+        <div id="email_error" class="error-message">Please enter a valid email address</div>
 
         <label for="image">Item Picture (optional):</label>
         <input type="file" id="image" accept="image/*" placeholder="Upload a photo of the item">
+        <div id="image_error" class="error-message">Image must be less than 5MB</div>
         <div id="imagePreview" style="margin-top: 10px;"></div>
 
         <button type="submit">Submit Report</button>
@@ -110,16 +143,117 @@
     <script>
         let imageData = null;
 
+        // Validation functions
+        function validateField(field, errorDiv, validationFn, errorMsg) {
+            const value = field.value.trim();
+            const isValid = validationFn(value);
+            
+            if (!isValid && value !== '') {
+                field.classList.add('error');
+                field.classList.remove('success');
+                errorDiv.textContent = errorMsg;
+                errorDiv.style.display = 'block';
+                return false;
+            } else if (value !== '' && isValid) {
+                field.classList.remove('error');
+                field.classList.add('success');
+                errorDiv.style.display = 'none';
+                return true;
+            } else {
+                field.classList.remove('error', 'success');
+                errorDiv.style.display = 'none';
+                return value === '' ? null : true;
+            }
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validateDate(dateStr) {
+            if (!dateStr) return false;
+            const selectedDate = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return selectedDate <= today;
+        }
+
+        // Character counter for description
+        const descriptionField = document.getElementById('description');
+        const charCount = document.getElementById('char_count');
+        descriptionField.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+
+        // Real-time validation
+        document.getElementById('item_name').addEventListener('blur', function() {
+            validateField(this, document.getElementById('item_name_error'),
+                val => val.length >= 3, 'Please enter at least 3 characters');
+        });
+
+        document.getElementById('category').addEventListener('change', function() {
+            const errorDiv = document.getElementById('category_error');
+            if (this.value === '') {
+                this.classList.add('error');
+                errorDiv.style.display = 'block';
+            } else {
+                this.classList.remove('error');
+                this.classList.add('success');
+                errorDiv.style.display = 'none';
+            }
+        });
+
+        descriptionField.addEventListener('blur', function() {
+            validateField(this, document.getElementById('description_error'),
+                val => val.length >= 10, 'Please enter at least 10 characters');
+        });
+
+        document.getElementById('location').addEventListener('blur', function() {
+            validateField(this, document.getElementById('location_error'),
+                val => val.length >= 3, 'Please enter at least 3 characters');
+        });
+
+        document.getElementById('date_lost').addEventListener('change', function() {
+            validateField(this, document.getElementById('date_error'),
+                validateDate, 'Date cannot be in the future');
+        });
+
+        document.getElementById('name').addEventListener('blur', function() {
+            validateField(this, document.getElementById('name_error'),
+                val => val.length >= 2, 'Please enter at least 2 characters');
+        });
+
+        document.getElementById('email').addEventListener('blur', function() {
+            validateField(this, document.getElementById('email_error'),
+                validateEmail, 'Please enter a valid email address');
+        });
+
         // Handle image upload
-        // - Reads selected file with FileReader and stores Base64 data URL in `imageData`
-        // - Shows a preview in `#imagePreview`
         document.getElementById('image').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (!file) return;
+            const errorDiv = document.getElementById('image_error');
+            
+            if (!file) {
+                imageData = null;
+                document.getElementById('imagePreview').innerHTML = '';
+                errorDiv.style.display = 'none';
+                return;
+            }
 
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                this.value = '';
+                errorDiv.style.display = 'block';
+                document.getElementById('imagePreview').innerHTML = '';
+                imageData = null;
+                return;
+            }
+
+            errorDiv.style.display = 'none';
             const reader = new FileReader();
             reader.onload = function(event) {
-                imageData = event.target.result; // Base64 data URL
+                imageData = event.target.result;
                 const preview = document.getElementById('imagePreview');
                 preview.innerHTML = `<img src="${imageData}" style="max-width: 200px; border-radius: 4px; border: 1px solid #ddd;" alt="Preview" />`;
             };
@@ -127,20 +261,55 @@
         });
 
         // Form submit handler
-        // - Collects form values, builds an `item` object and appends it to `localStorage.lostItems`
-        // - `datePosted` is generated with `new Date().toLocaleString()` and used by pages that list items
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            // Validate all fields
+            const itemName = document.getElementById('item_name');
+            const category = document.getElementById('category');
+            const description = document.getElementById('description');
+            const location = document.getElementById('location');
+            const dateLost = document.getElementById('date_lost');
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+
+            const validations = [
+                validateField(itemName, document.getElementById('item_name_error'),
+                    val => val.length >= 3, 'Please enter at least 3 characters'),
+                category.value !== '',
+                validateField(description, document.getElementById('description_error'),
+                    val => val.length >= 10, 'Please enter at least 10 characters'),
+                validateField(location, document.getElementById('location_error'),
+                    val => val.length >= 3, 'Please enter at least 3 characters'),
+                validateField(dateLost, document.getElementById('date_error'),
+                    validateDate, 'Date cannot be in the future'),
+                validateField(name, document.getElementById('name_error'),
+                    val => val.length >= 2, 'Please enter at least 2 characters'),
+                validateField(email, document.getElementById('email_error'),
+                    validateEmail, 'Please enter a valid email address')
+            ];
+
+            // Show errors for empty category
+            if (category.value === '') {
+                category.classList.add('error');
+                document.getElementById('category_error').style.display = 'block';
+            }
+
+            // Check if all validations passed
+            if (!validations.every(v => v === true)) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
             // Collect form data
             const item = {
-                item_name: document.getElementById('item_name').value,
-                category: document.getElementById('category').value,
-                description: document.getElementById('description').value,
-                location: document.getElementById('location').value,
-                date_lost: document.getElementById('date_lost').value,
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
+                item_name: itemName.value.trim(),
+                category: category.value,
+                description: description.value.trim(),
+                location: location.value.trim(),
+                date_lost: dateLost.value,
+                name: name.value.trim(),
+                email: email.value.trim(),
                 image: imageData || null,
                 datePosted: new Date().toLocaleString()
             };
@@ -154,16 +323,28 @@
             // Save back to localStorage
             localStorage.setItem('lostItems', JSON.stringify(items));
 
-            // Show success message
-            alert('✅ Report submitted successfully! You can now see it on the Find Item page.');
+            // Show success banner
+            const successBanner = document.getElementById('success-banner');
+            successBanner.textContent = '✅ Report submitted successfully! You can now see it on the Find Item page.';
+            successBanner.style.display = 'block';
+            
+            // Scroll to top to show success message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             // Reset form
             this.reset();
+            imageData = null;
+            document.getElementById('imagePreview').innerHTML = '';
+            charCount.textContent = '0';
 
-            // Redirect to Find Your Missing Item page after 1 second
+            // Remove success classes
+            document.querySelectorAll('.success').forEach(el => el.classList.remove('success'));
+
+            // Hide success banner after 3 seconds and redirect
             setTimeout(() => {
+                successBanner.style.display = 'none';
                 window.location.href = 'find-your-missing-item.html';
-            }, 1000);
+            }, 3000);
         });
     </script>
     <p><a href="index.html">← Back</a></p>

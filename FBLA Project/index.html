@@ -220,6 +220,239 @@
         font-size: 24px;
       }
     }
+
+    /* Statistics Dashboard */
+    .stats-section {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: #7C078F;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .stat-icon {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+
+    /* How It Works Section */
+    .how-it-works {
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 25px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .how-it-works h2 {
+      text-align: center;
+      font-size: 36px;
+      color: #7C078F;
+      margin-bottom: 40px;
+    }
+
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .step {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .step-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .step-number {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #7C078F, #9C27B0);
+      color: white;
+      border-radius: 50%;
+      line-height: 40px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .step h3 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .step p {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .faq-section h2 {
+      text-align: center;
+      font-size: 36px;
+      color: #7C078F;
+      margin-bottom: 40px;
+    }
+
+    .faq-item {
+      background: white;
+      margin-bottom: 15px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-question {
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: #333;
+      transition: background 0.3s ease;
+    }
+
+    .faq-question:hover {
+      background: #f8f9fa;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 20px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 300px;
+      padding: 0 20px 20px 20px;
+    }
+
+    .faq-toggle {
+      font-size: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item.active .faq-toggle {
+      transform: rotate(180deg);
+    }
+
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: white;
+      padding: 40px 20px 20px;
+      margin-top: 60px;
+    }
+
+    .footer-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .footer-section h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #3498db;
+    }
+
+    .footer-section p, .footer-section a {
+      color: #ecf0f1;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .footer-section a:hover {
+      color: #3498db;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .social-links a {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      background: rgba(52, 152, 219, 0.2);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 40px;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+      background: #3498db;
+      transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #95a5a6;
+    }
+
+    @media (max-width: 768px) {
+      .stats-section {
+        grid-template-columns: 1fr;
+      }
+
+      .steps-container {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -248,6 +481,187 @@
       </div>
     </p1>
   </div>
+
+  <!-- Statistics Dashboard -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-number" id="total-items">0</div>
+      <div class="stat-label">Total Items Reported</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-number" id="items-found">0</div>
+      <div class="stat-label">Items Reunited</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🔍</div>
+      <div class="stat-number" id="active-items">0</div>
+      <div class="stat-label">Currently Listed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-number" id="success-rate">0%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-icon">📝</div>
+        <h3>Report Lost Item</h3>
+        <p>Fill out a simple form with details about your lost item, including photos and last known location.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-icon">🔍</div>
+        <h3>Browse & Search</h3>
+        <p>Search through reported items using filters by category, date, or location to find your missing belongings.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-icon">📞</div>
+        <h3>Connect & Verify</h3>
+        <p>Contact the person who found your item and verify ownership with specific details only you would know.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-icon">📦</div>
+        <h3>Coordinate Pickup</h3>
+        <p>Arrange a safe pickup time and location on campus to reunite with your lost item.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span>How long are items kept in the system?</span>
+        <span class="faq-toggle">▼</span>
+      </div>
+      <div class="faq-answer">
+        Items are automatically removed from the public listing after 7 days if they remain unclaimed. This helps keep the database current and relevant.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span>What if I found someone's item?</span>
+        <span class="faq-toggle">▼</span>
+      </div>
+      <div class="faq-answer">
+        Great! You can file a report describing the item you found. The owner can then search for it and contact you to arrange pickup. You're helping make our community better!
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span>Is my personal information safe?</span>
+        <span class="faq-toggle">▼</span>
+      </div>
+      <div class="faq-answer">
+        Yes! Only your name and email are visible to help facilitate contact. We recommend using your school email and arranging pickups in public, supervised areas on campus.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span>How do I verify ownership of electronics?</span>
+        <span class="faq-toggle">▼</span>
+      </div>
+      <div class="faq-answer">
+        For electronics, you'll need to provide verification details like serial numbers, IMEI, specific damage descriptions, or unique settings/wallpapers that only the owner would know.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span>Can I edit my report after submitting?</span>
+        <span class="faq-toggle">▼</span>
+      </div>
+      <div class="faq-answer">
+        Currently, reports cannot be edited after submission. If you need to make changes, you can mark the item as collected and submit a new report with the correct information.
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>About Us</h3>
+        <p>Ardrey Kell Lost and Found is a student-run initiative dedicated to helping our school community reunite with their lost belongings.</p>
+        <div class="social-links">
+          <a href="#" title="Facebook">📘</a>
+          <a href="#" title="Twitter">🐦</a>
+          <a href="#" title="Instagram">📷</a>
+          <a href="#" title="Email">✉️</a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <a href="find-your-missing-item.html">Find Your Item</a>
+        <a href="file-a-complaint.html">Report Lost Item</a>
+        <a href="coordinate-pickup.html">Coordinate Pickup</a>
+        <a href="index.html">Home</a>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Contact Us</h3>
+        <p>📧 Email: lostandfound@ardreyekell.edu</p>
+        <p>📞 Phone: (555) 123-4567</p>
+        <p>📍 Location: Student Services Office, Room 101</p>
+        <p>🕒 Hours: Mon-Fri, 8:00 AM - 3:30 PM</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Tips</h3>
+        <p>💡 Label your belongings with your name</p>
+        <p>💡 Check the Lost & Found regularly</p>
+        <p>💡 Report items as soon as you lose them</p>
+        <p>💡 Include clear photos when possible</p>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Ardrey Kell High School Lost and Found. All rights reserved. | Created for FBLA 2025-2026</p>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ Toggle
+    function toggleFAQ(element) {
+      const faqItem = element.parentElement;
+      faqItem.classList.toggle('active');
+    }
+
+    // Update Statistics
+    function updateStats() {
+      const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+      const pickupRequests = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
+      
+      const totalReported = (parseInt(localStorage.getItem('totalItemsReported') || '0')) + items.length;
+      const itemsReunited = pickupRequests.length;
+      const activeItems = items.length;
+      const successRate = totalReported > 0 ? Math.round((itemsReunited / totalReported) * 100) : 0;
+      
+      document.getElementById('total-items').textContent = totalReported;
+      document.getElementById('items-found').textContent = itemsReunited;
+      document.getElementById('active-items').textContent = activeItems;
+      document.getElementById('success-rate').textContent = successRate + '%';
+    }
+
+    // Update stats on page load
+    window.addEventListener('load', updateStats);
+  </script>
 
 </body>
 </html>
