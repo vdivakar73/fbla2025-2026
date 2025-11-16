@@ -9,6 +9,13 @@ body {
   min-height: 100vh;
 }
 
+body.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
 /* Header */
 .hero-header {
   background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
@@ -232,6 +239,23 @@ footer {
   width: 100%;
   box-shadow: 0 15px 40px rgba(138, 43, 226, 0.3);
   backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.back-to-home {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #9d4edd;
+  text-decoration: none;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.back-to-home:hover {
+  color: #c77dff;
+  transform: translateX(-3px);
 }
 
 .tabs {
