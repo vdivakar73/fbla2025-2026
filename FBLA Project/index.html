@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ardey Kell Lost and Found Services</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Ardrey Kell Lost and Found Services</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -13,126 +17,208 @@
     }
     
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       color: #333;
+      min-height: 100vh;
     }
     
-    header {
-      background-color: #7C078F;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    
-    header img {
-      display: inline-block;
-      margin-bottom: 15px;
-    }
-    
-    .top-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    header a {
-      color: white;
-      text-decoration: none;
-      margin: 10px 20px;
-      display: inline-block;
-      font-weight: bold;
-      font-size: 16px;
-    }
-    
-    header a:hover {
-      color: #3498db;
-      text-decoration: underline;
-    }
-    
-    header hr {
-      margin-top: 20px;
-      border: none;
-      border-top: 2px solid #3498db;
-    }
-    
-    main {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    main p {
-      font-size: 18px;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    
-    .oval-button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-    
-    .oval-button:hover {
-      background-color: #2980b9;
-    }
-    
-    .scrollmenu {
-      background-color: #f0f0f0;
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 5px;
-      min-height: 50px;
-    }
-
     .hero-header {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://d1hfln2sfez66z.cloudfront.net/04-29-2023/t_adbaeba330fc4a1eafa10d48c0d7107f_name_ARDREY_KELL_HS_BAT_PROBLEM_transfer_frame_608.jpeg');
+      background-image: linear-gradient(rgba(124, 7, 143, 0.7), rgba(52, 152, 219, 0.6)), url('https://d1hfln2sfez66z.cloudfront.net/04-29-2023/t_adbaeba330fc4a1eafa10d48c0d7107f_name_ARDREY_KELL_HS_BAT_PROBLEM_transfer_frame_608.jpeg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       width: 100%;
-      padding: 60px 20px;
+      padding: 100px 20px;
       text-align: center;
       color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
     }
 
     .hero-header h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      font-size: 64px;
+      margin-bottom: 30px;
+      font-weight: 700;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+      position: relative;
+      z-index: 1;
+      letter-spacing: 1px;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .hero-header nav {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 25px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .hero-header a {
       color: white;
       text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      background-color: rgba(52, 152, 219, 0.8);
-      font-weight: bold;
-      transition: background-color 0.3s ease;
+      padding: 15px 35px;
+      border-radius: 50px;
+      background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-header a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .hero-header a:hover::before {
+      left: 100%;
     }
 
     .hero-header a:hover {
-      background-color: rgba(52, 152, 219, 1);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(135deg, rgba(52, 152, 219, 1), rgba(41, 128, 185, 1));
+    }
+
+    .content-section {
+      max-width: 1100px;
+      margin: 50px auto;
+      padding: 0 20px;
+      animation: fadeIn 1s ease-out 0.6s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    p1 {
+      display: block;
+      padding: 45px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: none;
+      border-radius: 25px;
+      font-size: 17px;
+      line-height: 1.8;
+      color: #2c3e50;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    p1::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #7C078F, #3498db);
+    }
+
+    p1::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(124, 7, 143, 0.03) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    p1 strong {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: #7C078F;
+      margin-bottom: 25px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    p1 .text-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero-header h1 {
+        font-size: 42px;
+      }
+      
+      .hero-header a {
+        padding: 12px 25px;
+        font-size: 14px;
+      }
+      
+      p1 {
+        padding: 30px;
+        font-size: 15px;
+      }
+      
+      p1 strong {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
@@ -142,24 +228,26 @@
        - The `.hero-header` CSS sets the background image and overlay used for the header.
   -->
   <header class="hero-header">
-      <h1>Ardey Kell Lost and Found Services</h1>
+    <h1>Ardrey Kell Lost and Found Services</h1>
     <nav>
-      <a href="find-your-missing-item.html">Find Your Missing Item</a>
-      <a href="file-a-complaint.html">File Missing Item</a>
-      <a href="coordinate-pickup.html">Coordinate Pickup</a>
+      <a href="find-your-missing-item.html">🔍 Find Your Missing Item</a>
+      <a href="file-a-complaint.html">📝 File Missing Item</a>
+      <a href="coordinate-pickup.html">📦 Coordinate Pickup</a>
     </nav>
-  
-      <body>
-        <p1>About Our Lost & Found
-
-Welcome to our Lost & Found—created with one simple goal in mind: to help our community stay connected and cared for. We know how stressful it can be to misplace something important, and how uplifting it feels when someone helps you get it back. That’s why this space exists.
-
-Our Lost & Found is more than just a page—it's a commitment to kindness, responsibility, and support. By giving everyone a central place to report lost items or share what they’ve found, we make it easier for things to return to their owners and for our community to look out for one another.
-
-Every item returned is a reminder that small acts of honesty and empathy matter. Together, we can make this website not just a resource, but a reflection of the positive, connected community we’re building.</p1>
-      </body>
-
-      
-      
   </header>
+
+  <div class="content-section">
+    <p1>
+      <strong>About Our Lost & Found</strong>
+      <div class="text-content">
+        Welcome to our Lost & Found—created with one simple goal in mind: to help our community stay connected and cared for. We know how stressful it can be to misplace something important, and how uplifting it feels when someone helps you get it back. That's why this space exists.
+        <br><br>
+        Our Lost & Found is more than just a page—it's a commitment to kindness, responsibility, and support. By giving everyone a central place to report lost items or share what they've found, we make it easier for things to return to their owners and for our community to look out for one another.
+        <br><br>
+        Every item returned is a reminder that small acts of honesty and empathy matter. Together, we can make this website not just a resource, but a reflection of the positive, connected community we're building.
+      </div>
+    </p1>
+  </div>
+
 </body>
+</html>
