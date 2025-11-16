@@ -303,20 +303,30 @@
 								document.getElementById('status').innerHTML = '<div style="color:green;">Pickup request saved. The owner has been notified (if email provided).</div>';
 						});
 
-						// Mark as collected
-						document.getElementById('collectedBtn').addEventListener('click', function(){
-								if (!confirm('Are you sure you want to mark this item as collected? This will remove it from the public list.')) return;
-								const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
-								const idx = findItemIndex(items, selected);
-								if (idx > -1) {
-										items.splice(idx,1);
-										localStorage.setItem('lostItems', JSON.stringify(items));
-								}
-								localStorage.removeItem('selectedItem');
-								window.location.href = 'find-your-missing-item.html';
-						});
-
-						// Email buttons
+					// Mark as collected
+					document.getElementById('collectedBtn').addEventListener('click', function(){
+							if (!confirm('Are you sure you want to mark this item as collected? This will remove it from the public list.')) return;
+							
+							// Add to pickup requests to track reunion
+							const req = { 
+								item: selected, 
+								status: 'collected',
+								collectedAt: new Date().toLocaleString() 
+							};
+							const pickupArr = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
+							pickupArr.push(req);
+							localStorage.setItem('pickupRequests', JSON.stringify(pickupArr));
+							
+							// Remove from lost items
+							const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+							const idx = findItemIndex(items, selected);
+							if (idx > -1) {
+									items.splice(idx,1);
+									localStorage.setItem('lostItems', JSON.stringify(items));
+							}
+							localStorage.removeItem('selectedItem');
+							window.location.href = 'find-your-missing-item.html';
+					});						// Email buttons
 						document.getElementById('gmailBtn').addEventListener('click', function(){
 								const subject = `Pickup coordination: ${selected.item_name}`;
 								const body = `Hello ${selected.name},%0A%0AI would like to coordinate pickup for the item titled "${selected.item_name}".%0APreferred time: %0A%0AMessage:%0A`;
