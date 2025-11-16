@@ -4,6 +4,13 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Coordinate Pickup</title>
+	<script>
+		// Authentication check
+		const currentUser = localStorage.getItem('currentUser');
+		if (!currentUser) {
+			window.location.href = 'FBLA Project/login.html';
+		}
+	</script>
 	<style>
 		* {
 			margin: 0;

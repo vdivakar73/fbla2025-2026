@@ -5,6 +5,27 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ardey Kell Lost and Found Services</title>
+  <script>
+    // Authentication check - redirect to login if not logged in
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      window.location.href = 'FBLA Project/login.html';
+    } else {
+      const userData = JSON.parse(currentUser);
+      if (!userData.rememberMe) {
+        // Check if session is still valid (optional: add time-based expiry here)
+        const loginTime = new Date(userData.loginTime);
+        const now = new Date();
+        const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+        
+        // Session expires after 24 hours if "remember me" is not checked
+        if (hoursSinceLogin > 24) {
+          localStorage.removeItem('currentUser');
+          window.location.href = 'FBLA Project/login.html';
+        }
+      }
+    }
+  </script>
   <style>
     * {
       margin: 0;
@@ -372,14 +393,32 @@
   -->
   <header class="hero-header">
       <h1>Ardey Kell Lost and Found Services</h1>
+      <p id="welcome-message" style="font-size: 18px; margin-bottom: 15px; color: rgba(255,255,255,0.9);"></p>
     <nav>
       <a href="find-your-missing-item.html">Find Your Missing Item</a>
       <a href="file-a-complaint.html">File Missing Item</a>
       <a href="coordinate-pickup.html">Coordinate Pickup</a>
       <a href="feedback.html">Your Feedback</a>
+      <a href="#" onclick="handleLogout(event)" style="background: linear-gradient(135deg, #c41e3a, #e63946); border-color: rgba(220, 53, 69, 0.5);">Logout</a>
     </nav>
   
   </header>
+
+  <script>
+    // Display welcome message with user's name
+    const userData = JSON.parse(localStorage.getItem('currentUser'));
+    if (userData) {
+      document.getElementById('welcome-message').textContent = `Welcome back, ${userData.name}! 👋`;
+    }
+
+    function handleLogout(event) {
+      event.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'FBLA Project/login.html';
+      }
+    }
+  </script>
 
   <div class="about-section">
     <h2>About Our Lost & Found</h2>
