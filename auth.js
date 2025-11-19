@@ -18,6 +18,55 @@ function isDisposableEmail(email) {
   return disposableDomains.includes(domain);
 }
 
+// Google Sign-In Handler
+async function handleGoogleSignIn(response) {
+  try {
+    // Decode the JWT token to get user info
+    const userInfo = JSON.parse(atob(response.credential.split('.')[1]));
+    
+    const email = userInfo.email;
+    const name = userInfo.name;
+    
+    // Check if it's a CMS school email
+    const cmsEmailPattern = /@cms\.k12\.nc\.us$/i;
+    if (!cmsEmailPattern.test(email)) {
+      alert('Please use your Charlotte-Mecklenburg Schools (@cms.k12.nc.us) email address to sign in.');
+      return;
+    }
+    
+    // Check if user exists in database
+    let user = await DB.getUserByEmail(email);
+    
+    // If not, create a new user
+    if (!user) {
+      await DB.addUser({
+        name: name,
+        email: email,
+        password: 'google-oauth-' + Math.random().toString(36),
+        createdAt: new Date().toISOString(),
+        loginMethod: 'google'
+      });
+      user = await DB.getUserByEmail(email);
+    }
+    
+    // Store session
+    localStorage.setItem('currentUser', JSON.stringify({
+      name: user.name,
+      email: user.email,
+      rememberMe: true,
+      loginTime: new Date().toISOString(),
+      loginMethod: 'google'
+    }));
+    
+    // Redirect to homepage
+    showSuccess(`Welcome, ${user.name}! Redirecting...`);
+    setTimeout(() => window.location.href = 'index.html', 1000);
+  } catch (error) {
+    console.error('Google Sign-In Error:', error);
+    alert('Error signing in with Google. Please try again or use email/password.');
+  }
+}
+
 // Authentication Functions
 function checkAuth() {
   const user = localStorage.getItem('currentUser');
