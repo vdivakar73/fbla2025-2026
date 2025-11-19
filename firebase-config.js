@@ -75,6 +75,10 @@ const DB = {
     return users ? Object.values(users)[0] : null;
   },
 
+  async removeUser(userId) {
+    await db.ref(`users/${userId}`).remove();
+  },
+
   // Feedback
   async addFeedback(feedback) {
     const newRef = db.ref('feedback').push();
