@@ -53,38 +53,41 @@ function switchTab(tab) {
   });
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const remember = document.getElementById('remember-login').checked;
   
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const user = users.find(u => u.email === email);
-  
-  if (!user) {
-    showError('login-email-error', 'No account found with this email');
-    return;
+  try {
+    const user = await DB.getUserByEmail(email);
+    
+    if (!user) {
+      showError('login-email-error', 'No account found with this email');
+      return;
+    }
+    
+    if (user.password !== password) {
+      showError('login-password-error', 'Incorrect password');
+      return;
+    }
+    
+    localStorage.setItem('currentUser', JSON.stringify({
+      name: user.name,
+      email: user.email,
+      rememberMe: remember,
+      loginTime: new Date().toISOString()
+    }));
+    
+    showSuccess(`Welcome back, ${user.name}! Redirecting...`);
+    setTimeout(() => window.location.href = 'index.html', 1000);
+  } catch (error) {
+    alert('Login error: ' + error.message);
   }
-  
-  if (user.password !== password) {
-    showError('login-password-error', 'Incorrect password');
-    return;
-  }
-  
-  localStorage.setItem('currentUser', JSON.stringify({
-    name: user.name,
-    email: user.email,
-    rememberMe: remember,
-    loginTime: new Date().toISOString()
-  }));
-  
-  showSuccess(`Welcome back, ${user.name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'index.html', 1000);
 }
 
-function handleSignup(e) {
+async function handleSignup(e) {
   e.preventDefault();
   
   const name = document.getElementById('signup-name').value.trim();
@@ -109,22 +112,25 @@ function handleSignup(e) {
     return;
   }
   
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  
-  if (users.find(u => u.email === email)) {
-    showError('signup-email-error', 'An account with this email already exists');
-    return;
+  try {
+    const existingUser = await DB.getUserByEmail(email);
+    
+    if (existingUser) {
+      showError('signup-email-error', 'An account with this email already exists');
+      return;
+    }
+    
+    await DB.addUser({ name, email, password, createdAt: new Date().toISOString() });
+    
+    localStorage.setItem('currentUser', JSON.stringify({
+      name, email, rememberMe: remember, loginTime: new Date().toISOString()
+    }));
+    
+    showSuccess(`Account created! Welcome, ${name}! Redirecting...`);
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  } catch (error) {
+    alert('Signup error: ' + error.message);
   }
-  
-  users.push({ name, email, password, createdAt: new Date().toISOString() });
-  localStorage.setItem('users', JSON.stringify(users));
-  
-  localStorage.setItem('currentUser', JSON.stringify({
-    name, email, rememberMe: remember, loginTime: new Date().toISOString()
-  }));
-  
-  showSuccess(`Account created! Welcome, ${name}! Redirecting...`);
-  setTimeout(() => window.location.href = 'index.html', 1500);
 }
 
 function showError(id, msg) {
@@ -161,17 +167,21 @@ function toggleFaq(element) {
 }
 
 // Stats Update
-function updateStats() {
-  const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
-  const pickups = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
-  
-  const total = items.length;
-  const reunited = pickups.length;
-  const pending = total - reunited;
-  const rate = total > 0 ? Math.round((reunited / total) * 100) : 0;
-  
-  document.getElementById('totalReports').textContent = total;
-  document.getElementById('reunited').textContent = reunited;
-  document.getElementById('pending').textContent = pending;
-  document.getElementById('successRate').textContent = rate + '%';
+async function updateStats() {
+  try {
+    const items = await DB.getLostItems();
+    const pickups = await DB.getPickupRequests();
+    
+    const total = items.length;
+    const reunited = pickups.length;
+    const pending = total - reunited;
+    const rate = total > 0 ? Math.round((reunited / total) * 100) : 0;
+    
+    document.getElementById('totalReports').textContent = total;
+    document.getElementById('reunited').textContent = reunited;
+    document.getElementById('pending').textContent = pending;
+    document.getElementById('successRate').textContent = rate + '%';
+  } catch (error) {
+    console.error('Error updating stats:', error);
+  }
 }
