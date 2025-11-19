@@ -43,6 +43,25 @@
                 </div>
 
                 <button type="submit" class="submit-button">Login</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" onclick="showForgotPassword(); return false;" style="color: #9d4edd; text-decoration: none; font-size: 14px;">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div id="forgot-password-form" class="form-container">
+            <form onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label for="forgot-email">Enter Your Email</label>
+                    <input type="email" id="forgot-email" required>
+                    <div id="forgot-email-error" class="error-message"></div>
+                </div>
+
+                <button type="submit" class="submit-button">Reset Password</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" onclick="switchTab('login'); return false;" style="color: #9d4edd; text-decoration: none; font-size: 14px;">Back to Login</a>
+                </div>
             </form>
         </div>
 

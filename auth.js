@@ -42,15 +42,48 @@ function switchTab(tab) {
   const tabs = document.querySelectorAll('.tab-button');
   const forms = document.querySelectorAll('.form-container');
   
-  tabs.forEach((t, i) => {
-    if ((tab === 'login' && i === 0) || (tab === 'signup' && i === 1)) {
-      t.classList.add('active');
-      forms[i].classList.add('active');
-    } else {
-      t.classList.remove('active');
-      forms[i].classList.remove('active');
+  // Hide all forms first
+  forms.forEach(form => form.classList.remove('active'));
+  
+  // Show the selected form
+  if (tab === 'login') {
+    tabs[0]?.classList.add('active');
+    tabs[1]?.classList.remove('active');
+    document.getElementById('login-form')?.classList.add('active');
+  } else if (tab === 'signup') {
+    tabs[0]?.classList.remove('active');
+    tabs[1]?.classList.add('active');
+    document.getElementById('signup-form')?.classList.add('active');
+  }
+}
+
+function showForgotPassword() {
+  document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('forgot-password-form')?.classList.add('active');
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('forgot-email').value.trim();
+  
+  try {
+    const user = await DB.getUserByEmail(email);
+    
+    if (!user) {
+      showError('forgot-email-error', 'No account found with this email');
+      return;
     }
-  });
+    
+    // Show password in alert (in a real app, you'd send an email)
+    alert(`Your password is: ${user.password}\n\nNote: In a production app, this would be sent to your email instead of displayed here.`);
+    
+    // Switch back to login
+    switchTab('login');
+  } catch (error) {
+    alert('Error retrieving password: ' + error.message);
+  }
 }
 
 async function handleLogin(e) {
