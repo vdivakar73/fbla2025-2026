@@ -146,24 +146,26 @@
         </div>
     </div>
 
-    <script type="module">
-        import { db } from './firebase-config.js';
-
+    <script>
         // Admin credentials - In production, this should be in Firebase with proper security
         const ADMIN_CREDENTIALS = {
             email: 'admin@akhslostnfound.com',
             password: 'AKHSAdmin2025!'
         };
 
-        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const email = document.getElementById('admin-email').value.trim();
             const password = document.getElementById('admin-password').value;
             const errorDiv = document.getElementById('error-message');
 
+            console.log('Attempting login with:', email);
+            console.log('Expected:', ADMIN_CREDENTIALS.email);
+
             // Validate admin credentials
             if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                console.log('Login successful!');
                 // Store admin session
                 sessionStorage.setItem('adminAuthenticated', 'true');
                 sessionStorage.setItem('adminEmail', email);
@@ -172,11 +174,12 @@
                 // Redirect to admin dashboard
                 window.location.href = 'admin-dashboard.html';
             } else {
+                console.log('Login failed');
                 errorDiv.textContent = 'Invalid credentials. Access denied.';
                 errorDiv.style.display = 'block';
                 
                 // Clear error after 3 seconds
-                setTimeout(() => {
+                setTimeout(function() {
                     errorDiv.style.display = 'none';
                 }, 3000);
             }
