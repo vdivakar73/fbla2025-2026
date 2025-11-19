@@ -329,27 +329,23 @@
                 datePosted: new Date().toLocaleString()
             };
 
-            // Get existing items from localStorage
-            let items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+            // Save to Firebase
+            DB.addLostItem(item).then(() => {
+                // Show success message
+                alert('✅ Report submitted successfully! You can now see it on the Find Item page.');
 
-            // Add new item
-            items.push(item);
+                // Reset form
+                document.getElementById('complaintForm').reset();
+                imagesData = [];
+                updateImagePreview();
 
-            // Save back to localStorage
-            localStorage.setItem('lostItems', JSON.stringify(items));
-
-            // Show success message
-            alert('✅ Report submitted successfully! You can now see it on the Find Item page.');
-
-            // Reset form
-            this.reset();
-            imagesData = [];
-            updateImagePreview();
-
-            // Redirect to Find Your Missing Item page after 1 second
-            setTimeout(() => {
-                window.location.href = 'find-your-missing-item.html';
-            }, 1000);
+                // Redirect to Find Your Missing Item page after 1 second
+                setTimeout(() => {
+                    window.location.href = 'find-your-missing-item.html';
+                }, 1000);
+            }).catch(error => {
+                alert('Error submitting report: ' + error.message);
+            });
         });
     </script>
     <div class="nav-links">

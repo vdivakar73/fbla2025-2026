@@ -593,10 +593,10 @@
             }).join('');
         }
 
-        // Load all items from localStorage
-        // - Prunes items older than 7 days and persists the pruned list back to localStorage
-        function loadItems() {
-            allItems = JSON.parse(localStorage.getItem('lostItems') || '[]');
+        // Load all items from Firebase
+        // - Prunes items older than 7 days
+        async function loadItems() {
+            allItems = await DB.getLostItems();
 
             // Automatically remove items that have been unclaimed for more than 7 days
             const container = document.getElementById('itemsContainer');

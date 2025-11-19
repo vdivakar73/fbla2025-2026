@@ -296,36 +296,36 @@
 									verification = verField.value;
 								}
 								
-								const req = { item: selected, preferred: pref, phone, note, verification, requestedAt: new Date().toLocaleString() };
-								const arr = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
-								arr.push(req);
-								localStorage.setItem('pickupRequests', JSON.stringify(arr));
+							const req = { item: selected, preferred: pref, phone, note, verification, requestedAt: new Date().toLocaleString() };
+							DB.addPickupRequest(req).then(() => {
 								document.getElementById('status').innerHTML = '<div style="color:green;">Pickup request saved. The owner has been notified (if email provided).</div>';
+							}).catch(error => {
+								alert('Error saving pickup request: ' + error.message);
+							});
 						});
 
 					// Mark as collected
-					document.getElementById('collectedBtn').addEventListener('click', function(){
+					document.getElementById('collectedBtn').addEventListener('click', async function(){
 							if (!confirm('Are you sure you want to mark this item as collected? This will remove it from the public list.')) return;
 							
-							// Add to pickup requests to track reunion
-							const req = { 
-								item: selected, 
-								status: 'collected',
-								collectedAt: new Date().toLocaleString() 
-							};
-							const pickupArr = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
-							pickupArr.push(req);
-							localStorage.setItem('pickupRequests', JSON.stringify(pickupArr));
-							
-							// Remove from lost items
-							const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
-							const idx = findItemIndex(items, selected);
-							if (idx > -1) {
-									items.splice(idx,1);
-									localStorage.setItem('lostItems', JSON.stringify(items));
+							try {
+								// Add to pickup requests to track reunion
+								const req = { 
+									item: selected, 
+									status: 'collected',
+									collectedAt: new Date().toLocaleString() 
+								};
+								await DB.addPickupRequest(req);
+								
+								// Remove from lost items
+								if (selected.id) {
+									await DB.removeLostItem(selected.id);
+								}
+								localStorage.removeItem('selectedItem');
+								window.location.href = 'find-your-missing-item.html';
+							} catch (error) {
+								alert('Error marking item as collected: ' + error.message);
 							}
-							localStorage.removeItem('selectedItem');
-							window.location.href = 'find-your-missing-item.html';
 					});						// Email buttons
 						document.getElementById('gmailBtn').addEventListener('click', function(){
 								const subject = `Pickup coordination: ${selected.item_name}`;
