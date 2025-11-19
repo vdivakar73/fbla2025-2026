@@ -1,3 +1,23 @@
+// Email Validation Functions
+function isValidEmail(email) {
+  // Strict email validation regex
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+}
+
+function isDisposableEmail(email) {
+  // Block common fake/disposable email domains
+  const disposableDomains = [
+    'tempmail.com', 'throwaway.email', '10minutemail.com', 'guerrillamail.com',
+    'mailinator.com', 'maildrop.cc', 'trashmail.com', 'fakeinbox.com',
+    'temp-mail.org', 'getnada.com', 'throwawaymail.com', 'yopmail.com',
+    'example.com', 'test.com', 'fake.com', 'dummy.com', 'temp.com'
+  ];
+  
+  const domain = email.split('@')[1]?.toLowerCase();
+  return disposableDomains.includes(domain);
+}
+
 // Authentication Functions
 function checkAuth() {
   const user = localStorage.getItem('currentUser');
@@ -132,6 +152,18 @@ async function handleSignup(e) {
   // Validate
   if (name.length < 2) {
     showError('signup-name-error', 'Name must be at least 2 characters');
+    return;
+  }
+  
+  // Validate email format
+  if (!isValidEmail(email)) {
+    showError('signup-email-error', 'Please enter a valid email address');
+    return;
+  }
+  
+  // Block disposable/fake emails
+  if (isDisposableEmail(email)) {
+    showError('signup-email-error', 'Please use a real email address, not a temporary or fake one');
     return;
   }
   
