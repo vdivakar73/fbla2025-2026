@@ -52,6 +52,10 @@ const DB = {
     return request;
   },
 
+  async removePickupRequest(pickupId) {
+    await db.ref(`pickupRequests/${pickupId}`).remove();
+  },
+
   // Users (for authentication)
   async getUsers() {
     const snapshot = await db.ref('users').once('value');

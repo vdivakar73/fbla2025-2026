@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Lost and Found</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .admin-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 40px;
+            border-bottom: 3px solid #7b2cbf;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
+        }
+
+        .admin-header h1 {
+            color: #c77dff;
+            font-size: 28px;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-email {
+            color: #9d4edd;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #7b2cbf;
+            box-shadow: 0 8px 25px rgba(123, 44, 191, 0.2);
+        }
+
+        .stat-card h3 {
+            color: #9d4edd;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-value {
+            color: #c77dff;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #7b2cbf;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: #9d4edd;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%);
+            color: #fff;
+        }
+
+        .tab-btn:hover {
+            background: rgba(123, 44, 191, 0.2);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #7b2cbf;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%);
+            color: #fff;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(123, 44, 191, 0.3);
+            color: #f0f0f0;
+        }
+
+        .data-table tr:hover {
+            background: rgba(123, 44, 191, 0.1);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #fff;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(123, 44, 191, 0.3);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #22c55e;
+        }
+
+        .status-collected {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f6;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9d4edd;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #7b2cbf;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #c77dff;
+        }
+
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: #9d4edd;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            color: #f0f0f0;
+        }
+
+        .modal-body p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-body strong {
+            color: #c77dff;
+        }
+
+        .item-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .item-images img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #7b2cbf;
+        }
+
+        /* Search and Filter */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            background: rgba(123, 44, 191, 0.1);
+            border: 2px solid #7b2cbf;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9d4edd;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            background: rgba(123, 44, 191, 0.1);
+            border: 2px solid #7b2cbf;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9d4edd;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="admin-header">
+        <h1>🛡️ Admin Dashboard</h1>
+        <div class="admin-info">
+            <span class="admin-email" id="admin-email"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Lost Items</h3>
+                <div class="stat-value" id="total-items">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Items</h3>
+                <div class="stat-value" id="active-items">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Collected Items</h3>
+                <div class="stat-value" id="collected-items">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="stat-value" id="total-users">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Pickup Requests</h3>
+                <div class="stat-value" id="total-pickups">0</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('lost-items')">Lost Items</button>
+            <button class="tab-btn" onclick="switchTab('users')">Users</button>
+            <button class="tab-btn" onclick="switchTab('pickups')">Pickup Requests</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+        </div>
+
+        <!-- Lost Items Tab -->
+        <div id="lost-items-tab" class="tab-content active">
+            <div class="controls">
+                <input type="text" class="search-input" id="items-search" placeholder="Search by item name, category, or location...">
+                <select class="filter-select" id="items-filter" onchange="filterItems()">
+                    <option value="all">All Items</option>
+                    <option value="active">Active</option>
+                    <option value="collected">Collected</option>
+                </select>
+            </div>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Filed By</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-tbody">
+                        <tr>
+                            <td colspan="7" class="loading">Loading items...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users-tab" class="tab-content">
+            <div class="controls">
+                <input type="text" class="search-input" id="users-search" placeholder="Search by name or email...">
+            </div>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Items Filed</th>
+                            <th>Items Claimed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pickups Tab -->
+        <div id="pickups-tab" class="tab-content">
+            <div class="controls">
+                <input type="text" class="search-input" id="pickups-search" placeholder="Search pickups...">
+            </div>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Claimer Name</th>
+                            <th>Claimer Email</th>
+                            <th>Phone</th>
+                            <th>Pickup Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pickups-tbody">
+                        <tr>
+                            <td colspan="6" class="loading">Loading pickups...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="data-table">
+                <h2 style="color: #c77dff; padding: 20px;">Category Breakdown</h2>
+                <div id="category-breakdown" style="padding: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Item Details -->
+    <div id="item-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Item Details</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Check admin authentication
+        if (!sessionStorage.getItem('adminAuthenticated')) {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Display admin email
+        document.getElementById('admin-email').textContent = sessionStorage.getItem('adminEmail');
+
+        let allItems = [];
+        let allUsers = [];
+        let allPickups = [];
+
+        // Load all data
+        async function loadData() {
+            try {
+                allItems = await DB.getLostItems();
+                allUsers = await DB.getUsers();
+                allPickups = await DB.getPickupRequests();
+
+                updateStats();
+                displayItems(allItems);
+                displayUsers(allUsers);
+                displayPickups(allPickups);
+                displayAnalytics();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const activeItems = allItems.filter(item => !item.collected);
+            const collectedItems = allItems.filter(item => item.collected);
+
+            document.getElementById('total-items').textContent = allItems.length;
+            document.getElementById('active-items').textContent = activeItems.length;
+            document.getElementById('collected-items').textContent = collectedItems.length;
+            document.getElementById('total-users').textContent = allUsers.length;
+            document.getElementById('total-pickups').textContent = allPickups.length;
+        }
+
+        // Display items
+        function displayItems(items) {
+            const tbody = document.getElementById('items-tbody');
+            
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><h3>No items found</h3></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.itemName || 'N/A'}</td>
+                    <td>${item.category || 'N/A'}</td>
+                    <td>${item.location || 'N/A'}</td>
+                    <td>${item.email || 'N/A'}</td>
+                    <td>${item.date || 'N/A'}</td>
+                    <td><span class="status-badge ${item.collected ? 'status-collected' : 'status-active'}">${item.collected ? 'Collected' : 'Active'}</span></td>
+                    <td>
+                        <button class="action-btn view-btn" onclick="viewItem('${item.id}')">View</button>
+                        <button class="action-btn delete-btn" onclick="deleteItem('${item.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Display users
+        function displayUsers(users) {
+            const tbody = document.getElementById('users-tbody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><h3>No users found</h3></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const itemsFiled = allItems.filter(item => item.email === user.email).length;
+                const itemsClaimed = allPickups.filter(pickup => pickup.claimerEmail === user.email).length;
+                
+                return `
+                    <tr>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.email || 'N/A'}</td>
+                        <td>${itemsFiled}</td>
+                        <td>${itemsClaimed}</td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="viewUser('${user.email}')">View</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Display pickups
+        function displayPickups(pickups) {
+            const tbody = document.getElementById('pickups-tbody');
+            
+            if (pickups.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><h3>No pickup requests found</h3></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pickups.map(pickup => `
+                <tr>
+                    <td>${pickup.itemName || 'N/A'}</td>
+                    <td>${pickup.claimerName || 'N/A'}</td>
+                    <td>${pickup.claimerEmail || 'N/A'}</td>
+                    <td>${pickup.phone || 'N/A'}</td>
+                    <td>${pickup.pickupDate || 'N/A'}</td>
+                    <td>
+                        <button class="action-btn delete-btn" onclick="deletePickup('${pickup.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Display analytics
+        function displayAnalytics() {
+            const categoryCount = {};
+            allItems.forEach(item => {
+                const cat = item.category || 'Uncategorized';
+                categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+            });
+
+            const breakdown = document.getElementById('category-breakdown');
+            breakdown.innerHTML = Object.entries(categoryCount).map(([cat, count]) => `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #c77dff; font-weight: 600;">${cat}</span>
+                        <span style="color: #9d4edd;">${count} items</span>
+                    </div>
+                    <div style="background: rgba(123, 44, 191, 0.2); height: 30px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%); height: 100%; width: ${(count / allItems.length) * 100}%; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View item details
+        window.viewItem = function(itemId) {
+            const item = allItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = `
+                <p><strong>Item Name:</strong> ${item.itemName || 'N/A'}</p>
+                <p><strong>Category:</strong> ${item.category || 'N/A'}</p>
+                <p><strong>Location:</strong> ${item.location || 'N/A'}</p>
+                <p><strong>Date:</strong> ${item.date || 'N/A'}</p>
+                <p><strong>Description:</strong> ${item.description || 'N/A'}</p>
+                <p><strong>Filed By:</strong> ${item.email || 'N/A'}</p>
+                <p><strong>Status:</strong> <span class="status-badge ${item.collected ? 'status-collected' : 'status-active'}">${item.collected ? 'Collected' : 'Active'}</span></p>
+                ${item.images && item.images.length > 0 ? `
+                    <p><strong>Images:</strong></p>
+                    <div class="item-images">
+                        ${item.images.map(img => `<img src="${img}" alt="Item image">`).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('item-modal').classList.add('active');
+        };
+
+        // View user details
+        window.viewUser = function(email) {
+            const user = allUsers.find(u => u.email === email);
+            if (!user) return;
+
+            const userItems = allItems.filter(item => item.email === email);
+            const userPickups = allPickups.filter(pickup => pickup.claimerEmail === email);
+
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = `
+                <p><strong>Name:</strong> ${user.name || 'N/A'}</p>
+                <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
+                <p><strong>Items Filed:</strong> ${userItems.length}</p>
+                <p><strong>Items Claimed:</strong> ${userPickups.length}</p>
+                <br>
+                <h3 style="color: #c77dff; margin-bottom: 10px;">Filed Items:</h3>
+                ${userItems.map(item => `<p>• ${item.itemName} (${item.category})</p>`).join('') || '<p>No items filed</p>'}
+            `;
+
+            document.getElementById('item-modal').classList.add('active');
+        };
+
+        // Delete item
+        window.deleteItem = async function(itemId) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+
+            try {
+                await DB.removeLostItem(itemId);
+                alert('Item deleted successfully');
+                await loadData();
+            } catch (error) {
+                alert('Error deleting item: ' + error.message);
+            }
+        };
+
+        // Delete pickup
+        window.deletePickup = async function(pickupId) {
+            if (!confirm('Are you sure you want to delete this pickup request?')) return;
+
+            try {
+                await DB.removePickupRequest(pickupId);
+                alert('Pickup request deleted successfully');
+                await loadData();
+            } catch (error) {
+                alert('Error deleting pickup: ' + error.message);
+            }
+        };
+
+        // Close modal
+        window.closeModal = function() {
+            document.getElementById('item-modal').classList.remove('active');
+        };
+
+        // Switch tabs
+        window.switchTab = function(tabName) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        };
+
+        // Filter items
+        window.filterItems = function() {
+            const filter = document.getElementById('items-filter').value;
+            let filtered = allItems;
+
+            if (filter === 'active') {
+                filtered = allItems.filter(item => !item.collected);
+            } else if (filter === 'collected') {
+                filtered = allItems.filter(item => item.collected);
+            }
+
+            displayItems(filtered);
+        };
+
+        // Search functionality
+        document.getElementById('items-search').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const filtered = allItems.filter(item => 
+                (item.itemName && item.itemName.toLowerCase().includes(search)) ||
+                (item.category && item.category.toLowerCase().includes(search)) ||
+                (item.location && item.location.toLowerCase().includes(search))
+            );
+            displayItems(filtered);
+        });
+
+        document.getElementById('users-search').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(user => 
+                (user.name && user.name.toLowerCase().includes(search)) ||
+                (user.email && user.email.toLowerCase().includes(search))
+            );
+            displayUsers(filtered);
+        });
+
+        document.getElementById('pickups-search').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            const filtered = allPickups.filter(pickup => 
+                (pickup.itemName && pickup.itemName.toLowerCase().includes(search)) ||
+                (pickup.claimerName && pickup.claimerName.toLowerCase().includes(search)) ||
+                (pickup.claimerEmail && pickup.claimerEmail.toLowerCase().includes(search))
+            );
+            displayPickups(filtered);
+        });
+
+        // Logout
+        window.logout = function() {
+            if (confirm('Are you sure you want to logout?')) {
+                sessionStorage.removeItem('adminAuthenticated');
+                sessionStorage.removeItem('adminEmail');
+                sessionStorage.removeItem('adminLoginTime');
+                window.location.href = 'admin-login.html';
+            }
+        };
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
