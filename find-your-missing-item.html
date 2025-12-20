@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Found: Missing Item</title>
+    <script src="auth.js"></script>
+    <script>checkAuth();</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            color: #f0f0f0;
+            padding: 20px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #b794f6 50%, #9333ea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            max-width: 1200px;
+            margin: 0 auto 1.5rem;
+            color: #b794f6;
+            font-size: 1.8rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+            border: 2px solid #9333ea;
+            padding: 1.5rem;
+            border-radius: 12px;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.6);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+
+        .label {
+            font-weight: 600;
+            color: #c084fc;
+            margin-top: 0.75rem;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+        }
+
+        a.button:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+        }
+
+        button {
+            font: inherit;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid #9333ea;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #f0f0f0;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #9333ea;
+            box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+        }
+
+        input[type="text"]::placeholder {
+            color: #888;
+        }
+
+        #itemsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .filters-container {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #9333ea;
+            position: relative;
+        }
+
+        .filters-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            color: #c084fc;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"] {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid #9333ea;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-size: 0.95rem;
+        }
+
+        .filter-group select option {
+            background: #1f1135;
+            color: #f0f0f0;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .sort-btn:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+            transform: translateY(-1px);
+        }
+
+        .sort-btn.active {
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.5);
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #c084fc;
+            border: 1px solid #9333ea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .status-claimed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .status-expired {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .image-gallery img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #9333ea;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .image-gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            background: rgba(147, 51, 234, 0.8);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            background: rgba(147, 51, 234, 1);
+        }
+    </style>
+</head>
+<body>
+        <!-- Note: Items will be taken off the site after 7 days of being unclaimed. -->
+        <!--
+            IMPORTANT: This page reads `localStorage.lostItems` and renders the list.
+            - `datePosted` is used to sort and to determine the 7-day pruning cutoff.
+            - `localStorage.selectedItem` is set when a user clicks "Coordinate Pickup" and is read by `Coordinate Pickup.html`.
+        -->
+    <header>
+        <h1>Find Your Missing Item</h1>
+            <nav>
+      <a href="index.html">Home</a>
+      <a href="file-a-complaint.html">File Missing Item</a>
+      <a href="coordinate-pickup.html">Coordinate Pickup</a>
+      <a href="my-claims.html">My Claims</a>
+      <a href="feedback.html">Your Feedback</a>
+    </nav>
+    </header>
+
+    <main>
+        <h2 style="margin-top: 2rem; margin-bottom: 1.5rem;">Browse All Lost Items</h2>
+        
+        <!-- Enhanced Filters -->
+        <div class="filters-container">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="searchInput">Search</label>
+                    <input type="text" id="searchInput" placeholder="Search by name, description..." style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid #9333ea; border-radius: 6px; color: #f0f0f0;" />
+                </div>
+                
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="documents">Documents</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateFrom">Date From</label>
+                    <input type="date" id="dateFrom" />
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateTo">Date To</label>
+                    <input type="date" id="dateTo" />
+                </div>
+            </div>
+            
+            <div class="sort-controls">
+                <span style="color: #c084fc; font-weight: 600; margin-right: 10px;">Sort By:</span>
+                <button class="sort-btn active" data-sort="newest">Newest First</button>
+                <button class="sort-btn" data-sort="oldest">Oldest First</button>
+                <button class="sort-btn" data-sort="category">Category</button>
+                <button class="clear-filters-btn" onclick="clearFilters()">Clear All Filters</button>
+            </div>
+        </div>
+
+        <div id="itemsContainer"></div>
+    </main>
+
+    <!-- Image Modal for zoom -->
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <span class="modal-close" onclick="closeImageModal()">×</span>
+        <img id="modalImage" src="" alt="Full size image" />
+    </div>
+
+    <script>
+        let allItems = [];
+        let currentSort = 'newest';
+        let filters = {
+            search: '',
+            category: '',
+            dateFrom: '',
+            dateTo: ''
+        };
+
+        // Get item status based on age and pickup requests
+        function getItemStatus(item) {
+            const pickupRequests = JSON.parse(localStorage.getItem('pickupRequests') || '[]');
+            const hasClaim = pickupRequests.some(req => 
+                req.item.datePosted === item.datePosted && 
+                req.item.item_name === item.item_name
+            );
+            
+            if (hasClaim) return 'claimed';
+            
+            const datePosted = new Date(item.datePosted);
+            const daysSince = (new Date() - datePosted) / (1000 * 60 * 60 * 24);
+            
+            if (daysSince > 7) return 'expired';
+            return 'pending';
+        }
+
+        // Apply all filters and sorting
+        function applyFiltersAndSort() {
+            let filtered = [...allItems];
+            
+            // Search filter
+            if (filters.search.trim()) {
+                const query = filters.search.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.item_name.toLowerCase().includes(query) ||
+                    item.description.toLowerCase().includes(query) ||
+                    item.category.toLowerCase().includes(query) ||
+                    item.location.toLowerCase().includes(query)
+                );
+            }
+            
+            // Category filter
+            if (filters.category) {
+                filtered = filtered.filter(item => 
+                    item.category.toLowerCase() === filters.category.toLowerCase()
+                );
+            }
+            
+            // Date range filter
+            if (filters.dateFrom) {
+                filtered = filtered.filter(item => {
+                    const itemDate = new Date(item.date_lost);
+                    return itemDate >= new Date(filters.dateFrom);
+                });
+            }
+            
+            if (filters.dateTo) {
+                filtered = filtered.filter(item => {
+                    const itemDate = new Date(item.date_lost);
+                    return itemDate <= new Date(filters.dateTo);
+                });
+            }
+            
+            // Apply sorting
+            sortItems(filtered, currentSort);
+            
+            displayItems(filtered);
+        }
+
+        // Sort items
+        function sortItems(items, sortType) {
+            switch(sortType) {
+                case 'newest':
+                    items.sort((a, b) => new Date(b.datePosted) - new Date(a.datePosted));
+                    break;
+                case 'oldest':
+                    items.sort((a, b) => new Date(a.datePosted) - new Date(b.datePosted));
+                    break;
+                case 'category':
+                    items.sort((a, b) => a.category.localeCompare(b.category));
+                    break;
+            }
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            filters = {
+                search: '',
+                category: '',
+                dateFrom: '',
+                dateTo: ''
+            };
+            
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            
+            applyFiltersAndSort();
+        }
+
+        // Image modal functions
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageSrc;
+            modal.classList.add('active');
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
+
+        // Display items in grid
+        // - Builds each card, includes contact `mailto:` link and the Coordinate Pickup button
+        function displayItems(items) {
+            const container = document.getElementById('itemsContainer');
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <strong style="color: #c084fc; font-size: 1.2rem;">No lost items found matching your criteria.</strong>
+                        <p style="color: #9ca3af; margin-top: 1rem;">Try adjusting your filters or <a href="file-a-complaint.html" style="color: #9333ea; font-weight: bold;">report a new item</a>.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map((item, index) => {
+                const status = getItemStatus(item);
+                const statusBadge = status === 'claimed' 
+                    ? '<span class="status-badge status-claimed">✓ Claimed</span>'
+                    : status === 'expired' 
+                    ? '<span class="status-badge status-expired">⊗ Expired</span>'
+                    : '<span class="status-badge status-pending">◷ Available</span>';
+                
+                // Handle multiple images
+                let imageHTML = '';
+                if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                    imageHTML = `<div class="image-gallery">
+                        ${item.images.map(img => `<img src="${img}" alt="Item" onclick="openImageModal('${img}')" />`).join('')}
+                    </div>`;
+                } else if (item.image) {
+                    imageHTML = `<img src="${item.image}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #9333ea; cursor: pointer;" alt="Item" onclick="openImageModal('${item.image}')" />`;
+                }
+                
+                return `
+                <div class="card">
+                    ${imageHTML}
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                            <h3 style="margin: 0 0 0.5rem 0; color: #c084fc; font-size: 1.4rem;">${escapeHtml(item.item_name)}</h3>
+                            ${statusBadge}
+                        </div>
+                        <span style="background: linear-gradient(135deg, #7c3aed, #9333ea); color: #fff; padding: 0.35rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: bold;">${escapeHtml(item.category)}</span>
+                    </div>
+                    
+                    <div class="label" style="margin-top: 0.75rem;">Description:</div>
+                    <div style="color: #e5e5e5; line-height: 1.6;">${escapeHtml(item.description)}</div>
+                    
+                    <div class="label">Last Known Location:</div>
+                    <div style="color: #d1d5db;">${escapeHtml(item.location)}</div>
+                    
+                    <div class="label">Date Lost:</div>
+                    <div style="color: #d1d5db;">${escapeHtml(item.date_lost)}</div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid #9333ea;">
+                        <div class="label" style="margin-top: 0;">Report Found By:</div>
+                        <div style="color: #d1d5db; margin-top: 0.5rem;">If This Is Your Lost Item, Contact:</div>
+                        <div style="margin-top: 0.5rem; font-weight: bold; color: #c084fc;">${escapeHtml(item.name)}</div>
+                        <div><a href="mailto:${escapeHtml(item.email)}" style="color: #a855f7; text-decoration: none; font-weight: bold;">${escapeHtml(item.email)}</a></div>
+                    </div>
+                    
+                    <div style="color: #9ca3af; font-size: 0.85rem; margin-top: 0.75rem;">Posted: ${escapeHtml(item.datePosted)}</div>
+                    <button onclick="viewItem(${allItems.indexOf(item)})" style="margin-top: 1rem; width: 100%;" ${status === 'claimed' ? 'disabled style="opacity: 0.6; cursor: not-allowed;"' : ''}>
+                        ${status === 'claimed' ? 'Already Claimed' : 'Coordinate Pickup'}
+                    </button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // Load all items from Firebase
+        // - Prunes items older than 7 days
+        async function loadItems() {
+            allItems = await DB.getLostItems();
+
+            // Automatically remove items that have been unclaimed for more than 7 days
+            const container = document.getElementById('itemsContainer');
+            try {
+                const now = new Date();
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - 7);
+
+                const kept = allItems.filter(item => {
+                    const d = new Date(item.datePosted);
+                    // if date parsing fails, keep the item (avoid accidental deletion)
+                    if (isNaN(d)) return true;
+                    return d >= cutoff;
+                });
+
+                const removedCount = allItems.length - kept.length;
+                if (removedCount > 0) {
+                    // persist the pruned list
+                    localStorage.setItem('lostItems', JSON.stringify(kept));
+                    allItems = kept;
+
+                    // show a small non-blocking notice above the items container
+                    const noticeId = 'pruneNotice';
+                    let noticeEl = document.getElementById(noticeId);
+                    if (!noticeEl) {
+                        noticeEl = document.createElement('div');
+                        noticeEl.id = noticeId;
+                        noticeEl.style.cssText = 'background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:.75rem;border-radius:6px;margin-bottom:1rem;';
+                        container.parentNode.insertBefore(noticeEl, container);
+                    }
+                    noticeEl.innerHTML = `<strong>${removedCount} item(s) removed:</strong> Items unclaimed for over 7 days were automatically removed.`;
+                }
+            } catch (e) {
+                // If anything goes wrong with pruning, fall back to displaying everything
+                console.warn('Pruning failed:', e);
+            }
+
+            applyFiltersAndSort();
+        }
+
+        // When a user wants to coordinate pickup, save the selected item and go to Coordinate Pickup.html
+        function viewItem(index) {
+            const selected = allItems[index];
+            
+            if (!selected) {
+                alert('Item not found. Please refresh the page.');
+                return;
+            }
+            
+            localStorage.setItem('selectedItem', JSON.stringify(selected));
+            window.location.href = 'coordinate-pickup.html';
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function(m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadItems();
+            
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                filters.search = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            // Category filter
+            document.getElementById('categoryFilter').addEventListener('change', function(e) {
+                filters.category = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            // Date filters
+            document.getElementById('dateFrom').addEventListener('change', function(e) {
+                filters.dateFrom = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            document.getElementById('dateTo').addEventListener('change', function(e) {
+                filters.dateTo = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            // Sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Update sort type
+                    currentSort = this.dataset.sort;
+                    applyFiltersAndSort();
+                });
+            });
+        });
+    </script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+</body>
+</html>

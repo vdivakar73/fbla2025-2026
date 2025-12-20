@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Coordinate Pickup</title>
+	<script src="auth.js"></script>
+	<script>checkAuth();</script>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+			color: #f0f0f0;
+			padding: 20px;
+		}
+
+		header {
+			max-width: 900px;
+			margin: 0 auto 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		h1 {
+			font-size: 2.5rem;
+			background: linear-gradient(135deg, #ffffff 0%, #b794f6 50%, #9333ea 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		h2 {
+			color: #b794f6;
+			font-size: 1.8rem;
+			margin-top: 0;
+		}
+
+		h3 {
+			color: #b794f6;
+			font-size: 1.4rem;
+			margin-top: 1.5rem;
+		}
+
+		main {
+			max-width: 900px;
+			margin: 0 auto;
+		}
+
+		a.button {
+			background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+			color: #fff;
+			padding: 0.6rem 1rem;
+			border-radius: 8px;
+			text-decoration: none;
+			font-weight: bold;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+		}
+
+		a.button:hover {
+			background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+		}
+
+		.card {
+			background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+			padding: 2rem;
+			border-radius: 12px;
+			border: 2px solid #9333ea;
+			position: relative;
+		}
+
+		.card::before {
+			content: '';
+			position: absolute;
+			top: -2px;
+			left: -2px;
+			right: -2px;
+			bottom: -2px;
+			background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+			border-radius: 12px;
+			z-index: -1;
+			opacity: 0.6;
+			filter: blur(10px);
+		}
+
+		label {
+			display: block;
+			font-weight: 600;
+			margin-top: 1rem;
+			color: #c084fc;
+		}
+
+		input, textarea, select {
+			width: 100%;
+			padding: 0.75rem;
+			margin-top: 0.5rem;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid #9333ea;
+			border-radius: 6px;
+			color: #f0f0f0;
+			font-family: inherit;
+			transition: border-color 0.3s ease;
+		}
+
+		input:focus, textarea:focus, select:focus {
+			outline: none;
+			border-color: #9333ea;
+			box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+		}
+
+		.actions {
+			margin-top: 1.5rem;
+			display: flex;
+			gap: 0.75rem;
+			flex-wrap: wrap;
+		}
+
+		.btn {
+			padding: 0.75rem 1.5rem;
+			border-radius: 8px;
+			border: none;
+			cursor: pointer;
+			font-weight: bold;
+			font-size: 1rem;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary {
+			background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+			color: white;
+			box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+		}
+
+		.btn-primary:hover {
+			background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+		}
+
+		.btn-danger {
+			background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+			color: white;
+			box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+		}
+
+		.btn-danger:hover {
+			background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 25px rgba(220, 38, 38, 0.6);
+		}
+
+		.muted {
+			color: #9ca3af;
+			font-size: 0.95rem;
+		}
+
+		hr {
+			margin: 2rem 0;
+			border: none;
+			border-top: 1px solid #7c3aed;
+		}
+
+		.nav-links {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		.nav-links a {
+			background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+			color: #fff;
+			padding: 0.6rem 1rem;
+			border-radius: 8px;
+			text-decoration: none;
+			font-weight: bold;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+			font-size: 0.9rem;
+		}
+
+		.nav-links a:hover {
+			background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>Coordinate Pickup</h1>
+		<nav class="nav-links">
+			<a href="index.html">Home</a>
+			<a href="find-your-missing-item.html">Find Your Missing Item</a>
+			<a href="file-a-complaint.html">File Missing Item</a>
+			<a href="feedback.html">Your Feedback</a>
+		</nav>
+	</header>
+
+	<main>
+		<div id="content"></div>
+	</main>
+
+	<script>
+		/* IMPORTANT: This page reads `localStorage.selectedItem` to render a selected item.
+		     Pickup requests are saved to `localStorage.pickupRequests` and collected items are removed
+		     from `localStorage.lostItems` when marked as collected.
+		*/
+		// Escape text before rendering into HTML
+		function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+
+		// Find item index helper (used when marking collected)
+		function findItemIndex(items, item) {
+			return items.findIndex(i => i.datePosted === item.datePosted && i.item_name === item.item_name && i.email === item.email);
+		}
+
+		function openComposer(email, subject, body) {
+			const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
+				+ '&to=' + encodeURIComponent(email)
+				+ '&su=' + encodeURIComponent(subject)
+				+ '&body=' + encodeURIComponent(body);
+			window.open(gmailUrl, '_blank');
+		}
+
+		function renderSelected(selected) {
+			const container = document.getElementById('content');
+						container.innerHTML = `
+								<div class="card">
+									${selected.image ? `<img src="${selected.image}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 1.5rem; border: 2px solid #7c3aed;" alt="Item" />` : ''}
+									<h2>${escapeHtml(selected.item_name)}</h2>
+									<div class="muted">Category: ${escapeHtml(selected.category)} • Date lost: ${escapeHtml(selected.date_lost)}</div>
+									<p style="margin-top:1rem; color: #d1d5db; line-height: 1.6;">${escapeHtml(selected.description)}</p>
+									<div style="color: #d1d5db;"><strong style="color: #b794f6;">Last Known Location:</strong> ${escapeHtml(selected.location)}</div>
+									<div style="margin-top:.5rem; color: #d1d5db;"><strong style="color: #b794f6;">Contact:</strong> ${escapeHtml(selected.name)} — <a href="mailto:${escapeHtml(selected.email)}" style="color: #9333ea; font-weight: bold;">${escapeHtml(selected.email)}</a></div>
+
+									<hr />
+
+									<h3>Request a pickup / coordinate</h3>
+									<form id="pickupForm">
+										<label for="preferred">Preferred pickup date & time</label>
+										<input id="preferred" type="datetime-local" />
+
+										<label for="phone">Your phone (optional)</label>
+										<input id="phone" type="text" placeholder="Phone or contact method" />
+
+										<label for="note">Note / pickup instructions (optional)</label>
+										<textarea id="note" rows="3" placeholder="Where to meet, locker number, etc."></textarea>
+
+										${selected.category.toLowerCase() === 'electronics' ? `
+											<div style="background: rgba(255, 193, 7, 0.15); border: 2px solid #ffc107; padding: 1.25rem; border-radius: 8px; margin-top: 1.5rem;">
+												<label style="margin-top: 0; color: #ffc107;">Verification Required (Electronics)</label>
+												<p style="margin: 0.75rem 0 0 0; color: #d1d5db; font-size: 0.95rem;">Since this is an electronics item, please provide verification that you are the rightful owner:</p>
+												
+												<label for="verification" style="margin-top: 0.75rem; color: #b794f6;">Verification (serial number, IMEI, description of damage, etc.)</label>
+												<textarea id="verification" rows="3" placeholder="Provide details that prove ownership..." required></textarea>
+											</div>
+										` : ''}
+
+										<div class="actions">
+											<button type="submit" class="btn btn-primary">Request Pickup</button>
+											<button type="button" id="collectedBtn" class="btn btn-danger">Mark as Collected</button>
+										</div>
+
+										<div style="margin-top: .75rem; display:flex; gap:.75rem; flex-wrap:wrap;">
+											<button id="gmailBtn" type="button" class="btn" style="background:#4285F4;color:#fff; padding: 0.75rem 1.5rem;">Email Owner (Gmail)</button>
+											<button id="mailtoBtn" type="button" class="btn" style="background:#6c757d;color:#fff; padding: 0.75rem 1.5rem;">Open Mail Client</button>
+										</div>
+									</form>
+
+									<div id="status" style="margin-top:1rem;"></div>
+								</div>`;
+
+						// pickup form submit
+						document.getElementById('pickupForm').addEventListener('submit', function(e){
+								e.preventDefault();
+								const pref = document.getElementById('preferred').value;
+								const phone = document.getElementById('phone').value;
+								const note = document.getElementById('note').value;
+								
+								// Check if verification is required and filled
+								let verification = '';
+								if (selected.category.toLowerCase() === 'electronics') {
+									const verField = document.getElementById('verification');
+									if (!verField.value.trim()) {
+										alert('Please provide verification details for this electronics item.');
+										return;
+									}
+									verification = verField.value;
+								}
+								
+							const req = { item: selected, preferred: pref, phone, note, verification, requestedAt: new Date().toLocaleString() };
+							DB.addPickupRequest(req).then(() => {
+								document.getElementById('status').innerHTML = '<div style="color:green;">Pickup request saved. The owner has been notified (if email provided).</div>';
+							}).catch(error => {
+								alert('Error saving pickup request: ' + error.message);
+							});
+						});
+
+					// Mark as collected
+					document.getElementById('collectedBtn').addEventListener('click', async function(){
+							if (!confirm('Are you sure you want to mark this item as collected? This will remove it from the public list.')) return;
+							
+							try {
+								// Add to pickup requests to track reunion
+								const req = { 
+									item: selected, 
+									status: 'collected',
+									collectedAt: new Date().toLocaleString() 
+								};
+								await DB.addPickupRequest(req);
+								
+								// Remove from lost items
+								if (selected.id) {
+									await DB.removeLostItem(selected.id);
+								}
+								localStorage.removeItem('selectedItem');
+								window.location.href = 'find-your-missing-item.html';
+							} catch (error) {
+								alert('Error marking item as collected: ' + error.message);
+							}
+					});						// Email buttons
+						document.getElementById('gmailBtn').addEventListener('click', function(){
+								const subject = `Pickup coordination: ${selected.item_name}`;
+								const body = `Hello ${selected.name},%0A%0AI would like to coordinate pickup for the item titled "${selected.item_name}".%0APreferred time: %0A%0AMessage:%0A`;
+								openComposer(selected.email, subject, body);
+						});
+
+						document.getElementById('mailtoBtn').addEventListener('click', function(){
+								const subject = `Pickup coordination: ${selected.item_name}`;
+								const body = `Hello ${selected.name},\n\nI would like to coordinate pickup for the item titled "${selected.item_name}".\nPreferred time:\n\nMessage:\n`;
+								const mailto = 'mailto:' + encodeURIComponent(selected.email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+								window.location.href = mailto;
+						});
+		}
+
+		function renderChooser(items){
+			const container = document.getElementById('content');
+			if (!items || items.length === 0) {
+				container.innerHTML = '<div class="card">No items available. Go to <a href="file-a-complaint.html">File Missing Item</a> to add one.</div>';
+				return;
+			}
+			container.innerHTML = '<h2>Select an item to coordinate pickup</h2>' + items.map((it, idx) => `\
+				<div class="card" style="margin-bottom: .75rem;">\
+					<div style="display:flex;justify-content:space-between;align-items:center;">\
+						<div>\
+							<strong>${escapeHtml(it.item_name)}</strong><div class="muted">${escapeHtml(it.category)} — ${escapeHtml(it.date_lost)}</div>\
+						</div>\
+						<div>\
+							<button class="btn" onclick='selectAndGo(${idx})' style="background:#0366d6;color:#fff;border-radius:6px;padding:.5rem 0.75rem;border:none;">Coordinate</button>\
+						</div>\
+					</div>\
+				</div>`).join('');
+		}
+
+		function selectAndGo(index) {
+			const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+			const selected = items[index];
+			if (!selected) return alert('Item not found');
+			localStorage.setItem('selectedItem', JSON.stringify(selected));
+			// reload page to show selected view
+			location.reload();
+		}
+
+		// Init
+		(function(){
+			const selected = JSON.parse(localStorage.getItem('selectedItem') || 'null');
+			if (selected) {
+				renderSelected(selected);
+				return;
+			}
+			const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+			renderChooser(items);
+		})();
+		</script>
+
+		<!-- Firebase SDK -->
+		<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+		<script src="firebase-config.js"></script>
+	</body>
+</html>

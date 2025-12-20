@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Missing Item - Lost and Found</title>
+    <script src="auth.js"></script>
+    <script>checkAuth();</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px; 
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 42px;
+            margin: 40px 0 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #b794f6 50%, #9333ea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        form {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+            border: 2px solid #9333ea;
+            position: relative;
+        }
+
+        form::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.6;
+            filter: blur(10px);
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            color: #c084fc;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid #9333ea;
+            border-radius: 6px;
+            box-sizing: border-box;
+            color: #f0f0f0;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #9333ea;
+            box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        select option {
+            background: #1a0a2e;
+            color: #e0e0e0;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #b794f6;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #9333ea;
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .nav-links a {
+            color: #b794f6;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid #9333ea;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(147, 51, 234, 0.4);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        #imagePreview img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 2px solid #9333ea;
+            margin-top: 10px;
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #9333ea;
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-image-btn:hover {
+            background: rgba(185, 28, 28, 1);
+            transform: scale(1.1);
+        }
+
+        .upload-hint {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- IMPORTANT: Items submitted here are stored in `localStorage.lostItems` as a JSON array.
+         Key fields: item_name, category, description, location, date_lost, name, email, image, datePosted
+         The image (if provided) is stored as a Base64 data URL in `image`.
+    -->
+    <div class="container">
+        <h1>Report a Found Item</h1>
+        <form id="reportForm">
+        <label for="item_name">Item Name:</label>
+        <input type="text" id="item_name" placeholder="Name of the item (eg. backpack, phone)" required>
+
+        <label for="category">Category:</label>
+        <select id="category" required>
+            <option value="">Select a category</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+            <option value="accessories">Accessories</option>
+            <option value="documents">Documents</option>
+            <option value="other">Other</option>
+        </select>
+
+        <label for="description">Description:</label>
+        <textarea id="description" placeholder="Describe the item in detail..." required></textarea>
+
+        <label for="location">Last Known Location:</label>
+        <input type="text" id="location" placeholder="Describe the last known location of the item..." required>
+
+        <label for="date_lost">Date Lost:</label>
+        <input type="date" id="date_lost" required>
+
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" placeholder="Enter your full name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email address" required>
+
+        <label for="images">Item Pictures (optional - up to 5 photos):</label>
+        <input type="file" id="images" accept="image/*" multiple placeholder="Upload photos of the item">
+        <div class="upload-hint">You can select multiple photos. Max 5 images.</div>
+        <div id="imagePreview" class="image-preview-grid"></div>
+
+        <button type="submit">Submit Report</button>
+    </form>
+
+    <script>
+        let imagesData = [];
+        const MAX_IMAGES = 5;
+
+        // Handle multiple image uploads
+        document.getElementById('images').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length + imagesData.length > MAX_IMAGES) {
+                alert(`You can only upload up to ${MAX_IMAGES} images. Currently you have ${imagesData.length} images.`);
+                return;
+            }
+
+            files.forEach(file => {
+                if (imagesData.length >= MAX_IMAGES) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagesData.push(event.target.result);
+                    updateImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Update image preview grid
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = imagesData.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview ${index + 1}" />
+                    <button type="button" class="remove-image-btn" onclick="removeImage(${index})" title="Remove image">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Remove image from array
+        function removeImage(index) {
+            imagesData.splice(index, 1);
+            updateImagePreview();
+            // Clear file input to allow re-selection
+            document.getElementById('images').value = '';
+        }
+
+        // Form submit handler
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Collect form data
+            const item = {
+                item_name: document.getElementById('item_name').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                location: document.getElementById('location').value,
+                date_lost: document.getElementById('date_lost').value,
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                images: imagesData.length > 0 ? imagesData : null, // Store array of images
+                image: imagesData.length > 0 ? imagesData[0] : null, // Keep first image for backward compatibility
+                datePosted: new Date().toLocaleString()
+            };
+
+            // Save to Firebase
+            DB.addLostItem(item).then(() => {
+                // Show success message
+                alert('✅ Report submitted successfully! You can now see it on the Find Item page.');
+
+                // Reset form
+                document.getElementById('reportForm').reset();
+                imagesData = [];
+                updateImagePreview();
+
+                // Redirect to Find Your Missing Item page after 1 second
+                setTimeout(() => {
+                    window.location.href = 'find-your-missing-item.html';
+                }, 1000);
+            }).catch(error => {
+                alert('Error submitting report: ' + error.message);
+            });
+        });
+    </script>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="find-your-missing-item.html">Find Your Missing Item</a>
+        <a href="coordinate-pickup.html">Coordinate Pickup</a>
+        <a href="feedback.html">Your Feedback</a>
+    </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</body>
+</html>

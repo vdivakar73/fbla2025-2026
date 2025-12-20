@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ardrey Kell Lost and Found Services</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+      color: #f0f0f0;
+    }
+
+    .hero-header {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://d1hfln2sfez66z.cloudfront.net/04-29-2023/t_adbaeba330fc4a1eafa10d48c0d7107f_name_ARDREY_KELL_HS_BAT_PROBLEM_transfer_frame_608.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      width: 100%;
+      padding: 80px 20px 60px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(138, 43, 226, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.15), transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-header h1 {
+      font-size: 56px;
+      margin-bottom: 30px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 50%, #9333ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
+    }
+
+    .hero-header nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      text-decoration: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      z-index: 10;
+    }
+
+    .login-button:hover {
+      background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+    }
+
+    .logout-button {
+      background: linear-gradient(135deg, #c41e3a, #e63946);
+      border-color: rgba(220, 53, 69, 0.5);
+    }
+
+    .logout-button:hover {
+      background: linear-gradient(135deg, #e63946, #f08080);
+      box-shadow: 0 6px 25px rgba(220, 53, 69, 0.6);
+    }
+
+    .hero-header a {
+      color: white;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+    }
+
+    .hero-header a:hover {
+      background: linear-gradient(135deg, #9333ea 0%, #a855f7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+    }
+
+    .about-section {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+      border: 2px solid #9333ea;
+      position: relative;
+    }
+
+    .about-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.6;
+      filter: blur(10px);
+    }
+
+    .about-section h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .about-section p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #e5e5e5;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-align: justify;
+    }
+
+    .about-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 0 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      border: 2px solid #9333ea;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.6);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.4;
+      filter: blur(8px);
+    }
+
+    .stat-number {
+      font-size: 48px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      color: #e5e5e5;
+      font-weight: 600;
+    }
+
+    .faq-section, .tips-section {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+      border: 2px solid #9333ea;
+      position: relative;
+    }
+
+    .faq-section::before, .tips-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.6;
+      filter: blur(10px);
+    }
+
+    .faq-section h2, .tips-section h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .faq-item {
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      border-left: 4px solid #a855f7;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-question {
+      font-size: 20px;
+      font-weight: bold;
+      color: #c084fc;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+
+    .faq-question:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .faq-question::after {
+      content: '+';
+      font-size: 28px;
+      font-weight: bold;
+      color: #a855f7;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-question.active::after {
+      content: '−';
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #e5e5e5;
+      padding: 0 20px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-answer.active {
+      max-height: 500px;
+      padding: 0 20px 20px 20px;
+    }
+
+    .tips-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list li {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      border-left: 4px solid #a855f7;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #e5e5e5;
+    }
+
+    .tips-list li strong {
+      color: #c084fc;
+    }
+
+    .charts-section {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 40px;
+      background: linear-gradient(135deg, #2d1b4e 0%, #1f1135 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+      border: 2px solid #9333ea;
+      position: relative;
+    }
+
+    .charts-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.6;
+      filter: blur(10px);
+    }
+
+    .charts-section h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #b794f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #a855f7;
+    }
+
+    .chart-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #c084fc;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- IMPORTANT: Landing page / navigation.
+       - Use the links below to go to `Find Your Missing Item.html` (Find), `File A Complaint.html` (File), and `Coordinate Pickup.html` (Coordinate).
+       - The `.hero-header` CSS sets the background image and overlay used for the header.
+  -->
+  <header class="hero-header">
+      <a href="#" id="auth-button" class="login-button" onclick="handleAuth(event)">Login</a>
+      <h1>Ardrey Kell Lost and Found Services</h1>
+      <p id="welcome-message" style="font-size: 18px; margin-bottom: 15px; color: rgba(255,255,255,0.9);"></p>
+    <nav>
+      <a href="find-your-missing-item.html">Find Your Missing Item</a>
+      <a href="file-a-complaint.html">File Missing Item</a>
+      <a href="coordinate-pickup.html">Coordinate Pickup</a>
+      <a href="my-claims.html">My Claims</a>
+      <a href="feedback.html">Your Feedback</a>
+    </nav>
+  
+  </header>
+
+  <script src="auth.js"></script>
+  <script>updateAuthButton();</script>
+
+  <div class="about-section">
+    <h2>About Our Lost & Found</h2>
+    
+    <p>Welcome to our Lost & Found—created with one simple goal in mind: to help our community stay connected and cared for. We know how stressful it can be to misplace something important, and how uplifting it feels when someone helps you get it back. That's why this space exists.</p>
+
+    <p>Our Lost & Found is more than just a page—it's a commitment to kindness, responsibility, and support. By giving everyone a central place to report lost items or share what they've found, we make it easier for things to return to their owners and for our community to look out for one another.</p>
+
+    <p>Every item returned is a reminder that small acts of honesty and empathy matter. Together, we can make this website not just a resource, but a reflection of the positive, connected community we're building.</p>
+  </div>
+
+  <!-- Statistics Section -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-number" id="totalReports">0</div>
+      <div class="stat-label">📦 Items Reported</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="reunited">0</div>
+      <div class="stat-label">✅ Successfully Reunited</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pending">0</div>
+      <div class="stat-label">⏳ Still Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="successRate">0%</div>
+      <div class="stat-label">🎯 Success Rate</div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Q: What should I do if I find a lost item?</div>
+      <div class="faq-answer">A: Click "File Missing Item" to report the found item. Provide as much detail as possible including description, location where found, and upload a photo if available. This helps the rightful owner identify their item.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Q: How do I search for my lost item?</div>
+      <div class="faq-answer">A: Visit "Find Your Missing Item" to browse all reported items. You can filter by category, date, and location to quickly find your item.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Q: What is the verification process for electronics?</div>
+      <div class="faq-answer">A: For security reasons, electronics require verification such as serial numbers, IMEI, or specific details about the device (lock screen photo, case description, etc.) to ensure items are returned to rightful owners.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Q: How long are items kept in the system?</div>
+      <div class="faq-answer">A: Items remain in our system indefinitely until claimed. However, we recommend checking regularly as some items may be collected without updating the system.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Q: Can I coordinate pickup directly with the finder?</div>
+      <div class="faq-answer">A: Yes! Use the "Coordinate Pickup" feature to schedule a time and place to retrieve your item. You can also contact the reporter directly via the provided email.</div>
+    </div>
+  </div>
+
+  <!-- Tips Section -->
+  <div class="tips-section">
+    <h2>Tips for Using Our Lost & Found</h2>
+    
+    <ul class="tips-list">
+      <li><strong>Be Detailed:</strong> When reporting a found item, include specific details like brand, color, unique features, and exact location where found.</li>
+      
+      <li><strong>Upload Photos:</strong> A picture is worth a thousand words! Upload clear photos of found items to help owners identify their belongings.</li>
+      
+      <li><strong>Check Daily:</strong> New items are added frequently. If you've lost something, check back daily for updates.</li>
+      
+      <li><strong>Act Quickly:</strong> If you see your item, coordinate pickup as soon as possible to ensure it's still available.</li>
+      
+      <li><strong>Verify Ownership:</strong> For valuable items, be prepared to provide proof of ownership such as receipts, serial numbers, or specific details only the owner would know.</li>
+      
+      <li><strong>Be Patient:</strong> It may take some time for someone to find and report your item. Keep checking back regularly.</li>
+      
+      <li><strong>Say Thank You:</strong> If someone finds and returns your item, a simple thank you goes a long way in building our caring community!</li>
+    </ul>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <h2>Lost & Found Analytics</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <div class="chart-title">Items by Category</div>
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Reports Over Time</div>
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create category pie chart
+    function createCategoryChart() {
+      const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+      const categoryCounts = {};
+      
+      items.forEach(item => {
+        const category = item.category || 'Other';
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+      });
+      
+      const canvas = document.getElementById('categoryChart');
+      const ctx = canvas.getContext('2d');
+      const categories = Object.keys(categoryCounts);
+      const counts = Object.values(categoryCounts);
+      const total = counts.reduce((a, b) => a + b, 0);
+      
+      if (total === 0) {
+        ctx.fillStyle = '#e5e5e5';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available yet', canvas.width / 2, canvas.height / 2);
+        return;
+      }
+      
+      const colors = ['#9333ea', '#a855f7', '#c084fc', '#7c3aed', '#8b5cf6', '#d8b4fe'];
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 40;
+      
+      let currentAngle = -Math.PI / 2;
+      
+      categories.forEach((category, index) => {
+        const sliceAngle = (counts[index] / total) * 2 * Math.PI;
+        
+        // Draw slice
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw label
+        const labelAngle = currentAngle + sliceAngle / 2;
+        const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
+        const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
+        
+        ctx.fillStyle = '#e5e5e5';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = labelX > centerX ? 'left' : 'right';
+        ctx.fillText(`${category} (${counts[index]})`, labelX, labelY);
+        
+        currentAngle += sliceAngle;
+      });
+    }
+    
+    // Create timeline bar chart
+    function createTimelineChart() {
+      const items = JSON.parse(localStorage.getItem('lostItems') || '[]');
+      const canvas = document.getElementById('timelineChart');
+      const ctx = canvas.getContext('2d');
+      
+      if (items.length === 0) {
+        ctx.fillStyle = '#e5e5e5';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available yet', canvas.width / 2, canvas.height / 2);
+        return;
+      }
+      
+      // Group by date
+      const dateCounts = {};
+      items.forEach(item => {
+        const date = item.datePosted ? item.datePosted.split(' ')[0] : 'Unknown';
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+      });
+      
+      const dates = Object.keys(dateCounts).sort().slice(-7); // Last 7 dates
+      const counts = dates.map(date => dateCounts[date]);
+      const maxCount = Math.max(...counts);
+      
+      const barWidth = (canvas.width - 80) / dates.length;
+      const chartHeight = canvas.height - 80;
+      
+      dates.forEach((date, index) => {
+        const barHeight = (counts[index] / maxCount) * chartHeight;
+        const x = 40 + index * barWidth;
+        const y = canvas.height - 40 - barHeight;
+        
+        // Draw bar with gradient
+        const gradient = ctx.createLinearGradient(x, y, x, canvas.height - 40);
+        gradient.addColorStop(0, '#a855f7');
+        gradient.addColorStop(1, '#7c3aed');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, barWidth - 10, barHeight);
+        
+        // Draw count on top
+        ctx.fillStyle = '#e5e5e5';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(counts[index], x + (barWidth - 10) / 2, y - 5);
+        
+        // Draw date label
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '12px Arial';
+        ctx.save();
+        ctx.translate(x + (barWidth - 10) / 2, canvas.height - 20);
+        ctx.rotate(-Math.PI / 4);
+        ctx.textAlign = 'right';
+        ctx.fillText(date, 0, 0);
+        ctx.restore();
+      });
+      
+      // Draw axis
+      ctx.strokeStyle = '#9ca3af';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(40, canvas.height - 40);
+      ctx.lineTo(canvas.width - 20, canvas.height - 40);
+      ctx.stroke();
+    }
+    
+    // Initialize charts
+    function initCharts() {
+      // Set canvas size
+      const canvases = document.querySelectorAll('canvas');
+      canvases.forEach(canvas => {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 300;
+      });
+      
+      createCategoryChart();
+      createTimelineChart();
+    }
+    
+    // Update stats on page load
+    updateStats();
+    initCharts();
+    
+    // Update stats and charts every 5 seconds in case localStorage changes
+    setInterval(() => {
+      updateStats();
+      initCharts();
+    }, 5000);
+  </script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+</body>
+</html>

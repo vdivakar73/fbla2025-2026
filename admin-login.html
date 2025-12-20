@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Lost and Found</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .admin-login-container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(123, 44, 191, 0.4);
+            border: 2px solid #7b2cbf;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            color: #c77dff;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #9d4edd;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #c77dff;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(123, 44, 191, 0.1);
+            border: 2px solid #7b2cbf;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #9d4edd;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.3);
+        }
+
+        .admin-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .admin-btn:hover {
+            background: linear-gradient(135deg, #9d4edd 0%, #c77dff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(123, 44, 191, 0.4);
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.2);
+            border: 2px solid #dc2626;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #9d4edd;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            color: #c77dff;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-header">
+            <h1>🔐 Admin Portal</h1>
+            <p>Authorized Access Only</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label for="admin-email">Email Address</label>
+                <input type="email" id="admin-email" required placeholder="admin@akhslostnfound.com">
+            </div>
+
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" required placeholder="Enter admin password">
+            </div>
+
+            <button type="submit" class="admin-btn">Login to Admin Panel</button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Homepage</a>
+        </div>
+    </div>
+
+    <script>
+        // Admin credentials - In production, this should be in Firebase with proper security
+        const ADMIN_CREDENTIALS = {
+            email: 'admin@akhslostnfound.com',
+            password: 'AKHSAdmin2025!'
+        };
+
+        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const errorDiv = document.getElementById('error-message');
+
+            console.log('Attempting login with:', email);
+            console.log('Expected:', ADMIN_CREDENTIALS.email);
+
+            // Validate admin credentials
+            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                console.log('Login successful!');
+                // Store admin session
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                sessionStorage.setItem('adminEmail', email);
+                sessionStorage.setItem('adminLoginTime', new Date().toISOString());
+                
+                // Redirect to admin dashboard
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                console.log('Login failed');
+                errorDiv.textContent = 'Invalid credentials. Access denied.';
+                errorDiv.style.display = 'block';
+                
+                // Clear error after 3 seconds
+                setTimeout(function() {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

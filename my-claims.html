@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Claims - Ardrey Kell Lost & Found</title>
+    <script src="auth.js"></script>
+    <script>checkAuth();</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2d1b4e, #1f1135);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #9333ea;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #fff, #b794f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            background: linear-gradient(135deg, #9333ea, #a855f7);
+            transform: translateY(-2px);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid #9333ea;
+            border-radius: 8px;
+            color: #b794f6;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(147, 51, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #2d1b4e, #1f1135);
+            border: 2px solid #9333ea;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: rgba(147, 51, 234, 0.1);
+        }
+
+        .item-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #b794f6;
+            margin-bottom: 10px;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .item-label {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .item-value {
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+        }
+
+        .status-claimed {
+            background: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+            border: 1px solid #facc15;
+        }
+
+        .status-collected {
+            background: rgba(147, 51, 234, 0.2);
+            color: #b794f6;
+            border: 1px solid #b794f6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            color: #b794f6;
+            margin-bottom: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #9333ea, #a855f7);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #b794f6;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 28px;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 My Claims History</h1>
+            <p style="color: #b794f6; margin-top: 10px;">Track all your filed and claimed items</p>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="find-your-missing-item.html">Find Items</a>
+                <a href="file-a-complaint.html">File Item</a>
+                <a href="coordinate-pickup.html">Coordinate Pickup</a>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('filed')">Items I Filed</button>
+            <button class="tab-btn" onclick="switchTab('claimed')">Items I Claimed</button>
+            <button class="tab-btn" onclick="switchTab('collected')">Collected Items</button>
+        </div>
+
+        <div id="filed-tab" class="tab-content active">
+            <div id="filed-items" class="loading">Loading your filed items...</div>
+        </div>
+
+        <div id="claimed-tab" class="tab-content">
+            <div id="claimed-items" class="loading">Loading your claimed items...</div>
+        </div>
+
+        <div id="collected-tab" class="tab-content">
+            <div id="collected-items" class="loading">Loading collected items...</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+        }
+
+        function createItemCard(item, type) {
+            const hasImage = item.image || (item.images && item.images.length > 0);
+            const imageUrl = item.image || (item.images && item.images[0]) || '';
+            
+            let statusBadge = '';
+            if (type === 'filed') {
+                statusBadge = '<span class="status-badge status-active">🟢 Active</span>';
+            } else if (type === 'claimed') {
+                statusBadge = '<span class="status-badge status-claimed">⏳ Claimed</span>';
+            } else if (type === 'collected') {
+                statusBadge = '<span class="status-badge status-collected">✅ Collected</span>';
+            }
+
+            return `
+                <div class="item-card">
+                    ${hasImage ? `<img src="${imageUrl}" alt="${item.item_name}" class="item-image">` : '<div class="item-image"></div>'}
+                    <div class="item-name">${item.item_name || 'Unnamed Item'}</div>
+                    <div class="item-info">
+                        <div>
+                            <div class="item-label">Category</div>
+                            <div class="item-value">${item.category || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="item-label">Location</div>
+                            <div class="item-value">${item.location || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="item-label">Date Posted</div>
+                            <div class="item-value">${item.datePosted || item.requestedAt || item.collectedAt || 'N/A'}</div>
+                        </div>
+                        ${item.description ? `
+                        <div>
+                            <div class="item-label">Description</div>
+                            <div class="item-value">${item.description}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${statusBadge}
+                </div>
+            `;
+        }
+
+        async function loadFiledItems() {
+            try {
+                const allItems = await DB.getLostItems();
+                const myItems = allItems.filter(item => item.email === currentUser.email);
+
+                const container = document.getElementById('filed-items');
+                
+                if (myItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <h3>No Items Filed Yet</h3>
+                            <p>You haven't reported any lost items.</p>
+                            <button class="action-btn" onclick="window.location.href='file-a-complaint.html'">File an Item</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="items-grid">${myItems.map(item => createItemCard(item, 'filed')).join('')}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('filed-items').innerHTML = `<div class="empty-state"><p>Error loading items: ${error.message}</p></div>`;
+            }
+        }
+
+        async function loadClaimedItems() {
+            try {
+                const allRequests = await DB.getPickupRequests();
+                const myRequests = allRequests.filter(req => 
+                    req.item && req.item.email !== currentUser.email && req.status !== 'collected'
+                );
+
+                const container = document.getElementById('claimed-items');
+                
+                if (myRequests.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <h3>No Claims Yet</h3>
+                            <p>You haven't claimed any items.</p>
+                            <button class="action-btn" onclick="window.location.href='find-your-missing-item.html'">Find Items</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="items-grid">${myRequests.map(req => createItemCard(req.item, 'claimed')).join('')}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('claimed-items').innerHTML = `<div class="empty-state"><p>Error loading claims: ${error.message}</p></div>`;
+            }
+        }
+
+        async function loadCollectedItems() {
+            try {
+                const allRequests = await DB.getPickupRequests();
+                const collectedItems = allRequests.filter(req => req.status === 'collected');
+
+                const container = document.getElementById('collected-items');
+                
+                if (collectedItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h3>No Collected Items</h3>
+                            <p>No items have been marked as collected yet.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="items-grid">${collectedItems.map(req => createItemCard(req.item, 'collected')).join('')}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('collected-items').innerHTML = `<div class="empty-state"><p>Error loading collected items: ${error.message}</p></div>`;
+            }
+        }
+
+        // Load all data on page load
+        loadFiledItems();
+        loadClaimedItems();
+        loadCollectedItems();
+    </script>
+</body>
+</html>
