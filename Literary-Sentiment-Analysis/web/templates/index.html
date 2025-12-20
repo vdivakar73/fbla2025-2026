@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literary Sentiment Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        {% include '_header.html' %}
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('text')">Analyze Text</button>
+                <button class="tab" onclick="switchTab('file')">Upload File</button>
+                <button class="tab" onclick="switchTab('examples')">Examples</button>
+            </div>
+
+            <!-- Text Analysis Tab -->
+            <div id="text-tab" class="tab-content active">
+                <label for="text-type">Text Type:</label>
+                <select id="text-type">
+                    <option value="general">General Text</option>
+                    <option value="poem">Poem</option>
+                    <option value="book">Book Excerpt</option>
+                    <option value="story">Short Story</option>
+                    <option value="essay">Essay</option>
+                </select>
+
+                <label for="text-input">Enter your text:</label>
+                <textarea id="text-input" placeholder="Paste your poem, book excerpt, or any literary text here..."></textarea>
+
+                <button class="btn" onclick="analyzeText()">Analyze</button>
+            </div>
+
+            <!-- File Upload Tab -->
+            <div id="file-tab" class="tab-content">
+                <label for="file-type">Text Type:</label>
+                <select id="file-type">
+                    <option value="general">General Text</option>
+                    <option value="poem">Poem</option>
+                    <option value="book">Book Excerpt</option>
+                    <option value="story">Short Story</option>
+                    <option value="essay">Essay</option>
+                </select>
+
+                <label for="file-input">Upload a text file:</label>
+                <input type="file" id="file-input" accept=".txt,.poem,.md">
+
+                <button class="btn" onclick="analyzeFile()">Analyze File</button>
+            </div>
+
+            <!-- Examples Tab -->
+            <div id="examples-tab" class="tab-content">
+                <h3>Try these classic examples:</h3>
+                <div class="examples">
+                    <div class="example-btn" onclick="loadExample('frost')">
+                        <h4>Robert Frost</h4>
+                        <p>"Stopping by Woods on a Snowy Evening"</p>
+                    </div>
+                    <div class="example-btn" onclick="loadExample('shakespeare')">
+                        <h4>Shakespeare</h4>
+                        <p>Sonnet 18</p>
+                    </div>
+                    <div class="example-btn" onclick="loadExample('poe')">
+                        <h4>Edgar Allan Poe</h4>
+                        <p>"The Raven" (excerpt)</p>
+                    </div>
+                    <div class="example-btn" onclick="loadExample('dickinson')">
+                        <h4>Emily Dickinson</h4>
+                        <p>"Hope is the thing with feathers"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+    {% include '_footer.html' %}
+
+    <script>
+        const examples = {
+            frost: `The woods are lovely, dark and deep,
+But I have promises to keep,
+And miles to go before I sleep,
+And miles to go before I sleep.`,
+
+            shakespeare: `Shall I compare thee to a summer's day?
+Thou art more lovely and more temperate:
+Rough winds do shake the darling buds of May,
+And summer's lease hath all too short a date`,
+
+            poe: `Once upon a midnight dreary, while I pondered, weak and weary,
+Over many a quaint and curious volume of forgotten lore—
+While I nodded, nearly napping, suddenly there came a tapping,
+As of some one gently rapping, rapping at my chamber door.`,
+
+            dickinson: `Hope is the thing with feathers
+That perches in the soul,
+And sings the tune without the words,
+And never stops at all.`
+        };
+
+        // Small UI notify helper for templates (uses showError or showToast if available)
+        function notifyUI(message) {
+            if (typeof showError === 'function') return showError(message);
+            if (typeof showToast === 'function') return showToast(message, 'error');
+            console.warn('notifyUI:', message);
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        function loadExample(example) {
+            document.getElementById('text-input').value = examples[example];
+            document.getElementById('text-type').value = 'poem';
+            switchTab('text');
+            document.querySelectorAll('.tab')[0].click();
+        }
+
+        async function analyzeText() {
+            const text = document.getElementById('text-input').value;
+            const type = document.getElementById('text-type').value;
+
+            if (!text.trim()) {
+                notifyUI('Please enter some text to analyze');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text, type })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.results, data.summary);
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function analyzeFile() {
+            const fileInput = document.getElementById('file-input');
+            const type = document.getElementById('file-type').value;
+
+            if (!fileInput.files.length) {
+                notifyUI('Please select a file');
+                return;
+            }
+
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('type', type);
+
+            try {
+                const response = await fetch('/analyze_file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.results, data.summary);
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('results').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your text with AI...</p>
+                </div>
+            `;
+        }
+
+        function displayResults(results, summary) {
+            const sentiment = results.sentiment;
+            const emotions = results.emotions;
+            const features = results.features;
+
+            let html = `
+                <div class="result-card">
+                    <h3>📊 Analysis Results</h3>
+                    
+                    <div class="stat-grid">
+                        <div class="stat">
+                            <div class="stat-value">${sentiment.overall_sentiment.toUpperCase()}</div>
+                            <div class="stat-label">Overall Sentiment</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${emotions.primary_emotion.toUpperCase()}</div>
+                            <div class="stat-label">Primary Emotion</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${features.word_count}</div>
+                            <div class="stat-label">Words</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${(features.lexical_diversity * 100).toFixed(0)}%</div>
+                            <div class="stat-label">Lexical Diversity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>😊 Emotion Distribution</h3>
+            `;
+
+            for (const [emotion, score] of Object.entries(emotions.all_emotions)) {
+                if (score > 0) {
+                    const percentage = (score * 100).toFixed(1);
+                    html += `
+                        <div class="emotion-bar" style="width: ${percentage}%">
+                            <div class="emotion-label">${emotion.charAt(0).toUpperCase() + emotion.slice(1)}: ${percentage}%</div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += `
+                </div>
+
+                <div class="result-card">
+                    <h3>📝 Detailed Summary</h3>
+                    <pre>${summary}</pre>
+                </div>
+            `;
+
+            document.getElementById('results').innerHTML = html;
+        }
+
+        function showError(error) {
+            document.getElementById('results').innerHTML = `
+                <div class="result-card" style="border-left-color: #dc3545;">
+                    <h3 style="color: #dc3545;">❌ Error</h3>
+                    <p>${error}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

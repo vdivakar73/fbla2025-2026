@@ -1,0 +1,18 @@
+<header class="app-header container">
+  <a class="logo" href="/">Literary Sentiment</a>
+  <nav class="header-nav" role="navigation" aria-label="Main navigation">
+    <a href="sentiment-analyzer.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tools.html">Tools</a>
+    <a href="analysis.html">Analysis</a>
+  </nav>
+  <div class="header-right">
+    <button class="icon-btn" onclick="speakCurrentText()" title="Read text">🔊</button>
+    <button class="icon-btn" onclick="decreaseFontSize()" title="Decrease font">A-</button>
+    <button class="icon-btn" onclick="resetFontSize()" title="Reset font">A</button>
+    <button class="icon-btn" onclick="increaseFontSize()" title="Increase font">A+</button>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-pressed="false" title="Toggle theme">🌓</button>
+    <button class="icon-btn" onclick="openFeedbackModal()" title="Feedback">✉️</button>
+    <button class="btn btn-primary" id="toolbarAnalyzeBtn" onclick="analyzeText(this)">⚡ Analyze</button>
+  </div>
+</header>

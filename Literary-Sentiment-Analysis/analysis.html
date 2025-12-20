@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis View — Literary Sentiment Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
+        <nav class="header-nav" role="navigation">
+            <a href="sentiment-analyzer.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="tools.html">Tools</a>
+            <a href="analysis.html" aria-current="page">Analysis</a>
+        </nav>
+        <div class="header-right">
+            <button class="btn" onclick="runFromStorage()">Run Analysis</button>
+            <button class="icon-btn theme-toggle" onclick="toggleTheme()" aria-pressed="false">🌓</button>
+            <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
+        </div>
+    </header>
+    <div class="container">
+        <div id="resultsContainer" class="section">
+            <h3>Results</h3>
+            <pre id="resultsContent" style="white-space:pre-wrap;">No analysis run yet. Click "Run Analysis" to analyze the last input or paste text into the Home page and press Analyze.</pre>
+        </div>
+        <div id="timelineContainer" class="section"></div>
+    </div>
+
+    <script src="ui-tools.js"></script>
+    <script src="ai-qa.js"></script>
+    <script src="annotations-engine.js"></script>
+    <script src="summary-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/franc@6.1.0/build/franc.min.js"></script>
+    <script>
+        // minimal runner: fetch last text from localStorage and run performAnalysis (fallback provided)
+        function runFromStorage() {
+            try {
+                const text = localStorage.getItem('lastText') || localStorage.getItem('pendingExample') || '';
+                if (!text) {
+                    if (typeof notify === 'function') { notify('No text found in storage. Go to Home and Analyze a text first.', 'error'); }
+                    else if (typeof console !== 'undefined') console.warn('No text in storage');
+                    return;
+                }
+                // call performAnalysis defined in this project (if duplicated script available)
+                let analysis;
+                if (typeof performAnalysis === 'function') {
+                    analysis = performAnalysis(text);
+                } else {
+                    // fallback lightweight analysis
+                    analysis = (function(t){ const words = t.split(/\s+/).filter(Boolean); const sentences = t.split(/[.!?]+/).filter(s=>s.trim()); return { text: t, wordCount: words.length, sentenceCount: sentences.length, sentiment: (words.filter(w=>['love','happy','joy','good'].includes(w.toLowerCase())).length > words.filter(w=>['hate','sad','bad','angry'].includes(w.toLowerCase())).length) ? 'positive' : 'neutral', confidence: 50, words: words.slice(0,200) }; })(text);
+                }
+                document.getElementById('resultsContent').innerText = JSON.stringify(analysis, null, 2);
+                if (typeof renderEmotionTimeline === 'function') renderEmotionTimeline(analysis);
+            } catch (e) { document.getElementById('resultsContent').innerText = 'Run failed: ' + e; }
+        }
+
+        // Auto-run if lastText exists
+        document.addEventListener('DOMContentLoaded', () => {
+            const txt = localStorage.getItem('lastText') || localStorage.getItem('pendingExample');
+            if (txt) runFromStorage();
+        });
+    </script>
+</body>
+</html>

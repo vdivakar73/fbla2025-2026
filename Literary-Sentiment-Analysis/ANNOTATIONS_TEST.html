@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotations Engine Test Suite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
+        <nav class="header-nav" role="navigation">
+            <a href="sentiment-analyzer.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="tools.html">Tools</a>
+            <a href="analysis.html">Analysis</a>
+        </nav>
+        <div class="header-right">
+            <button class="icon-btn" onclick="toggleDarkMode()">🌓</button>
+        </div>
+    </header>
+    <div class="container">
+      <div class="card test-suite">
+        <h1>🧪 Advanced Annotations Engine - Test Suite</h1>
+        
+        <div class="summary">
+            <h2>ℹ️ Test Information</h2>
+            <p>This test suite verifies the Advanced Annotations Engine is properly integrated and functional.</p>
+            <p><strong>System Status:</strong> <span id="systemStatus">Initializing...</span></p>
+            <p><strong>Annotations Loaded:</strong> <span id="annotationsCount">0</span></p>
+        </div>
+
+        <!-- Test 1 -->
+        <div class="test-case">
+            <h3>Test 1: Engine Initialization <span id="test1-status" class="status"></span></h3>
+            <p>Verify the Advanced Annotations Engine initializes properly with correct global state.</p>
+            <div class="test-controls">
+                <button onclick="runTest1()">▶ Run Test 1</button>
+            </div>
+            <div id="test1-result" class="result"></div>
+        </div>
+
+        <!-- Test 2 -->
+        <div class="test-case">
+            <h3>Test 2: Create Annotation <span id="test2-status" class="status"></span></h3>
+            <p>Verify annotation creation with automatic metadata generation (sentiment, tags, relevance).</p>
+            <div class="test-controls">
+                <button onclick="runTest2()">▶ Run Test 2</button>
+            </div>
+            <div id="test2-result" class="result"></div>
+        </div>
+
+        <!-- Test 3 -->
+        <div class="test-case">
+            <h3>Test 3: Edit & Update <span id="test3-status" class="status"></span></h3>
+            <p>Verify annotation editing and edit history tracking.</p>
+            <div class="test-controls">
+                <button onclick="runTest3()">▶ Run Test 3</button>
+            </div>
+            <div id="test3-result" class="result"></div>
+        </div>
+
+        <!-- Test 4 -->
+        <div class="test-case">
+            <h3>Test 4: Search & Filter <span id="test4-status" class="status"></span></h3>
+            <p>Verify search functionality and category filtering.</p>
+            <div class="test-controls">
+                <button onclick="runTest4()">▶ Run Test 4</button>
+            </div>
+            <div id="test4-result" class="result"></div>
+        </div>
+
+        <!-- Test 5 -->
+        <div class="test-case">
+            <h3>Test 5: Storage & Persistence <span id="test5-status" class="status"></span></h3>
+            <p>Verify localStorage persistence and recovery.</p>
+            <div class="test-controls">
+                <button onclick="runTest5()">▶ Run Test 5</button>
+            </div>
+            <div id="test5-result" class="result"></div>
+        </div>
+
+        <!-- Test 6 -->
+        <div class="test-case">
+            <h3>Test 6: Statistics & Analysis <span id="test6-status" class="status"></span></h3>
+            <p>Verify statistics generation and sentiment analysis.</p>
+            <div class="test-controls">
+                <button onclick="runTest6()">▶ Run Test 6</button>
+            </div>
+            <div id="test6-result" class="result"></div>
+        </div>
+
+        <!-- Test 7 -->
+        <div class="test-case">
+            <h3>Test 7: Export Functions <span id="test7-status" class="status"></span></h3>
+            <p>Verify export to JSON and CSV formats.</p>
+            <div class="test-controls">
+                <button onclick="runTest7()">▶ Run Test 7</button>
+            </div>
+            <div id="test7-result" class="result"></div>
+        </div>
+
+        <!-- Run All Tests -->
+        <div class="test-case" style="background: #f0f4ff; border-left-color: #667eea;">
+            <h3>🚀 Run All Tests</h3>
+            <div class="test-controls">
+                <button onclick="runAllTests()" style="background: #4caf50; padding: 15px 30px; font-size: 1.1rem;">▶ RUN ALL TESTS</button>
+                <button onclick="clearAllResults()">🗑️ Clear Results</button>
+                <button onclick="clearAllAnnotations()" style="background: #f44336;">⚠️ Clear Test Data</button>
+            </div>
+        </div>
+            </div>
+        </div>
+
+    <script>
+        // Load the annotations engine
+        // Note: In actual use, this would be loaded via HTML script tags
+        const logResults = (testName, result, isError = false) => {
+            const resultEl = document.getElementById(`${testName}-result`);
+            const statusEl = document.getElementById(`${testName}-status`);
+            
+            resultEl.textContent = result;
+            resultEl.classList.add('show');
+            if (isError) resultEl.classList.add('error');
+            
+            const passed = !isError;
+            statusEl.textContent = passed ? '✅ PASS' : '❌ FAIL';
+            statusEl.className = `status ${passed ? 'pass' : 'fail'}`;
+        };
+
+        const runTest1 = () => {
+            try {
+                if (!window.annotationState) throw new Error('annotationState not initialized');
+                if (!window.createAnnotation) throw new Error('createAnnotation function missing');
+                if (!window.renderAllAnnotations) throw new Error('renderAllAnnotations function missing');
+                if (!window.annotationState.annotationCategories.length === 0) throw new Error('Categories not defined');
+                
+                const result = `✅ ENGINE STATUS:
+- annotationState: INITIALIZED
+- Categories: ${window.annotationState.annotationCategories.join(', ')}
+- Color Scheme: ${Object.keys(window.annotationState.colorScheme).length} colors
+- Functions Available: createAnnotation, renderAllAnnotations, editAnnotation, deleteAnnotation, searchAnnotations, filterAnnotationsByCategory
+- Storage: localStorage ready`;
+                
+                logResults('test1', result);
+                updateSystemStatus();
+            } catch (e) {
+                logResults('test1', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest2 = () => {
+            try {
+                const beforeCount = window.annotationState.allAnnotations.length;
+                
+                window.createAnnotation('This is a test passage about love and loss.', 'insight', 'Test Annotation', 'This demonstrates annotation creation');
+                
+                const afterCount = window.annotationState.allAnnotations.length;
+                if (afterCount !== beforeCount + 1) throw new Error('Annotation not added');
+                
+                const lastAnn = window.annotationState.allAnnotations[window.annotationState.allAnnotations.length - 1];
+                
+                const result = `✅ ANNOTATION CREATED:
+- ID: ${lastAnn.id}
+- Text: "${lastAnn.text}"
+- Category: ${lastAnn.category}
+- Title: ${lastAnn.title}
+- Sentiment: ${lastAnn.sentiment}
+- Relevance: ${lastAnn.relevance}
+- Tags: ${lastAnn.tags.join(', ') || 'none'}
+- Color: ${lastAnn.color}
+- Timestamp: ${lastAnn.timestamp}`;
+                
+                logResults('test2', result);
+                updateSystemStatus();
+            } catch (e) {
+                logResults('test2', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest3 = () => {
+            try {
+                if (window.annotationState.allAnnotations.length === 0) {
+                    throw new Error('No annotations to edit. Run Test 2 first.');
+                }
+                
+                const ann = window.annotationState.allAnnotations[0];
+                const originalTitle = ann.title;
+                
+                window.updateAnnotation(ann.id, {
+                    title: 'UPDATED TITLE',
+                    content: 'This is the updated content'
+                });
+                
+                const updated = window.annotationState.allAnnotations.find(a => a.id === ann.id);
+                if (!updated) throw new Error('Annotation not found after update');
+                if (updated.title !== 'UPDATED TITLE') throw new Error('Title not updated');
+                
+                const result = `✅ ANNOTATION UPDATED:
+- Original Title: ${originalTitle}
+- New Title: ${updated.title}
+- New Content: ${updated.content}
+- Edit History Entries: ${updated.editHistory.length}
+- Last Edit: ${updated.timestamp}`;
+                
+                logResults('test3', result);
+                updateSystemStatus();
+            } catch (e) {
+                logResults('test3', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest4 = () => {
+            try {
+                // Create test annotations if needed
+                if (window.annotationState.allAnnotations.length === 0) {
+                    window.createAnnotation('Theme about love', 'theme');
+                    window.createAnnotation('Question about symbolism', 'question');
+                }
+                
+                const searchResults = window.searchAnnotations('love');
+                const categoryFilter = window.filterAnnotationsByCategory('theme');
+                
+                if (searchResults.length === 0) throw new Error('Search returned no results');
+                
+                const result = `✅ SEARCH & FILTER WORKING:
+- Search Query: "love"
+- Results Found: ${searchResults.length}
+- Category Filter: "theme"
+- Theme Annotations: ${categoryFilter.length}
+- Total Annotations: ${window.annotationState.allAnnotations.length}`;
+                
+                logResults('test4', result);
+                updateSystemStatus();
+            } catch (e) {
+                logResults('test4', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest5 = () => {
+            try {
+                const beforeSave = window.annotationState.allAnnotations.length;
+                window.saveAnnotationsToStorage();
+                
+                const stored = localStorage.getItem('advancedAnnotations');
+                if (!stored) throw new Error('Data not saved to localStorage');
+                
+                const parsed = JSON.parse(stored);
+                if (parsed.length !== beforeSave) throw new Error('Storage count mismatch');
+                
+                const result = `✅ STORAGE & PERSISTENCE:
+- localStorage Key: advancedAnnotations
+- Annotations Stored: ${parsed.length}
+- Storage Size: ~${stored.length} bytes
+- Data Integrity: ✓ VERIFIED`;
+                
+                logResults('test5', result);
+            } catch (e) {
+                logResults('test5', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest6 = () => {
+            try {
+                const stats = window.getAnnotationStats();
+                
+                const result = `✅ STATISTICS GENERATED:
+- Total Annotations: ${stats.total}
+- Average Relevance: ${stats.averageRelevance}
+- By Category: ${JSON.stringify(stats.byCategory, null, 2)}
+- By Sentiment: ${JSON.stringify(stats.bySentiment, null, 2)}`;
+                
+                logResults('test6', result);
+            } catch (e) {
+                logResults('test6', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runTest7 = () => {
+            try {
+                if (window.annotationState.allAnnotations.length === 0) {
+                    throw new Error('No annotations to export. Run Tests 2+ first.');
+                }
+                
+                const jsonExportFn = typeof window.exportAnnotationsJSON === 'function';
+                const csvExportFn = typeof window.exportAnnotationsCSV === 'function';
+                
+                if (!jsonExportFn || !csvExportFn) {
+                    throw new Error('Export functions not found');
+                }
+                
+                // Simulate export without triggering actual download
+                const json = JSON.stringify(window.annotationState.allAnnotations);
+                
+                const result = `✅ EXPORT FUNCTIONS READY:
+- exportAnnotationsJSON: ${jsonExportFn ? '✓' : '✗'}
+- exportAnnotationsCSV: ${csvExportFn ? '✓' : '✗'}
+- JSON Export Size: ~${json.length} bytes
+- Ready to Export: ${window.annotationState.allAnnotations.length} annotations`;
+                
+                logResults('test7', result);
+            } catch (e) {
+                logResults('test7', '❌ ERROR: ' + e.message, true);
+            }
+        };
+
+        const runAllTests = async () => {
+            console.log('🧪 Starting comprehensive test suite...');
+            runTest1();
+            await new Promise(r => setTimeout(r, 500));
+            runTest2();
+            await new Promise(r => setTimeout(r, 500));
+            runTest3();
+            await new Promise(r => setTimeout(r, 500));
+            runTest4();
+            await new Promise(r => setTimeout(r, 500));
+            runTest5();
+            await new Promise(r => setTimeout(r, 500));
+            runTest6();
+            await new Promise(r => setTimeout(r, 500));
+            runTest7();
+            console.log('✅ All tests completed!');
+        };
+
+        const clearAllResults = () => {
+            document.querySelectorAll('.result').forEach(el => {
+                el.classList.remove('show', 'error');
+                el.textContent = '';
+            });
+            document.querySelectorAll('.status').forEach(el => {
+                el.textContent = '';
+                el.className = 'status';
+            });
+        };
+
+        const updateSystemStatus = () => {
+            const statusEl = document.getElementById('systemStatus');
+            const countEl = document.getElementById('annotationsCount');
+            
+            if (window.annotationState) {
+                statusEl.textContent = '✅ Advanced Annotations Engine - ACTIVE';
+                statusEl.style.color = '#4caf50';
+                countEl.textContent = window.annotationState.allAnnotations.length;
+            } else {
+                statusEl.textContent = '❌ Engine Not Loaded';
+                statusEl.style.color = '#f44336';
+            }
+        };
+
+        // Initial status check
+        window.addEventListener('load', updateSystemStatus);
+        setTimeout(updateSystemStatus, 1000);
+    </script>
+</body>
+</html>

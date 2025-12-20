@@ -1,0 +1,23 @@
+/* Backup of styles.css */
+
+:root{
+  /* Light theme (default) variables */
+  --bg:#f7fafc; --panel:#ffffff; --surface:#ffffff; --muted:#6b7280;
+  --primary:#2563eb; --accent:#7c3aed; --success:#16a34a; --danger:#dc2626;
+  --border:rgba(0,0,0,0.08); --glass:rgba(2,6,23,0.03);
+  --card:#ffffff; --code-bg:#f3f4f6; --surface-2:#f1f5f9;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace;
+}
+
+/* Dark-mode variable overrides (applied when body.dark-mode is present) */
+body.dark-mode{
+  --bg:#071022; --panel:#0b1220; --surface:#0f1724; --muted:#9aa4bf;
+  --primary:#3b82f6; --accent:#7c3aed; --success:#22c55e; --danger:#ef4444;
+  --border:rgba(255,255,255,0.04); --glass:rgba(255,255,255,0.03);
+  --card:#0b1220; --code-bg:#071022; --surface-2:#0d1b2a;
+}
+
+/* Rest of original styles.css content follows (truncated in backup) */
+
+/* ... */

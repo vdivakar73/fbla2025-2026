@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literary Sentiment Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .card {
+            background: #2d2d44;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode label,
+        body.dark-mode h3,
+        body.dark-mode .result-section {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode textarea {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        body.dark-mode .example-btn {
+            background: #1a1a2e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .stat-box {
+            background: #1a1a2e;
+        }
+
+        body.dark-mode .result-section {
+            background: #1a1a2e !important;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #2d2d44;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .example-btn {
+            padding: 12px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .example-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .emotion-bars {
+            margin: 20px 0;
+        }
+
+        .emotion-bar {
+            margin: 10px 0;
+        }
+
+        .emotion-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .bar-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .result-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .positive { background: #28a745; color: white; }
+        .negative { background: #dc3545; color: white; }
+        .neutral { background: #6c757d; color: white; }
+
+        #results {
+            display: none;
+        }
+
+        .word-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .word-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        body.dark-mode .chart-container {
+            background: #1a1a2e;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+
+        .sentence-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .sentence-item {
+            background: #1a1a2e;
+        }
+
+        .sentence-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sentence-emotion {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+
+        .quote-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-style: italic;
+            position: relative;
+        }
+
+        .quote-card::before {
+            content: '"';
+            font-size: 4rem;
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            opacity: 0.3;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        .highlight {
+            background-color: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        body.dark-mode .highlight {
+            background-color: #ffd700;
+            color: #000;
+        }
+
+        .genre-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .readability-meter {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .readability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible::after {
+            content: ' ▼';
+            font-size: 0.8rem;
+        }
+
+        .collapsible.collapsed::after {
+            content: ' ▶';
+        }
+
+        .collapsible-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleDarkMode()">🌙</button>
+    
+    <div class="container">
+        <header>
+            <h1>📚 Literary Sentiment Analyzer</h1>
+            <p class="subtitle">Advanced AI-powered analysis of emotions, themes, and literary elements</p>
+        </header>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Try an Example:</h3>
+            <div class="examples">
+                <button class="example-btn" onclick="loadExample('frost')">🌲 Robert Frost</button>
+                <button class="example-btn" onclick="loadExample('shakespeare')">🌹 Shakespeare</button>
+                <button class="example-btn" onclick="loadExample('poe')">🦅 Edgar Allan Poe</button>
+                <button class="example-btn" onclick="loadExample('dickinson')">🕊️ Emily Dickinson</button>
+            </div>
+
+            <label for="text-input">Enter your text:</label>
+            <textarea id="text-input" placeholder="Paste your poem, book excerpt, or any literary text here..."></textarea>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="analyzeText()">🔍 Analyze Text</button>
+                <button class="btn-secondary" onclick="exportResults()">📥 Export PDF</button>
+                <button class="btn-secondary" onclick="clearAll()">🗑️ Clear</button>
+            </div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let currentAnalysisData = null;
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const toggle = document.querySelector('.theme-toggle');
+            toggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        }
+
+        function clearAll() {
+            document.getElementById('text-input').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results').style.display = 'none';
+            currentAnalysisData = null;
+        }
+
+        function exportResults() {
+            if (!currentAnalysisData) {
+                alert('Please analyze some text first!');
+                return;
+            }
+            
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Literary Analysis Report</title>');
+            printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;}h1{color:#667eea;}h2{color:#764ba2;margin-top:20px;}.stat{margin:10px 0;}</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h1>📚 Literary Sentiment Analysis Report</h1>');
+            printWindow.document.write(document.getElementById('results').innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function toggleCollapsible(element) {
+            const content = element.nextElementSibling;
+            element.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        const examples = {
+            frost: `The woods are lovely, dark and deep,
+But I have promises to keep,
+And miles to go before I sleep,
+And miles to go before I sleep.`,
+
+            shakespeare: `Shall I compare thee to a summer's day?
+Thou art more lovely and more temperate:
+Rough winds do shake the darling buds of May,
+And summer's lease hath all too short a date`,
+
+            poe: `Once upon a midnight dreary, while I pondered, weak and weary,
+Over many a quaint and curious volume of forgotten lore—
+While I nodded, nearly napping, suddenly there came a tapping,
+As of some one gently rapping, rapping at my chamber door.`,
+
+            dickinson: `Hope is the thing with feathers
+That perches in the soul,
+And sings the tune without the words,
+And never stops at all.`
+        };
+
+        const sentimentWords = {
+            positive: ['love', 'lovely', 'beautiful', 'joy', 'happy', 'wonderful', 'excellent', 'good', 'great', 'amazing', 'perfect', 'hope', 'feathers', 'sweet', 'bright', 'light', 'peace', 'heaven', 'bliss', 'delight', 'pleasure', 'laugh', 'smile'],
+            negative: ['hate', 'terrible', 'awful', 'bad', 'horrible', 'sad', 'angry', 'dreary', 'weak', 'weary', 'dark', 'death', 'pain', 'sorrow', 'fear', 'evil', 'cruel', 'suffer', 'tears', 'cry', 'lost', 'alone', 'despair']
+        };
+
+        const emotionWords = {
+            joy: ['joy', 'happy', 'delighted', 'cheerful', 'merry', 'laugh', 'smile', 'pleasure', 'bliss', 'wonderful'],
+            sadness: ['sad', 'sorrow', 'grief', 'melancholy', 'tears', 'cry', 'weep', 'mourn', 'lonely', 'gloomy'],
+            love: ['love', 'adore', 'cherish', 'affection', 'devotion', 'passion', 'heart', 'beloved', 'dear', 'sweet'],
+            fear: ['fear', 'afraid', 'terror', 'dread', 'panic', 'scared', 'frightened', 'anxious', 'worried'],
+            anger: ['anger', 'rage', 'fury', 'wrath', 'mad', 'furious', 'hostile', 'bitter', 'cruel'],
+            hope: ['hope', 'faith', 'trust', 'believe', 'wish', 'dream', 'aspire', 'optimism', 'promise'],
+            mystery: ['dark', 'mysterious', 'unknown', 'shadow', 'secret', 'hidden', 'midnight', 'dreary']
+        };
+
+        function loadExample(name) {
+            document.getElementById('text-input').value = examples[name];
+        }
+
+        function analyzeText() {
+            const text = document.getElementById('text-input').value.trim();
+            
+            if (!text) {
+                alert('Please enter some text to analyze!');
+                return;
+            }
+
+            // Basic text analysis
+            const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            const uniqueWords = new Set(words);
+            const lines = text.split('\n').filter(l => l.trim().length > 0);
+            
+            // Calculate statistics
+            const wordCount = words.length;
+            const sentenceCount = sentences.length;
+            const lexicalDiversity = (uniqueWords.size / wordCount * 100).toFixed(1);
+            const avgWordLength = (words.reduce((sum, w) => sum + w.length, 0) / words.length).toFixed(1);
+            
+            // Detect literary form
+            const isPoetry = detectPoetry(lines, sentences, wordCount);
+            
+            // Find most important sentences
+            const importantSentences = findImportantSentences(sentences, words);
+            
+            // Calculate readability metrics
+            const readability = calculateReadability(words, sentences, text);
+            
+            // Classify genre
+            const genre = classifyGenre(text, words, isPoetry);
+            
+            // Extract key quotes
+            const keyQuotes = extractKeyQuotes(sentences, words);
+
+            // Sentiment analysis
+            let positiveScore = 0;
+            let negativeScore = 0;
+            
+            words.forEach(word => {
+                if (sentimentWords.positive.includes(word)) positiveScore++;
+                if (sentimentWords.negative.includes(word)) negativeScore++;
+            });
+
+            const totalSentiment = positiveScore + negativeScore;
+            const sentiment = positiveScore > negativeScore ? 'Positive' : 
+                            negativeScore > positiveScore ? 'Negative' : 'Neutral';
+            const sentimentClass = sentiment.toLowerCase();
+            const sentimentConfidence = totalSentiment > 0 ? 
+                Math.max(positiveScore, negativeScore) / totalSentiment * 100 : 50;
+
+            // Find common words (excluding very short ones)
+            const stopWords = new Set(['the', 'and', 'but', 'for', 'with', 'that', 'this', 'from', 'have', 'not', 'are', 'was', 'were', 'been', 'will', 'would', 'could', 'should']);
+            const wordFreq = {};
+            words.filter(w => w.length > 3 && !stopWords.has(w)).forEach(word => {
+                wordFreq[word] = (wordFreq[word] || 0) + 1;
+            });
+            const topWords = Object.entries(wordFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([word, count]) => ({ word, count }));
+            
+            // Detect themes and their intensity
+            const themeAnalysis = detectThemes(words);
+            
+            // Analyze tone and mood
+            const toneAnalysis = analyzeTone(words, sentences);
+            
+            // Detect literary devices
+            const literaryDevices = detectLiteraryDevices(text, lines, words);
+
+            // Enhanced emotion analysis (must come after theme analysis)
+            const emotionAnalysis = analyzeEmotionsDeep(words, sentences, text, themeAnalysis);
+            const emotionPercentages = emotionAnalysis.scores;
+            const primaryEmotion = emotionAnalysis.primary;
+            const emotionExplanation = emotionAnalysis.explanation;
+            
+            // Sentence-by-sentence breakdown
+            const sentenceBreakdown = analyzeSentences(sentences, words);
+            
+            // Emotional arc
+            const emotionalArc = calculateEmotionalArc(sentences, words);
+
+            // Generate summary
+            const contentSummary = generateContentSummary({
+                importantSentences,
+                topWords,
+                themeAnalysis,
+                toneAnalysis,
+                literaryDevices,
+                sentiment,
+                primaryEmotion,
+                sentenceCount,
+                isPoetry,
+                text
+            });
+            
+            const statsSummary = generateStatsSummary({
+                wordCount,
+                sentenceCount,
+                lexicalDiversity,
+                sentiment,
+                primaryEmotion,
+                positiveScore,
+                negativeScore
+            });
+
+            // Display results
+            displayResults({
+                wordCount,
+                sentenceCount,
+                lexicalDiversity,
+                avgWordLength,
+                sentiment,
+                sentimentClass,
+                sentimentConfidence: sentimentConfidence.toFixed(1),
+                primaryEmotion,
+                emotionPercentages,
+                emotionExplanation,
+                contentSummary,
+                statsSummary,
+                readability,
+                genre,
+                keyQuotes,
+                sentenceBreakdown,
+                emotionalArc,
+                text
+            });
+        }
+
+        function detectPoetry(lines, sentences, wordCount) {
+            const avgLineLength = wordCount / lines.length;
+            const hasShortLines = avgLineLength < 10;
+            const hasLineBreaks = lines.length > sentences.length;
+            return hasShortLines || hasLineBreaks;
+        }
+
+        function calculateReadability(words, sentences, text) {
+            // Flesch Reading Ease
+            const syllables = words.reduce((sum, word) => sum + countSyllables(word), 0);
+            const avgSyllablesPerWord = syllables / words.length;
+            const avgWordsPerSentence = words.length / sentences.length;
+            
+            const fleschScore = 206.835 - 1.015 * avgWordsPerSentence - 84.6 * avgSyllablesPerWord;
+            const fleschClamped = Math.max(0, Math.min(100, fleschScore));
+            
+            // Grade level (Flesch-Kincaid)
+            const gradeLevel = 0.39 * avgWordsPerSentence + 11.8 * avgSyllablesPerWord - 15.59;
+            const gradeLevelClamped = Math.max(1, Math.min(18, gradeLevel));
+            
+            let difficulty;
+            if (fleschClamped >= 90) difficulty = 'Very Easy';
+            else if (fleschClamped >= 80) difficulty = 'Easy';
+            else if (fleschClamped >= 70) difficulty = 'Fairly Easy';
+            else if (fleschClamped >= 60) difficulty = 'Standard';
+            else if (fleschClamped >= 50) difficulty = 'Fairly Difficult';
+            else if (fleschClamped >= 30) difficulty = 'Difficult';
+            else difficulty = 'Very Difficult';
+            
+            return {
+                score: fleschClamped.toFixed(1),
+                gradeLevel: gradeLevelClamped.toFixed(1),
+                difficulty,
+                avgSyllablesPerWord: avgSyllablesPerWord.toFixed(2),
+                avgWordsPerSentence: avgWordsPerSentence.toFixed(1)
+            };
+        }
+
+        function countSyllables(word) {
+            word = word.toLowerCase();
+            if (word.length <= 3) return 1;
+            word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+            word = word.replace(/^y/, '');
+            const matches = word.match(/[aeiouy]{1,2}/g);
+            return matches ? matches.length : 1;
+        }
+
+        function classifyGenre(text, words, isPoetry) {
+            const genres = [];
+            
+            if (isPoetry) genres.push('Poetry');
+            
+            // Check for narrative elements
+            const narrativeWords = ['once', 'upon', 'there', 'was', 'were', 'then', 'suddenly', 'finally'];
+            const narrativeCount = words.filter(w => narrativeWords.includes(w)).length;
+            if (narrativeCount > 3) genres.push('Narrative');
+            
+            // Check for descriptive elements
+            const adjectives = ['beautiful', 'dark', 'bright', 'lovely', 'gentle', 'fierce', 'quiet', 'loud'];
+            const adjectiveCount = words.filter(w => adjectives.includes(w)).length;
+            if (adjectiveCount > 2) genres.push('Descriptive');
+            
+            // Check for philosophical elements
+            const philosophicalWords = ['life', 'death', 'time', 'meaning', 'truth', 'existence', 'soul'];
+            const philCount = words.filter(w => philosophicalWords.includes(w)).length;
+            if (philCount > 2) genres.push('Philosophical');
+            
+            // Check for romantic elements
+            const romanticWords = ['love', 'heart', 'passion', 'desire', 'beloved'];
+            const romanticCount = words.filter(w => romanticWords.includes(w)).length;
+            if (romanticCount > 1) genres.push('Romantic');
+            
+            return genres.length > 0 ? genres : ['General'];
+        }
+
+        function extractKeyQuotes(sentences, words) {
+            if (sentences.length === 0) return [];
+            
+            const scored = sentences.map((sentence, idx) => {
+                let score = 0;
+                const sentenceWords = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+                
+                // Favor medium-length quotes
+                if (sentence.length > 30 && sentence.length < 150) score += 3;
+                
+                // High emotional or philosophical weight
+                const powerWords = ['love', 'death', 'life', 'forever', 'never', 'always', 'hope', 'fear', 'dream'];
+                sentenceWords.forEach(word => {
+                    if (powerWords.includes(word)) score += 2;
+                });
+                
+                // Beautiful or poetic language
+                const poeticWords = ['lovely', 'beautiful', 'gentle', 'whisper', 'echo', 'shadow'];
+                sentenceWords.forEach(word => {
+                    if (poeticWords.includes(word)) score += 1;
+                });
+                
+                return { sentence, score };
+            });
+            
+            return scored
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3)
+                .map(s => s.sentence);
+        }
+
+        function analyzeSentences(sentences, words) {
+            return sentences.map((sentence, idx) => {
+                const sentenceWords = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+                
+                // Simple sentiment for this sentence
+                let posCount = 0, negCount = 0;
+                sentenceWords.forEach(word => {
+                    if (sentimentWords.positive.includes(word)) posCount++;
+                    if (sentimentWords.negative.includes(word)) negCount++;
+                });
+                
+                const sentiment = posCount > negCount ? 'positive' : 
+                                negCount > posCount ? 'negative' : 'neutral';
+                
+                // Detect primary emotion
+                let maxEmotion = 'neutral';
+                let maxCount = 0;
+                
+                Object.entries(emotionWords).forEach(([emotion, emotionWordList]) => {
+                    let count = 0;
+                    sentenceWords.forEach(word => {
+                        if (emotionWordList.includes(word)) count++;
+                    });
+                    if (count > maxCount) {
+                        maxCount = count;
+                        maxEmotion = emotion;
+                    }
+                });
+                
+                return {
+                    text: sentence.trim(),
+                    sentiment,
+                    emotion: maxCount > 0 ? maxEmotion : 'neutral',
+                    index: idx + 1
+                };
+            });
+        }
+
+        function calculateEmotionalArc(sentences, words) {
+            const segments = 5; // Divide into 5 parts
+            const segmentSize = Math.ceil(sentences.length / segments);
+            const arc = [];
+            
+            for (let i = 0; i < segments; i++) {
+                const start = i * segmentSize;
+                const end = Math.min(start + segmentSize, sentences.length);
+                const segmentSentences = sentences.slice(start, end);
+                
+                // Calculate sentiment for this segment
+                let posCount = 0, negCount = 0;
+                segmentSentences.forEach(sentence => {
+                    const sentenceWords = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+                    sentenceWords.forEach(word => {
+                        if (sentimentWords.positive.includes(word)) posCount++;
+                        if (sentimentWords.negative.includes(word)) negCount++;
+                    });
+                });
+                
+                const sentimentScore = posCount - negCount;
+                const normalizedScore = sentimentScore === 0 ? 50 : 
+                                       sentimentScore > 0 ? Math.min(100, 50 + sentimentScore * 10) :
+                                       Math.max(0, 50 + sentimentScore * 10);
+                
+                arc.push({
+                    label: i === 0 ? 'Beginning' : 
+                           i === segments - 1 ? 'End' : 
+                           `Part ${i + 1}`,
+                    score: normalizedScore
+                });
+            }
+            
+            return arc;
+        }
+
+        function findImportantSentences(sentences, words) {
+            // Score sentences based on multiple factors
+            const scored = sentences.map((sentence, idx) => {
+                let score = 0;
+                const sentenceWords = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+                
+                // Position bonus (first and last are important)
+                if (idx === 0) score += 3;
+                if (idx === sentences.length - 1) score += 3;
+                
+                // Length (prefer medium-length sentences)
+                const wordCount = sentenceWords.length;
+                if (wordCount >= 5 && wordCount <= 20) score += 2;
+                
+                // Contains important keywords
+                const importantWords = ['but', 'because', 'therefore', 'however', 'although', 'yet', 'thus', 'never', 'always', 'must', 'shall', 'will'];
+                sentenceWords.forEach(word => {
+                    if (importantWords.includes(word)) score += 1;
+                });
+                
+                // Emotional intensity
+                const emotionalWords = ['love', 'hate', 'fear', 'hope', 'joy', 'sorrow', 'death', 'life', 'never', 'forever', 'dark', 'light'];
+                sentenceWords.forEach(word => {
+                    if (emotionalWords.includes(word)) score += 1;
+                });
+                
+                return { sentence: sentence.trim(), score, index: idx };
+            });
+            
+            // Return top 3 sentences by score
+            return scored
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3)
+                .sort((a, b) => a.index - b.index)
+                .map(s => s.sentence);
+        }
+
+        function detectThemes(words) {
+            const themeKeywords = {
+                nature: { keywords: ['woods', 'tree', 'forest', 'wind', 'rain', 'snow', 'sky', 'sun', 'moon', 'star', 'flower', 'leaf', 'bird', 'river', 'mountain', 'summer', 'winter', 'spring', 'autumn', 'cloud', 'storm'], description: 'the natural world and its elements' },
+                love: { keywords: ['love', 'heart', 'beloved', 'dear', 'affection', 'kiss', 'embrace', 'passion', 'adore', 'cherish', 'tender'], description: 'romantic and emotional connection' },
+                death: { keywords: ['death', 'dead', 'dying', 'grave', 'tomb', 'funeral', 'mourn', 'nevermore', 'lost', 'gone'], description: 'mortality and loss' },
+                time: { keywords: ['time', 'hour', 'day', 'night', 'year', 'past', 'future', 'forever', 'eternal', 'moment', 'fleeting', 'aging'], description: 'the passage and nature of time' },
+                journey: { keywords: ['journey', 'travel', 'road', 'path', 'walk', 'miles', 'distance', 'way', 'wander', 'voyage'], description: 'life as a journey or quest' },
+                dreams: { keywords: ['dream', 'sleep', 'slumber', 'vision', 'fantasy', 'imagine', 'wish', 'aspire'], description: 'aspirations and subconscious desires' },
+                isolation: { keywords: ['alone', 'lonely', 'solitude', 'isolated', 'apart', 'separate', 'exile'], description: 'solitude and separation' },
+                light: { keywords: ['light', 'bright', 'shine', 'gleam', 'radiant', 'glow', 'golden', 'illuminate'], description: 'illumination and enlightenment' },
+                darkness: { keywords: ['dark', 'darkness', 'shadow', 'night', 'midnight', 'black', 'dreary', 'gloom'], description: 'darkness and obscurity' },
+                hope: { keywords: ['hope', 'faith', 'believe', 'trust', 'promise', 'feathers', 'optimism'], description: 'optimism and faith in the future' },
+                duty: { keywords: ['duty', 'promise', 'must', 'obligation', 'responsibility', 'pledge', 'vow'], description: 'obligation and responsibility' },
+                beauty: { keywords: ['beautiful', 'lovely', 'fair', 'pretty', 'handsome', 'gorgeous', 'elegant'], description: 'aesthetic appreciation' },
+                mystery: { keywords: ['mysterious', 'unknown', 'secret', 'hidden', 'raven', 'chamber', 'forgotten', 'enigma'], description: 'the unknown and mysterious' }
+            };
+            
+            const detectedThemes = {};
+            Object.entries(themeKeywords).forEach(([theme, data]) => {
+                let count = 0;
+                words.forEach(word => {
+                    if (data.keywords.includes(word)) count++;
+                });
+                if (count > 0) {
+                    detectedThemes[theme] = { count, description: data.description };
+                }
+            });
+            
+            return Object.entries(detectedThemes)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 4)
+                .map(([theme, data]) => ({ theme, ...data }));
+        }
+
+        function analyzeTone(words, sentences) {
+            let formality = 0;
+            let intensity = 0;
+            
+            // Formality indicators
+            const formalWords = ['shall', 'thee', 'thou', 'therefore', 'thus', 'whilst', 'hath', 'art'];
+            const casualWords = ['gonna', 'wanna', 'yeah', 'hey', 'cool'];
+            
+            words.forEach(word => {
+                if (formalWords.includes(word)) formality += 2;
+                if (casualWords.includes(word)) formality -= 2;
+            });
+            
+            // Intensity (exclamations, emphasis)
+            const exclamationCount = sentences.filter(s => s.includes('!')).length;
+            const emphasisWords = ['very', 'really', 'extremely', 'utterly', 'absolutely', 'never', 'always', 'forever'];
+            words.forEach(word => {
+                if (emphasisWords.includes(word)) intensity += 1;
+            });
+            intensity += exclamationCount * 2;
+            
+            const avgSentenceLength = words.length / sentences.length;
+            
+            return {
+                formality: formality > 0 ? 'formal' : formality < 0 ? 'casual' : 'neutral',
+                intensity: intensity > 5 ? 'high' : intensity > 2 ? 'moderate' : 'subtle',
+                pacing: avgSentenceLength > 20 ? 'contemplative' : avgSentenceLength > 10 ? 'measured' : 'brisk'
+            };
+        }
+
+        function detectLiteraryDevices(text, lines, words) {
+            const devices = [];
+            
+            // Repetition
+            const wordFreq = {};
+            words.forEach(word => {
+                if (word.length > 3) {
+                    wordFreq[word] = (wordFreq[word] || 0) + 1;
+                }
+            });
+            const repeated = Object.entries(wordFreq).filter(([word, count]) => count >= 3);
+            if (repeated.length > 0) {
+                devices.push(`repetition of key phrases`);
+            }
+            
+            // Line-end patterns (potential rhyme in poetry)
+            if (lines.length >= 4) {
+                const lineEnds = lines.map(line => {
+                    const words = line.trim().match(/\b\w+\b/g);
+                    return words ? words[words.length - 1].toLowerCase().slice(-2) : '';
+                });
+                const rhymePattern = lineEnds.some((end, i) => 
+                    i < lineEnds.length - 1 && end === lineEnds[i + 1]
+                );
+                if (rhymePattern) {
+                    devices.push('rhyme scheme');
+                }
+            }
+            
+            // Imagery (descriptive words)
+            const imageryWords = words.filter(w => 
+                ['dark', 'bright', 'golden', 'silver', 'red', 'blue', 'green', 'white', 'black'].includes(w) ||
+                ['soft', 'hard', 'rough', 'smooth', 'cold', 'warm', 'hot'].includes(w)
+            );
+            if (imageryWords.length >= 3) {
+                devices.push('vivid imagery');
+            }
+            
+            // Questions
+            const questionCount = text.split('?').length - 1;
+            if (questionCount >= 2) {
+                devices.push('rhetorical questions');
+            }
+            
+            return devices;
+        }
+
+        function analyzeEmotionsDeep(words, sentences, text, themes) {
+            const emotionIndicators = {
+                joy: {
+                    direct: ['joy', 'happy', 'delighted', 'cheerful', 'merry', 'laugh', 'smile', 'pleasure', 'bliss', 'wonderful', 'ecstatic', 'gleeful', 'jubilant'],
+                    contextual: ['bright', 'light', 'golden', 'sun', 'dance', 'sing', 'celebrate'],
+                    intensifiers: ['very', 'so', 'extremely'],
+                    weight: 1.0
+                },
+                sadness: {
+                    direct: ['sad', 'sorrow', 'grief', 'melancholy', 'tears', 'cry', 'weep', 'mourn', 'lonely', 'gloomy', 'despair', 'misery', 'anguish'],
+                    contextual: ['lost', 'gone', 'never', 'empty', 'cold', 'rain', 'fall', 'fade'],
+                    intensifiers: ['deep', 'profound', 'utter'],
+                    weight: 1.2
+                },
+                love: {
+                    direct: ['love', 'adore', 'cherish', 'affection', 'devotion', 'passion', 'heart', 'beloved', 'dear', 'sweet', 'tender'],
+                    contextual: ['embrace', 'kiss', 'gentle', 'warm', 'summer', 'rose', 'beautiful'],
+                    intensifiers: ['true', 'eternal', 'endless'],
+                    weight: 1.1
+                },
+                fear: {
+                    direct: ['fear', 'afraid', 'terror', 'dread', 'panic', 'scared', 'frightened', 'anxious', 'worried', 'horror'],
+                    contextual: ['dark', 'shadow', 'unknown', 'creep', 'lurk', 'midnight', 'nightmare'],
+                    intensifiers: ['sheer', 'overwhelming', 'paralyzing'],
+                    weight: 1.3
+                },
+                anger: {
+                    direct: ['anger', 'rage', 'fury', 'wrath', 'mad', 'furious', 'hostile', 'bitter', 'cruel', 'hate'],
+                    contextual: ['storm', 'fire', 'blood', 'break', 'shatter', 'burn'],
+                    intensifiers: ['burning', 'seething', 'boiling'],
+                    weight: 1.2
+                },
+                hope: {
+                    direct: ['hope', 'faith', 'trust', 'believe', 'wish', 'dream', 'aspire', 'optimism', 'promise', 'future'],
+                    contextual: ['dawn', 'rise', 'feathers', 'wings', 'soar', 'tomorrow', 'light', 'spring'],
+                    intensifiers: ['endless', 'eternal', 'undying'],
+                    weight: 1.1
+                },
+                mystery: {
+                    direct: ['mysterious', 'unknown', 'secret', 'hidden', 'enigma', 'puzzle', 'riddle'],
+                    contextual: ['raven', 'chamber', 'forgotten', 'ancient', 'whisper', 'silence', 'night'],
+                    intensifiers: ['deeply', 'utterly', 'completely'],
+                    weight: 0.9
+                }
+            };
+
+            const emotionScores = {};
+            const emotionEvidence = {};
+            
+            // Initialize
+            Object.keys(emotionIndicators).forEach(emotion => {
+                emotionScores[emotion] = 0;
+                emotionEvidence[emotion] = [];
+            });
+
+            // Analyze each sentence for emotional context
+            sentences.forEach(sentence => {
+                const sentenceWords = sentence.toLowerCase().match(/\b\w+\b/g) || [];
+                const sentenceText = sentence.toLowerCase();
+                
+                Object.entries(emotionIndicators).forEach(([emotion, indicators]) => {
+                    let sentenceScore = 0;
+                    let foundWords = [];
+                    
+                    // Check direct emotional words
+                    sentenceWords.forEach((word, idx) => {
+                        if (indicators.direct.includes(word)) {
+                            let score = 2.0 * indicators.weight;
+                            
+                            // Check for intensifiers nearby
+                            const prevWord = sentenceWords[idx - 1];
+                            const nextWord = sentenceWords[idx + 1];
+                            if (prevWord && indicators.intensifiers.includes(prevWord)) {
+                                score *= 1.5;
+                            }
+                            if (nextWord && indicators.intensifiers.includes(nextWord)) {
+                                score *= 1.3;
+                            }
+                            
+                            sentenceScore += score;
+                            foundWords.push(word);
+                        }
+                    });
+                    
+                    // Check contextual words (worth less but still significant)
+                    sentenceWords.forEach(word => {
+                        if (indicators.contextual.includes(word)) {
+                            sentenceScore += 0.5 * indicators.weight;
+                            foundWords.push(word);
+                        }
+                    });
+                    
+                    // Bonus for multiple emotional words in same sentence (shows intensity)
+                    if (foundWords.length > 1) {
+                        sentenceScore *= (1 + foundWords.length * 0.2);
+                    }
+                    
+                    // Check for negation (reverses emotion)
+                    const negationWords = ['not', 'never', 'no', 'without', 'cannot'];
+                    const hasNegation = sentenceWords.some((word, idx) => 
+                        negationWords.includes(word) && idx < sentenceWords.length - 3
+                    );
+                    
+                    if (hasNegation && foundWords.length > 0) {
+                        sentenceScore *= 0.3; // Reduce but don't eliminate
+                    }
+                    
+                    if (sentenceScore > 0) {
+                        emotionScores[emotion] += sentenceScore;
+                        emotionEvidence[emotion].push({
+                            sentence: sentence.substring(0, 100),
+                            words: foundWords,
+                            score: sentenceScore
+                        });
+                    }
+                });
+            });
+
+            // Theme-based emotional context
+            if (themes) {
+                themes.forEach(theme => {
+                    if (theme.theme === 'death' || theme.theme === 'darkness') {
+                        emotionScores.sadness += theme.count * 1.5;
+                        emotionScores.fear += theme.count * 1.2;
+                        emotionEvidence.sadness.push({ thematic: true, theme: theme.theme });
+                        emotionEvidence.fear.push({ thematic: true, theme: theme.theme });
+                    } else if (theme.theme === 'love' || theme.theme === 'beauty') {
+                        emotionScores.love += theme.count * 1.5;
+                        emotionScores.joy += theme.count * 1.0;
+                        emotionEvidence.love.push({ thematic: true, theme: theme.theme });
+                    } else if (theme.theme === 'hope' || theme.theme === 'light') {
+                        emotionScores.hope += theme.count * 1.5;
+                        emotionEvidence.hope.push({ thematic: true, theme: theme.theme });
+                    } else if (theme.theme === 'isolation') {
+                        emotionScores.sadness += theme.count * 1.3;
+                        emotionEvidence.sadness.push({ thematic: true, theme: theme.theme });
+                    }
+                });
+            }
+
+            // Calculate percentages
+            const totalScore = Object.values(emotionScores).reduce((a, b) => a + b, 0);
+            const emotionPercentages = {};
+            Object.keys(emotionScores).forEach(emotion => {
+                emotionPercentages[emotion] = totalScore > 0 ? 
+                    (emotionScores[emotion] / totalScore * 100).toFixed(1) : 0;
+            });
+
+            const primaryEmotion = Object.keys(emotionScores).reduce((a, b) => 
+                emotionScores[a] > emotionScores[b] ? a : b
+            );
+
+            // Generate explanation
+            const explanation = generateEmotionExplanation(
+                primaryEmotion, 
+                emotionScores, 
+                emotionEvidence, 
+                emotionPercentages,
+                themes
+            );
+
+            return {
+                scores: emotionPercentages,
+                primary: primaryEmotion,
+                rawScores: emotionScores,
+                evidence: emotionEvidence,
+                explanation: explanation
+            };
+        }
+
+        function generateEmotionExplanation(primaryEmotion, scores, evidence, percentages, themes) {
+            let explanation = '';
+            
+            // Primary emotion explanation
+            const primaryPercentage = percentages[primaryEmotion];
+            explanation += `The dominant emotion of ${primaryEmotion} (${primaryPercentage}%) was identified through `;
+            
+            const primaryEvidence = evidence[primaryEmotion];
+            const directWords = [];
+            const thematicIndicators = [];
+            
+            primaryEvidence.forEach(ev => {
+                if (ev.thematic) {
+                    thematicIndicators.push(ev.theme);
+                } else if (ev.words) {
+                    directWords.push(...ev.words);
+                }
+            });
+            
+            const uniqueDirectWords = [...new Set(directWords)].slice(0, 6);
+            
+            const reasons = [];
+            if (uniqueDirectWords.length > 0) {
+                reasons.push(`direct emotional language including "${uniqueDirectWords.join('", "')}"`);
+            }
+            
+            if (thematicIndicators.length > 0) {
+                const uniqueThemes = [...new Set(thematicIndicators)];
+                reasons.push(`thematic elements of ${uniqueThemes.join(' and ')}`);
+            }
+            
+            // Check for contextual reinforcement
+            const contextualStrength = primaryEvidence.filter(ev => !ev.thematic && ev.words && ev.words.length > 1).length;
+            if (contextualStrength > 2) {
+                reasons.push(`repeated emotional patterns across multiple passages`);
+            }
+            
+            if (reasons.length > 0) {
+                explanation += reasons.join(', ') + '. ';
+            } else {
+                explanation += `contextual analysis of the text's overall tone. `;
+            }
+            
+            // Secondary emotions
+            const secondaryEmotions = Object.entries(scores)
+                .filter(([emotion, score]) => emotion !== primaryEmotion && parseFloat(score) > 15)
+                .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]))
+                .slice(0, 2);
+            
+            if (secondaryEmotions.length > 0) {
+                explanation += `\n\nSignificant secondary emotions include `;
+                const secondaryDescriptions = secondaryEmotions.map(([emotion, score]) => {
+                    const words = evidence[emotion]
+                        .filter(ev => ev.words)
+                        .flatMap(ev => ev.words);
+                    const uniqueWords = [...new Set(words)].slice(0, 3);
+                    return `${emotion} (${score}%)` + (uniqueWords.length > 0 ? `, conveyed through words like "${uniqueWords.join('", "')}"` : '');
+                });
+                explanation += secondaryDescriptions.join(', and ') + '. ';
+            }
+            
+            // Emotional complexity
+            const significantEmotions = Object.values(scores).filter(s => parseFloat(s) > 10).length;
+            if (significantEmotions > 3) {
+                explanation += `The text demonstrates emotional complexity with ${significantEmotions} distinct emotional threads, creating a nuanced and layered reading experience.`;
+            } else if (significantEmotions === 1) {
+                explanation += `The text maintains a focused emotional tone, with ${primaryEmotion} dominating the narrative without significant emotional variation.`;
+            } else {
+                explanation += `This emotional interplay creates depth and authentic human feeling in the text.`;
+            }
+            
+            return explanation;
+        }
+
+        function generateContentSummary(data) {
+            const { importantSentences, topWords, themeAnalysis, toneAnalysis, literaryDevices, sentiment, primaryEmotion, sentenceCount, isPoetry, text } = data;
+            
+            let summary = '';
+            
+            // Literary form
+            const form = isPoetry ? 'poem' : sentenceCount < 5 ? 'brief passage' : 'literary passage';
+            
+            // Opening statement with themes
+            if (themeAnalysis.length > 0) {
+                const primaryTheme = themeAnalysis[0];
+                const secondaryThemes = themeAnalysis.slice(1, 3);
+                
+                summary += `This ${form} centers on ${primaryTheme.description}`;
+                if (secondaryThemes.length > 0) {
+                    summary += `, while also touching upon ${secondaryThemes.map(t => t.description).join(' and ')}`;
+                }
+                summary += '. ';
+            } else {
+                summary += `This ${form} `;
+            }
+            
+            // Emotional and tonal analysis
+            summary += `The ${toneAnalysis.pacing} pacing and ${toneAnalysis.formality} tone create a ${sentiment.toLowerCase()} atmosphere suffused with ${primaryEmotion}. `;
+            
+            // Literary techniques
+            if (literaryDevices.length > 0) {
+                summary += `The author employs ${literaryDevices.join(', ')} to enhance the emotional impact. `;
+            }
+            
+            // Key concepts with context
+            if (topWords.length > 0) {
+                const dominantWords = topWords.slice(0, 4)
+                    .filter(w => w.count > 1)
+                    .map(w => `"${w.word}"`);
+                if (dominantWords.length > 0) {
+                    summary += `Central to the text are recurring motifs of ${dominantWords.join(', ')}, `;
+                    summary += `which reinforce the ${themeAnalysis.length > 0 ? themeAnalysis[0].theme : 'underlying'} themes. `;
+                }
+            }
+            
+            // Content essence using important sentences
+            if (importantSentences.length > 0) {
+                if (sentenceCount <= 3) {
+                    summary += `The text states: "${importantSentences[0]}"`;
+                } else {
+                    summary += `The narrative arc moves from "${importantSentences[0].substring(0, 100)}${importantSentences[0].length > 100 ? '...' : ''}" `;
+                    
+                    if (importantSentences.length > 2) {
+                        summary += `through profound reflections, `;
+                    }
+                    
+                    if (importantSentences.length > 1) {
+                        const lastSentence = importantSentences[importantSentences.length - 1];
+                        summary += `ultimately ${lastSentence.includes('?') ? 'questioning' : 'concluding'} with "${lastSentence.substring(0, 100)}${lastSentence.length > 100 ? '...' : ''}"`;
+                    }
+                }
+            }
+            
+            // Intensity assessment
+            if (toneAnalysis.intensity === 'high') {
+                summary += '. The highly charged emotional language creates a sense of urgency and depth.';
+            } else if (toneAnalysis.intensity === 'subtle') {
+                summary += '. The restrained emotional expression invites contemplative engagement.';
+            }
+            
+            return summary;
+        }
+
+        function generateStatsSummary(data) {
+            const { wordCount, sentenceCount, lexicalDiversity, sentiment, primaryEmotion, positiveScore, negativeScore } = data;
+            
+            let summary = `This text contains ${wordCount} words across ${sentenceCount} sentence${sentenceCount !== 1 ? 's' : ''}. `;
+            
+            // Lexical diversity analysis
+            if (lexicalDiversity > 70) {
+                summary += `The writing shows high lexical diversity (${lexicalDiversity}%), indicating a rich and varied vocabulary. `;
+            } else if (lexicalDiversity > 50) {
+                summary += `The text demonstrates moderate lexical diversity (${lexicalDiversity}%), with a balanced use of vocabulary. `;
+            } else {
+                summary += `The text has lower lexical diversity (${lexicalDiversity}%), suggesting repetition of key words or themes. `;
+            }
+            
+            // Sentiment analysis
+            summary += `The overall sentiment is ${sentiment.toLowerCase()}`;
+            if (positiveScore > 0 || negativeScore > 0) {
+                summary += `, with ${positiveScore} positive word${positiveScore !== 1 ? 's' : ''} and ${negativeScore} negative word${negativeScore !== 1 ? 's' : ''} detected. `;
+            } else {
+                summary += ` with minimal emotionally-charged language. `;
+            }
+            
+            // Emotion analysis
+            summary += `The dominant emotional tone is ${primaryEmotion}, `;
+            
+            const emotionDescriptions = {
+                joy: 'conveying feelings of happiness, delight, and cheerfulness',
+                sadness: 'expressing sorrow, melancholy, or grief',
+                love: 'reflecting affection, devotion, or romantic sentiment',
+                fear: 'suggesting anxiety, dread, or apprehension',
+                anger: 'indicating frustration, rage, or hostility',
+                hope: 'showing optimism, faith, and aspiration',
+                mystery: 'creating an atmosphere of intrigue and the unknown'
+            };
+            
+            summary += emotionDescriptions[primaryEmotion] || 'creating a unique emotional atmosphere';
+            summary += '.';
+            
+            return summary;
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <h2 style="color: #667eea; margin-bottom: 20px;">📊 Analysis Results</h2>
+                    
+                    <div class="result-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                        <h3 style="color: white;">📖 Content Summary</h3>
+                        <p style="line-height: 1.8; font-size: 1.05rem;">${data.contentSummary}</p>
+                    </div>
+                    
+                    <div class="result-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #667eea;">
+                        <h3>📊 Statistical Analysis</h3>
+                        <p style="line-height: 1.6; color: #333; font-size: 1rem;">${data.statsSummary}</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value">${data.wordCount}</div>
+                            <div class="stat-label">Words</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.sentenceCount}</div>
+                            <div class="stat-label">Sentences</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.lexicalDiversity}%</div>
+                            <div class="stat-label">Lexical Diversity</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.avgWordLength}</div>
+                            <div class="stat-label">Avg Word Length</div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>💭 Sentiment Analysis</h3>
+                        <span class="sentiment-badge ${data.sentimentClass}">${data.sentiment}</span>
+                        <p style="margin-top: 10px;">Confidence: ${data.sentimentConfidence}%</p>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>😊 Emotion Detection</h3>
+                        <p><strong>Primary Emotion: ${data.primaryEmotion.charAt(0).toUpperCase() + data.primaryEmotion.slice(1)}</strong></p>
+                        <div class="emotion-bars">
+                            ${Object.entries(data.emotionPercentages)
+                                .filter(([_, score]) => score > 0)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([emotion, score]) => `
+                                    <div class="emotion-bar">
+                                        <div class="emotion-label">
+                                            <span>${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                                            <span>${score}%</span>
+                                        </div>
+                                        <div class="bar-container">
+                                            <div class="bar-fill" style="width: ${score}%"></div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>� Emotion Analysis Explanation</h3>
+                        <p style="line-height: 1.7; color: #333; font-size: 1rem; white-space: pre-line;">${data.emotionExplanation}</p>
+                    </div>
+                </div>
+            `;
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
