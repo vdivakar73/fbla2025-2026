@@ -20,7 +20,7 @@
             <button class="icon-btn" onclick="decreaseFontSize()" title="Decrease font">A-</button>
             <button class="icon-btn" onclick="resetFontSize()" title="Reset font">A</button>
             <button class="icon-btn" onclick="increaseFontSize()" title="Increase font">A+</button>
-            <button class="icon-btn theme-toggle" onclick="toggleTheme()" aria-pressed="false">🌓</button>
+            <button class="icon-btn theme-toggle" onclick="toggleDarkMode()" aria-pressed="false">🌓</button>
             <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
         </div>
     </header>
@@ -94,6 +94,118 @@
         }
 
         document.addEventListener('DOMContentLoaded', ()=>{ renderHistory(); renderAnnotations(); });
+        function speakCurrentText() {
+    const text = document.getElementById('dashA').value || document.getElementById('dashB').value || '';
+    if (!text.trim()) { 
+        if (typeof notify === 'function') notify('No text to read');
+        else console.log('No text to read');
+        return; 
+    }
+    if (!window.speechSynthesis) { 
+        if (typeof notify === 'function') notify('Text-to-speech not available');
+        else console.log('Text-to-speech not available');
+        return; 
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+    }
+    function increaseFontSize() {
+    const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    document.documentElement.style.fontSize = Math.min(currentSize + 2, 24) + 'px';
+    }
+
+    function decreaseFontSize() {
+        const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        document.documentElement.style.fontSize = Math.max(currentSize - 2, 12) + 'px';
+    }
+
+    function resetFontSize() {
+        document.documentElement.style.fontSize = '16px';
+    }
+    function toggleDarkMode() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        const btn = document.querySelector('.theme-toggle');
+        if (btn) btn.setAttribute('aria-pressed', isDark);
+    }
+    function openFeedbackModal() {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+    modal.innerHTML = `
+        <div style="background:white;width:90%;max-width:600px;padding:18px;border-radius:10px;">
+            <h3 style="margin-top:0;">Send Feedback</h3>
+            <textarea id="feedbackText" placeholder="Your feedback..." style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;"></textarea>
+            <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">
+                <button class="btn btn-primary" onclick="submitFeedback()">Send</button>
+                <button class="btn btn-secondary" onclick="this.closest('div').parentElement.remove()">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+    function submitFeedback() {
+        const text = document.getElementById('feedbackText').value.trim();
+        if (!text) {
+            if (typeof notify === 'function') notify('Please enter feedback');
+            else alert('Please enter feedback');
+            return;
+        }
+        try {
+            const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
+            fb.unshift({ id: Date.now(), text: text, timestamp: new Date().toISOString() });
+            while (fb.length > 200) fb.pop();
+            localStorage.setItem('localFeedback', JSON.stringify(fb));
+            if (typeof notify === 'function') notify('Feedback saved locally');
+            else console.log('Feedback saved');
+            document.querySelector('div[style*="z-index:10003"]').remove();
+        } catch (e) {
+            console.error('Feedback error:', e);
+        }
+    }
+    function removeTopFixedOverlay() {
+    try {
+        const els = Array.from(document.body.children).reverse();
+        for (const el of els) {
+            const cs = window.getComputedStyle(el);
+            if (cs && cs.position === 'fixed' && cs.display !== 'none' && parseInt(cs.zIndex || 0, 10) >= 10000) {
+                el.remove();
+                return true;
+            }
+        }
+    } catch (e) {
+        console.warn('removeTopFixedOverlay error', e);
+    }
+    return false;
+    }
+    function performAnalysis(text) {
+    const words = text.toLowerCase().split(/\s+/).filter(w => w);
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+    const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy'];
+    const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'dark'];
+    const positiveCount = words.filter(w => positiveWords.includes(w)).length;
+    const negativeCount = words.filter(w => negativeWords.includes(w)).length;
+    let sentiment = 'neutral';
+    if (positiveCount > negativeCount) sentiment = 'positive';
+    if (negativeCount > positiveCount) sentiment = 'negative';
+    return { 
+        wordCount: words.length, 
+        sentenceCount: sentences.length, 
+        sentiment: sentiment
+    };
+}
+    document.addEventListener('DOMContentLoaded', () => { 
+    renderHistory(); 
+    renderAnnotations(); 
+    
+    // Restore dark mode
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        const btn = document.querySelector('.theme-toggle');
+        if (btn) btn.setAttribute('aria-pressed', 'true');
+    }
+});
     </script>
 </body>
 </html>

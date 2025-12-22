@@ -113,6 +113,94 @@
         </div>
 
     <script>
+        // Initialize mock annotation state if engine not loaded
+if (typeof window.annotationState === 'undefined') {
+    console.warn('⚠️ Annotations engine not loaded. Initializing mock state for testing...');
+    
+    window.annotationState = {
+        allAnnotations: [],
+        annotationCategories: ['general', 'insight', 'question', 'theme', 'character', 'symbolism', 'literary-device'],
+        colorScheme: {
+            general: '#2196F3',
+            insight: '#4CAF50',
+            question: '#FF9800',
+            theme: '#9C27B0',
+            character: '#E91E63',
+            symbolism: '#00BCD4',
+            'literary-device': '#FFC107'
+        }
+    };
+    
+    // Mock functions if not available
+    if (!window.createAnnotation) {
+        window.createAnnotation = function(text, category, title, content) {
+            const annotation = {
+                id: 'ann-' + Date.now() + '-' + Math.floor(Math.random() * 9999),
+                text: text || '',
+                category: category || 'general',
+                title: title || 'Untitled',
+                content: content || '',
+                sentiment: Math.random() > 0.5 ? 'positive' : (Math.random() > 0.5 ? 'negative' : 'neutral'),
+                relevance: Math.floor(Math.random() * 100),
+                tags: [],
+                color: window.annotationState.colorScheme[category] || '#2196F3',
+                timestamp: new Date().toISOString(),
+                editHistory: []
+            };
+            window.annotationState.allAnnotations.push(annotation);
+            return annotation;
+        };
+    }
+    
+    if (!window.renderAllAnnotations) {
+        window.renderAllAnnotations = function() {
+            console.log('Mock: renderAllAnnotations called');
+        };
+    }
+    
+    if (!window.searchAnnotations) {
+        window.searchAnnotations = function(query) {
+            return window.annotationState.allAnnotations.filter(a => 
+                a.text.toLowerCase().includes(query.toLowerCase()) ||
+                a.title.toLowerCase().includes(query.toLowerCase()) ||
+                a.content.toLowerCase().includes(query.toLowerCase())
+            );
+        };
+    }
+    
+    if (!window.filterAnnotationsByCategory) {
+        window.filterAnnotationsByCategory = function(category) {
+            return window.annotationState.allAnnotations.filter(a => a.category === category);
+        };
+    }
+    
+    if (!window.editAnnotation) {
+        window.editAnnotation = function(id) {
+            console.log('Mock: editAnnotation called for', id);
+        };
+    }
+    
+    if (!window.deleteAnnotation) {
+        window.deleteAnnotation = function(id) {
+            const index = window.annotationState.allAnnotations.findIndex(a => a.id === id);
+            if (index > -1) {
+                window.annotationState.allAnnotations.splice(index, 1);
+            }
+        };
+    }
+    
+    if (!window.exportAnnotationsJSON) {
+        window.exportAnnotationsJSON = function() {
+            console.log('Mock: JSON export would trigger download');
+        };
+    }
+    
+    if (!window.exportAnnotationsCSV) {
+        window.exportAnnotationsCSV = function() {
+            console.log('Mock: CSV export would trigger download');
+        };
+    }
+}
         // Load the annotations engine
         // Note: In actual use, this would be loaded via HTML script tags
         const logResults = (testName, result, isError = false) => {
@@ -348,8 +436,128 @@
         };
 
         // Initial status check
-        window.addEventListener('load', updateSystemStatus);
-        setTimeout(updateSystemStatus, 1000);
+        window.addEventListener('load', () => {
+            updateSystemStatus();
+            
+            // Restore dark mode
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+                if (btn) btn.setAttribute('aria-pressed', 'true');
+            }
+        });
+
+    setTimeout(updateSystemStatus, 1000);
+    function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+    const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+    if (btn) btn.setAttribute('aria-pressed', isDark);
+}
+    function clearAllAnnotations() {
+    if (!confirm('⚠️ This will delete ALL test annotations. Continue?')) return;
+    
+    try {
+        if (window.annotationState) {
+            window.annotationState.allAnnotations = [];
+        }
+        localStorage.removeItem('advancedAnnotations');
+        
+        clearAllResults();
+        updateSystemStatus();
+        
+        console.log('✅ All test data cleared');
+        alert('Test data cleared successfully');
+    } catch (e) {
+        console.error('Error clearing annotations:', e);
+        alert('Error: ' + e.message);
+    }
+}
+    function updateAnnotation(id, updates) {
+    if (!window.annotationState) throw new Error('Annotation state not initialized');
+    
+    const annotation = window.annotationState.allAnnotations.find(a => a.id === id);
+    if (!annotation) throw new Error('Annotation not found');
+    
+    // Track edit history
+    if (!annotation.editHistory) annotation.editHistory = [];
+    annotation.editHistory.push({
+        timestamp: new Date().toISOString(),
+        changes: updates
+    });
+    
+    // Apply updates
+    Object.assign(annotation, updates);
+    annotation.timestamp = new Date().toISOString();
+    
+    // Save to storage
+    if (typeof window.saveAnnotationsToStorage === 'function') {
+        window.saveAnnotationsToStorage();
+    }
+    
+    return annotation;
+}
+
+// Expose globally
+if (typeof window !== 'undefined') {
+    window.updateAnnotation = updateAnnotation;
+}
+    function saveAnnotationsToStorage() {
+    try {
+        if (!window.annotationState) throw new Error('Annotation state not initialized');
+        
+        const data = JSON.stringify(window.annotationState.allAnnotations);
+        localStorage.setItem('advancedAnnotations', data);
+        
+        return true;
+    } catch (e) {
+        console.error('Save to storage failed:', e);
+        throw e;
+    }
+}
+
+// Expose globally
+if (typeof window !== 'undefined') {
+    window.saveAnnotationsToStorage = saveAnnotationsToStorage;
+}
+    function getAnnotationStats() {
+    if (!window.annotationState) throw new Error('Annotation state not initialized');
+    
+    const annotations = window.annotationState.allAnnotations;
+    
+    const stats = {
+        total: annotations.length,
+        averageRelevance: 0,
+        byCategory: {},
+        bySentiment: {}
+    };
+    
+    // Calculate average relevance
+    const totalRelevance = annotations.reduce((sum, a) => sum + (a.relevance || 0), 0);
+    stats.averageRelevance = annotations.length > 0 
+        ? (totalRelevance / annotations.length).toFixed(2) 
+        : 0;
+    
+    // Group by category
+    annotations.forEach(a => {
+        const cat = a.category || 'uncategorized';
+        stats.byCategory[cat] = (stats.byCategory[cat] || 0) + 1;
+    });
+    
+    // Group by sentiment
+    annotations.forEach(a => {
+        const sent = a.sentiment || 'neutral';
+        stats.bySentiment[sent] = (stats.bySentiment[sent] || 0) + 1;
+    });
+    
+    return stats;
+}
+
+// Expose globally
+if (typeof window !== 'undefined') {
+    window.getAnnotationStats = getAnnotationStats;
+}
     </script>
 </body>
 </html>

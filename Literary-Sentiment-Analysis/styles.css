@@ -85,26 +85,6 @@ body{
 }
 
 .container{max-width:1200px;margin:0 auto;padding:20px}
-:root {
-    --bg-main: #f4f6fb;
-    --bg-card: #ffffff;
-    --bg-muted: #eef1f7;
-    --text-main: #1f2937;
-    --border-soft: #dbe1ea;
-}
-
-body {
-    background: linear-gradient(180deg, #f4f6fb, #e9edf5);
-    color: var(--text-main);
-}
-
-.dark-mode {
-    --bg-main: #0f172a;
-    --bg-card: #111827;
-    --bg-muted: #1e293b;
-    --text-main: #e5e7eb;
-    --border-soft: #334155;
-}
 .chart-container {
     background: var(--bg-muted);
     border-radius: 12px;
@@ -120,10 +100,14 @@ body {
   align-items:center;
   gap:14px;
   padding:14px 20px;
-  background:linear-gradient(180deg,rgba(255,255,255,.6),transparent);
+  background: var(--panel);
   border-bottom:1px solid var(--border);
-  backdrop-filter:blur(10px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
+body.dark-mode .app-header{
+  box-shadow: 0 6px 24px rgba(0,0,0,.45);
+}
+
 
 .app-header .logo{
   font-weight:900;
@@ -213,26 +197,49 @@ body {
   outline:3px solid rgba(99,102,241,.35);
   outline-offset:3px;
 }
+.muted{
+  color: var(--muted);
+}
 
 /* =========================
    Cards
    ========================= */
-.card {
-    background: var(--bg-card);
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.08);
-    border: 1px solid var(--border-soft);
+.card{
+  background: linear-gradient(
+    180deg,
+    var(--panel),
+    var(--surface-2)
+  );
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
 }
+
 
 .card h2{
   margin:0 0 10px 0;
-  background:linear-gradient(90deg,var(--primary),var(--accent));
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
+  font-weight:800;
+  font-size:1.25rem;
+  color: var(--text);
 }
-.card h3{margin:0 0 8px 0}
+.card h2::after{
+  content:"";
+  display:block;
+  width:48px;
+  height:3px;
+  margin-top:6px;
+  border-radius:2px;
+  background: var(--primary);
+  opacity:.6;
+}
+
+.card h3{
+  margin:0 0 8px 0;
+  font-weight:700;
+  color: var(--text);
+}
+
 aside.card h3 {
     font-size: 0.95rem;
     text-transform: uppercase;
@@ -273,6 +280,16 @@ textarea {
     font-family: "Inter", system-ui, sans-serif;
     line-height: 1.6;
 }
+textarea,
+input,
+select {
+  color: var(--text);
+}
+textarea::selection {
+  background: rgba(99,102,241,.35);
+  color: #fff;
+}
+
 
 textarea:focus,
 input[type="text"]:focus,

@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tools - Literary Sentiment Analysis</title>
   <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
 </head>
 <body>
   <header class="app-header">
@@ -20,7 +24,7 @@
       <button class="icon-btn" onclick="decreaseFontSize()" title="Decrease font">A-</button>
       <button class="icon-btn" onclick="resetFontSize()" title="Reset font">A</button>
       <button class="icon-btn" onclick="increaseFontSize()" title="Increase font">A+</button>
-      <button class="icon-btn theme-toggle" onclick="toggleTheme()" aria-pressed="false">🌓</button>
+      <button class="icon-btn theme-toggle" onclick="toggleDarkMode()" aria-pressed="false">🌓</button>
       <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
     </div>
   </header>
@@ -28,48 +32,52 @@
   <main class="container" style="padding:8px;">
     <div class="main-grid" style="align-items:start;">
       <section class="card sidebar">
-      <h3>Ingest</h3>
-      <input id="fileInputTools" type="file" accept=".txt,image/*,.pdf,.docx" aria-label="Upload file">
-      <div style="margin-top:8px; display:flex; gap:8px;">
-        <button class="btn" onclick="handleFileInputTools()">Upload</button>
-        <button class="btn" onclick="startOCRTools()">🖼️ OCR</button>
-      </div>
-      <div style="margin-top:12px; display:flex; gap:8px;">
-        <button class="btn" onclick="exportAnnotations()">Export Annotations</button>
-        <label class="btn" style="display:inline-block; cursor:pointer;">
-          Import
-          <input id="importAnnFile" type="file" accept="application/json" style="display:none" onchange="(function(f){ if(f && f.files && f.files[0]) importAnnotationsFile(f.files[0]); })(this); this.value=null;">
-        </label>
-        <button class="btn" onclick="downloadWordFreqCSV()">Download WordFreq</button>
-        <button class="btn" onclick="exportAnnotatedHTML()">Export Annotated HTML</button>
-        <button class="btn" onclick="copyAnnotationsToClipboard()">Copy Annotations</button>
-      </div>
-      <hr>
-      <h3>Utilities</h3>
-      <button class="btn" onclick="openAPIStub()">🔌 API Stub</button>
-      <button class="btn" onclick="openCompareModal()">⚖️ Compare</button>
-      <button class="btn" onclick="showHistory()">🕒 History</button>
+        <h3>Ingest</h3>
+        <input id="fileInputTools" type="file" accept=".txt,image/*,.pdf,.docx" aria-label="Upload file">
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button class="btn" onclick="handleFileInputTools()">Upload</button>
+          <button class="btn" onclick="startOCRTools()">🖼️ OCR</button>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" onclick="exportAnnotations()">Export Annotations</button>
+          <label class="btn" style="display:inline-block; cursor:pointer;">
+            Import
+            <input id="importAnnFile" type="file" accept="application/json" style="display:none" onchange="importAnnotationsFile(this.files[0]); this.value=null;">
+          </label>
+          <button class="btn" onclick="downloadWordFreqCSV()">Download WordFreq</button>
+          <button class="btn" onclick="exportAnnotatedHTML()">Export Annotated HTML</button>
+          <button class="btn" onclick="copyAnnotationsToClipboard()">Copy Annotations</button>
+        </div>
+        <hr>
+        <h3>Utilities</h3>
+        <button class="btn" onclick="openAPIStub()">🔌 API Stub</button>
+        <button class="btn" onclick="openCompareModal()">⚖️ Compare</button>
+        <button class="btn" onclick="showHistory()">🕒 History</button>
       </section>
 
       <section class="card">
-      <div id="annotations-panel" style="margin-bottom:16px;">
-        <h3>Annotations</h3>
-        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-          <div style="flex:1;">
-            <input id="annSearch" placeholder="Search annotations..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px;">
+        <div id="annotations-panel" style="margin-bottom:16px;">
+          <h3>Annotations</h3>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:200px;">
+              <input id="annSearch" placeholder="Search annotations..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-weight:600; margin-right:8px;">Filter:</label>
+              <select id="annCategoryFilter" multiple style="min-width:160px; height:90px;">
+              </select>
+            </div>
+            <div>
+              <label style="font-weight:600; display:block;">Min Confidence: <span id="annConfLabel">0</span>%</label>
+              <input id="annConf" type="range" min="0" max="100" value="0" oninput="document.getElementById('annConfLabel').innerText=this.value">
+              <div style="margin-top:8px;">
+                <button class="btn" id="applyAnnFilterBtn">Apply Filter</button> 
+                <button class="btn" id="resetAnnFilterBtn">Reset</button>
+              </div>
+            </div>
           </div>
-          <div>
-            <label style="font-weight:600; margin-right:8px;">Filter:</label>
-            <select id="annCategoryFilter" multiple style="min-width:160px; height:90px;">
-            </select>
-          </div>
-          <div>
-            <label style="font-weight:600; display:block;">Min Confidence: <span id="annConfLabel">0</span>%</label>
-            <input id="annConf" type="range" min="0" max="100" value="0" oninput="document.getElementById('annConfLabel').innerText=this.value">
-            <div style="margin-top:8px;"><button class="btn" id="applyAnnFilterBtn">Apply Filter</button> <button class="btn" id="resetAnnFilterBtn">Reset</button></div>
-          </div>
+          <div id="annotations-container"></div>
         </div>
-        <div id="annotations-container"></div>
       </section>
 
       <aside class="card">
@@ -77,41 +85,117 @@
         <div id="history-list"></div>
       </aside>
     </div>
+  </script>
+  </body>
   </main>
 
+  <!-- ALL JAVASCRIPT IN ONE CONSOLIDATED BLOCK -->
   <script>
-    // Sample texts for quick testing
+    // ==================== CONSTANTS ====================
     const SAMPLE_TEXTS = [
       { id: 'sample1', title: 'Short Poem', text: 'The moon drifts over the silver pond. Quiet ripples sing the night.' },
       { id: 'sample2', title: 'Paragraph Excerpt', text: 'She walked along the river that day, thinking of the small things that remained. The town was sleepy; a dog barked twice. Sunlight pooled on the pavement, and for a moment she felt younger.' },
       { id: 'sample3', title: 'Classic Opening', text: 'It was the best of times, it was the worst of times. In the city, life moved like a great machinery, indifferent and relentless.' }
     ];
 
-    function renderSampleButtons() {
-      const container = document.getElementById('history-list'); // reuse area for quick samples UI
-      const box = document.createElement('div');
-      box.style.marginBottom = '12px';
-      box.innerHTML = '<strong>Quick Samples:</strong><div style="display:flex;gap:8px;margin-top:8px;"></div>';
-      SAMPLE_TEXTS.forEach(s=>{
-        const b = document.createElement('button'); b.className='btn'; b.textContent = s.title; b.onclick = ()=>{ localStorage.setItem('pendingExample', s.text); showToast('Sample loaded - open Home', 'info', 1500); window.location.href='sentiment-analyzer.html'; };
-        box.querySelector('div').appendChild(b);
-      });
-      const h = document.getElementById('history-list'); if (h) h.parentNode.insertBefore(box, h);
+    // ==================== THEME & UI ====================
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      const btn = document.querySelector('.theme-toggle');
+      if (btn) btn.setAttribute('aria-pressed', isDark);
     }
 
-    document.addEventListener('DOMContentLoaded', ()=>{ renderSampleButtons(); });
-  </script>
+    function increaseFontSize() {
+      const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      document.documentElement.style.fontSize = Math.min(currentSize + 2, 24) + 'px';
+    }
 
-  <script src="annotations-engine.js"></script>
-  <script src="summary-manager.js"></script>
-  <script src="ui-tools.js"></script>
-  <script>
-    // Tools page helpers: wire simple file/OCR handlers and render annotations/history
+    function decreaseFontSize() {
+      const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      document.documentElement.style.fontSize = Math.max(currentSize - 2, 12) + 'px';
+    }
+
+    function resetFontSize() {
+      document.documentElement.style.fontSize = '16px';
+    }
+
+    function showToast(message, type, duration) {
+      type = type || 'info';
+      duration = duration || 3000;
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:6px;color:white;z-index:10000;display:none;';
+        document.body.appendChild(toast);
+      }
+
+      const colors = {
+        info: '#2196F3',
+        error: '#ef4444',
+        success: '#10b981',
+        warning: '#f59e0b'
+      };
+
+      toast.style.background = colors[type] || colors.info;
+      toast.textContent = message;
+      toast.style.display = 'block';
+
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(function() {
+        toast.style.display = 'none';
+      }, duration);
+    }
+
+    function notify(message, type) {
+      if (typeof showToast === 'function') {
+        showToast(message, type);
+      } else {
+        alert(message);
+      }
+    }
+
+    function showPrompt(title, defaultValue, callback) {
+      const value = prompt(title, defaultValue || '');
+      if (value !== null && callback) {
+        callback(value);
+      }
+    }
+
+    function showConfirm(message, callback) {
+      if (confirm(message) && callback) {
+        callback();
+      }
+    }
+
+    // ==================== TEXT TO SPEECH ====================
+    function speakCurrentText() {
+      const text = localStorage.getItem('lastText') || '';
+      if (!text.trim()) {
+        showToast('No text available to read', 'info');
+        return;
+      }
+      if (!window.speechSynthesis) {
+        showToast('Text-to-speech not available in this browser', 'error');
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // ==================== FILE HANDLING ====================
     function handleFileInputTools() {
       const f = document.getElementById('fileInputTools').files[0];
       if (!f) return notify('Select a file first');
+
+      if (!f.type.startsWith('text')) {
+        notify('Only .txt files supported here. Use OCR for images or PDFs.');
+        return;
+      }
+
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = function(e) {
         const txt = e.target.result;
         localStorage.setItem('lastText', txt);
         window.location.href = 'sentiment-analyzer.html';
@@ -124,113 +208,560 @@
       window.location.href = 'sentiment-analyzer.html';
     }
 
+    // ==================== EXPORT FUNCTIONS ====================
+    function downloadWordFreqCSV() {
+      try {
+        const text = localStorage.getItem('lastText') || '';
+        if (!text.trim()) {
+          showToast('No text analyzed yet', 'info');
+          return;
+        }
+        const words = text.toLowerCase().split(/\s+/).filter(function(w) { return w; });
+        const freq = {};
+        words.forEach(function(w) {
+          const clean = w.replace(/[^a-z0-9'-]/g, '');
+          if (clean) freq[clean] = (freq[clean] || 0) + 1;
+        });
+        const sorted = Object.entries(freq).sort(function(a, b) { return b[1] - a[1]; });
+        let csv = 'Word,Frequency\n';
+        sorted.forEach(function(pair) {
+          csv += '"' + pair[0] + '",' + pair[1] + '\n';
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'word-frequency-' + Date.now() + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Word frequency CSV downloaded', 'info');
+      } catch (e) {
+        console.error('CSV error:', e);
+        showToast('Export failed', 'error');
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function exportAnnotatedHTML() {
+      try {
+        const text = localStorage.getItem('lastText') || '';
+        const annotations = JSON.parse(localStorage.getItem('advancedAnnotations') || '[]');
+
+        if (!text.trim()) {
+          showToast('No text to export', 'info');
+          return;
+        }
+
+        let html = '<!DOCTYPE html>\n';
+        html += '<html lang="en">\n';
+        html += '<head>\n';
+        html += '<meta charset="UTF-8">\n';
+        html += '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n';
+        html += '<title>Annotated Text Export</title>\n';
+        html += '<style>\n';
+        html += 'body{font-family:system-ui,-apple-system,sans-serif;line-height:1.8;max-width:800px;margin:40px auto;padding:20px;}\n';
+        html += '.annotation{background:#fff3cd;border-left:3px solid #ffc107;padding:10px;margin:10px 0;border-radius:4px;}\n';
+        html += '.annotation-title{font-weight:600;color:#856404;}\n';
+        html += '.text-content{white-space:pre-wrap;background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;}\n';
+        html += '</style>\n';
+        html += '</head>\n';
+        html += '<body>\n';
+        html += '<h1>Annotated Text Export</h1>\n';
+        html += '<p><em>Generated: ' + new Date().toLocaleString() + '</em></p>\n';
+        html += '<div class="text-content">' + escapeHtml(text) + '</div>\n';
+        html += '<h2>Annotations (' + annotations.length + ')</h2>\n';
+
+        annotations.forEach(function(a) {
+          html += '<div class="annotation">\n';
+          html += '<div class="annotation-title">' + escapeHtml(a.title || 'Annotation') + '</div>\n';
+          html += '<div>' + escapeHtml(a.content || '') + '</div>\n';
+          html += '</div>\n';
+        });
+
+        html += '</body>\n';
+        html += '</html>';
+
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'annotated-text-' + Date.now() + '.html';
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast('Annotated HTML exported', 'info');
+      } catch (e) {
+        console.error('HTML export error:', e);
+        showToast('Export failed', 'error');
+      }
+    }
+
+    function copyAnnotationsToClipboard() {
+      try {
+        const annotations = JSON.parse(localStorage.getItem('advancedAnnotations') || '[]');
+        if (!annotations.length) {
+          showToast('No annotations to copy', 'info');
+          return;
+        }
+        let text = 'ANNOTATIONS\n' + '='.repeat(50) + '\n\n';
+        annotations.forEach(function(a, i) {
+          text += (i + 1) + '. ' + (a.title || 'Annotation') + '\n';
+          text += '   ' + (a.content || '') + '\n\n';
+        });
+        navigator.clipboard.writeText(text).then(function() {
+          showToast('Annotations copied to clipboard', 'info');
+        }).catch(function() {
+          showToast('Failed to copy to clipboard', 'error');
+        });
+      } catch (e) {
+        console.error('Copy error:', e);
+        showToast('Copy failed', 'error');
+      }
+    }
+    function exportAnnotations() {
+      try {
+        const raw = localStorage.getItem('advancedAnnotations');
+        if (!raw) {
+          showToast('No annotations to export', 'info');
+          return;
+        }
+        const annotations = JSON.parse(raw);
+        const dataStr = JSON.stringify(annotations, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'annotations-' + Date.now() + '.json';
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast('Annotations exported', 'info');
+      } catch (e) {
+        console.error('Export error:', e);
+        showToast('Export failed', 'error');
+      }
+    }
+
+    function importAnnotationsFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) {
+            showToast('Invalid annotation file format', 'error');
+            return;
+          }
+          const existing = JSON.parse(localStorage.getItem('advancedAnnotations') || '[]');
+          const merged = existing.concat(imported);
+          localStorage.setItem('advancedAnnotations', JSON.stringify(merged));
+          showToast('Annotations imported: ' + imported.length, 'info');
+          if (typeof renderAnnotationsFromStorage === 'function') {
+            renderAnnotationsFromStorage();
+          }
+        } catch (err) {
+          console.error('Import error:', err);
+          showToast('Failed to import annotations', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ==================== MODALS ====================
+    function openAPIStub() {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+      const content = '<div style="background:var(--panel);color:var(--text);width:90%;max-width:720px;padding:18px;border-radius:12px;">' +
+        '<h3 style="margin-top:0;">API / Batch Processing</h3>' +
+        '<p>This build includes client-side export for batch processing. Example curl to upload an exported JSON:</p>' +
+        '<pre style="background:var(--surface);padding:12px;border-radius:6px;overflow-x:auto;">curl -X POST -H "Content-Type: application/json" \\\n  --data-binary @analysis.json \\\n  https://your-server.example.com/api/ingest</pre>' +
+        '<p>To use programmatic access, export analysis JSON and POST it to your endpoint.</p>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">' +
+        '<button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Close</button>' +
+        '</div></div>';
+      modal.innerHTML = content;
+      document.body.appendChild(modal);
+    }
+
+    function openCompareModal() {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+      const content = '<div style="background:var(--panel);color:var(--text);width:95%;max-width:900px;padding:16px;border-radius:8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+        '<div><h4>Text A</h4><textarea id="compareA" style="width:100%;height:220px;padding:10px;border:1px solid var(--border);border-radius:6px;"></textarea></div>' +
+        '<div><h4>Text B</h4><textarea id="compareB" style="width:100%;height:220px;padding:10px;border:1px solid var(--border);border-radius:6px;"></textarea></div>' +
+        '<div style="grid-column:1/-1;"><button class="btn btn-primary" onclick="analyzeCompare()">Analyze Both</button></div>' +
+        '<div id="compareResults" style="grid-column:1/-1;margin-top:8px;"></div>' +
+        '<div style="grid-column:1/-1;text-align:right;"><button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Close</button></div>' +
+        '</div>';
+      modal.innerHTML = content;
+      document.body.appendChild(modal);
+    }
+
+    function analyzeCompare() {
+      const a = document.getElementById('compareA').value.trim();
+      const b = document.getElementById('compareB').value.trim();
+      if (!a || !b) {
+        showToast('Enter both texts to compare', 'error');
+        return;
+      }
+      const wordsA = a.split(/\s+/).length;
+      const wordsB = b.split(/\s+/).length;
+      const sentA = a.split(/[.!?]+/).length;
+      const sentB = b.split(/[.!?]+/).length;
+
+      const results = '<div style="display:flex;gap:12px;">' +
+        '<div style="flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;"><h4>Text A</h4><p>Words: ' + wordsA + '</p><p>Sentences: ' + sentA + '</p></div>' +
+        '<div style="flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;"><h4>Text B</h4><p>Words: ' + wordsB + '</p><p>Sentences: ' + sentB + '</p></div>' +
+        '</div>';
+      document.getElementById('compareResults').innerHTML = results;
+    }
+
+    function showHistory() {
+      const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+
+      let content = '<div style="background:var(--panel);color:var(--text);width:90%;max-width:800px;padding:16px;border-radius:8px;max-height:80vh;overflow:auto;">';
+      content += '<h3>Analysis History</h3>';
+
+      if (!hist.length) {
+        content += '<p style="color:var(--muted);">No history yet. Analyze texts to build history.</p>';
+      } else {
+        hist.forEach(function(item) {
+          content += '<div style="border-left:3px solid #667eea;padding:10px;margin-bottom:8px;">';
+          content += '<strong>' + new Date(item.timestamp).toLocaleString() + '</strong><br>';
+          content += '<small>' + (item.preview || '') + '...</small>';
+          content += '</div>';
+        });
+      }
+
+      content += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;"><button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Close</button></div>';
+      content += '</div>';
+
+      modal.innerHTML = content;
+      document.body.appendChild(modal);
+    }
+
+    function openFeedbackModal() {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+      const content = '<div style="background:var(--panel);color:var(--text);width:90%;max-width:720px;padding:18px;border-radius:12px;">' +
+        '<h3 style="margin-top:0;">Send Feedback</h3>' +
+        '<textarea id="feedbackText" placeholder="Your feedback..." style="width:100%;min-height:120px;padding:10px;border:1px solid var(--border);border-radius:6px;"></textarea>' +
+        '<div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">' +
+        '<button class="btn btn-primary" onclick="submitFeedback()">Send</button>' +
+        '<button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Cancel</button>' +
+        '</div></div>';
+      modal.innerHTML = content;
+      document.body.appendChild(modal);
+    }
+
+    function submitFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) {
+        showToast('Please enter feedback', 'error');
+        return;
+      }
+      try {
+        const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
+        fb.unshift({ id: Date.now(), text: text, timestamp: new Date().toISOString() });
+        while (fb.length > 200) fb.pop();
+        localStorage.setItem('localFeedback', JSON.stringify(fb));
+        showToast('Feedback saved locally', 'info');
+        document.querySelector('div[style*="z-index:10003"]').remove();
+      } catch (e) {
+        console.error('Feedback error:', e);
+        showToast('Error saving feedback', 'error');
+      }
+    }
+
+    // ==================== ANNOTATIONS ====================
+    function applyAnnotationFilters(categories, minConfidence) {
+      const container = document.getElementById('annotations-container');
+      if (!container) return;
+
+      const cards = container.querySelectorAll('.annotation-card');
+      cards.forEach(function(card) {
+        let show = true;
+        const text = card.innerText.toLowerCase();
+
+        if (categories.length) {
+          show = categories.some(function(c) { return text.includes(c.toLowerCase()); });
+        }
+
+        const confMatch = text.match(/confidence[:\s]+(\d+)/i);
+        if (confMatch) {
+          const conf = parseInt(confMatch[1], 10);
+          if (conf < minConfidence) show = false;
+        }
+
+        card.style.display = show ? '' : 'none';
+      });
+    }
+
+    function renderAllAnnotations() {
+      document.getElementById('annSearch').value = '';
+      document.getElementById('annCategoryFilter').selectedIndex = -1;
+      document.getElementById('annConf').value = 0;
+      document.getElementById('annConfLabel').innerText = '0';
+      renderAnnotationsFromStorage();
+    }
+
     function renderAnnotationsFromStorage() {
       const raw = localStorage.getItem('advancedAnnotations');
       const container = document.getElementById('annotations-container');
       container.innerHTML = '';
-      if (!raw) { container.innerHTML = '<small style="color:var(--gray);">No annotations saved yet.</small>'; return; }
+      if (!raw) {
+        container.innerHTML = '<small style="color:var(--gray);">No annotations saved yet.</small>';
+        return;
+      }
       try {
         const arr = JSON.parse(raw);
         if (!Array.isArray(arr) || arr.length === 0) {
           container.innerHTML = '<small style="color:var(--gray);">No annotations saved yet.</small>';
           return;
         }
-        // Bulk actions bar
+
         const bulkBar = document.createElement('div');
-        bulkBar.style.display = 'flex'; bulkBar.style.gap = '8px'; bulkBar.style.marginBottom = '8px';
+        bulkBar.style.display = 'flex';
+        bulkBar.style.gap = '8px';
+        bulkBar.style.marginBottom = '8px';
         bulkBar.innerHTML = '<button class="btn" id="selectAllAnns">Select All</button><button class="btn" id="deleteSelectedAnns">Delete Selected</button><button class="btn" id="exportSelectedAnns">Export Selected</button>';
         container.appendChild(bulkBar);
 
-        arr.forEach(a => {
+        let needsSave = false;
+        arr.forEach(function(a) {
+          if (!a.id) {
+            a.id = 'ann-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+            needsSave = true;
+          }
+        });
+
+        if (needsSave) {
+          localStorage.setItem('advancedAnnotations', JSON.stringify(arr));
+        }
+
+        arr.forEach(function(a) {
           const card = document.createElement('div');
           card.className = 'annotation-card';
           card.style.border = '1px solid var(--border)';
           card.style.padding = '8px';
           card.style.marginBottom = '8px';
-          card.dataset.annId = a.id || (a.title + Math.random());
-          card.innerHTML = `
-            <div style="display:flex; gap:8px; align-items:start;">
-              <input type="checkbox" class="ann-checkbox" data-id="${card.dataset.annId}" style="margin-top:6px;">
-              <div style="flex:1;"><strong>${a.title || 'Annotation'}</strong><div style="font-size:0.9rem;color:var(--gray); margin-top:6px;">${a.content || ''}</div></div>
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <button class="btn" onclick="(function(id){ showPrompt('Add tag for annotation', '', function(val){ if(!val) return; try{ const raw=localStorage.getItem('advancedAnnotations')||'[]'; const list=JSON.parse(raw); const it=list.find(x=>String(x.id)===String(id)); if(it){ it.tags = it.tags||[]; it.tags.push(val); localStorage.setItem('advancedAnnotations', JSON.stringify(list)); showToast('Tag added','info'); renderAnnotationsFromStorage(); } }catch(e){console.warn(e);} }); })('${card.dataset.annId}')">Add Tag</button>
-                <button class="btn" onclick="(function(id){ showPrompt('Add comment', '', function(val){ if(!val) return; try{ const raw=localStorage.getItem('advancedAnnotations')||'[]'; const list=JSON.parse(raw); const it=list.find(x=>String(x.id)===String(id)); if(it){ it.comments = it.comments||[]; it.comments.push({text:val, ts: Date.now()}); localStorage.setItem('advancedAnnotations', JSON.stringify(list)); showToast('Comment added','info'); renderAnnotationsFromStorage(); } }catch(e){console.warn(e);} }); })('${card.dataset.annId}')">Add Comment</button>
-              </div>
-            </div>
-          `;
+          card.dataset.annId = String(a.id);
+          
+          const cardHTML = '<div style="display:flex; gap:8px; align-items:start;">' +
+            '<input type="checkbox" class="ann-checkbox" data-id="' + card.dataset.annId + '" style="margin-top:6px;">' +
+            '<div style="flex:1;"><strong>' + (a.title || 'Annotation') + '</strong><div style="font-size:0.9rem;color:var(--gray); margin-top:6px;">' + (a.content || '') + '</div></div>' +
+            '<div style="display:flex; flex-direction:column; gap:6px;">' +
+            '<button class="btn" onclick="addAnnotationTag(\'' + card.dataset.annId + '\')">Add Tag</button>' +
+            '<button class="btn" onclick="addAnnotationComment(\'' + card.dataset.annId + '\')">Add Comment</button>' +
+            '</div></div>';
+          
+          card.innerHTML = cardHTML;
           container.appendChild(card);
         });
 
-        // wire bulk actions
-        document.getElementById('selectAllAnns').onclick = ()=>{ document.querySelectorAll('.ann-checkbox').forEach(cb=>cb.checked=true); };
-        document.getElementById('deleteSelectedAnns').onclick = ()=>{
-          const ids = [...document.querySelectorAll('.ann-checkbox:checked')].map(c=>c.dataset.id);
-          if (!ids.length) { showToast('No annotations selected','info'); return; }
-          showConfirm('Delete selected annotations?', ()=>{
-            try{ const raw = localStorage.getItem('advancedAnnotations')||'[]'; const list = JSON.parse(raw); const remaining = list.filter(a=> !ids.includes(String(a.id))); localStorage.setItem('advancedAnnotations', JSON.stringify(remaining)); showToast('Deleted selected', 'info'); renderAnnotationsFromStorage(); }catch(e){ console.warn(e); }
+        document.getElementById('selectAllAnns').onclick = function() {
+          document.querySelectorAll('.ann-checkbox').forEach(function(cb) { cb.checked = true; });
+        };
+        
+        document.getElementById('deleteSelectedAnns').onclick = function() {
+          const ids = Array.from(document.querySelectorAll('.ann-checkbox:checked')).map(function(c) { return c.dataset.id; });
+          if (!ids.length) {
+            showToast('No annotations selected', 'info');
+            return;
+          }
+          showConfirm('Delete selected annotations?', function() {
+            try {
+              const raw = localStorage.getItem('advancedAnnotations') || '[]';
+              const list = JSON.parse(raw);
+              const remaining = list.filter(function(a) { return !ids.includes(String(a.id)); });
+              localStorage.setItem('advancedAnnotations', JSON.stringify(remaining));
+              showToast('Deleted selected', 'info');
+              renderAnnotationsFromStorage();
+            } catch (e) {
+              console.warn(e);
+            }
           });
         };
-        document.getElementById('exportSelectedAnns').onclick = ()=>{
-          const ids = [...document.querySelectorAll('.ann-checkbox:checked')].map(c=>c.dataset.id);
-          if (!ids.length) { showToast('No annotations selected','info'); return; }
-          try{ const raw = localStorage.getItem('advancedAnnotations')||'[]'; const list = JSON.parse(raw); const sel = list.filter(a=> ids.includes(String(a.id))); const blob = new Blob([JSON.stringify(sel,null,2)], { type:'application/json' }); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='selected-annotations.json'; a.click(); URL.revokeObjectURL(url); showToast('Exported selected','info'); }catch(e){ console.warn(e); }
-        };
+        
+        document.getElementById('exportSelectedAnns').onclick = function() {
+          const ids = Array.from(document.querySelectorAll('.ann-checkbox:checked')).map(function(c) { return c.dataset.id; });
+          if (!ids.length) {
+            showToast('No annotations selected', 'info');
+            return;
+          }
+          try {
+            const raw = localStorage.getItem('advancedAnnotations') || '[]';
+            const list = JSON.parse(raw);
+            const sel = list.filter(function(a) { return ids.includes(String(a.id)); });
+const blob = new Blob([JSON.stringify(sel, null, 2)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'selected-annotations.json';
+a.click();
+URL.revokeObjectURL(url);
+showToast('Exported selected', 'info');
+} catch (e) {
+console.warn(e);
+}
+};
+} catch (err) {
+    container.innerHTML = '<small style="color:var(--danger);">Unable to read annotations.</small>';
+  }
+}
 
-      } catch (err) {
-        container.innerHTML = '<small style="color:var(--danger);">Unable to read annotations.</small>';
+function addAnnotationTag(id) {
+  showPrompt('Add tag for annotation', '', function(val) {
+    if (!val) return;
+    try {
+      const raw = localStorage.getItem('advancedAnnotations') || '[]';
+      const list = JSON.parse(raw);
+      const it = list.find(function(x) { return String(x.id) === String(id); });
+      if (it) {
+        it.tags = it.tags || [];
+        it.tags.push(val);
+        localStorage.setItem('advancedAnnotations', JSON.stringify(list));
+        showToast('Tag added', 'info');
+        renderAnnotationsFromStorage();
       }
+    } catch (e) {
+      console.warn(e);
     }
+  });
+}
 
-    function renderHistory() {
-      const raw = localStorage.getItem('analysisHistory');
-      const list = document.getElementById('history-list');
-      list.innerHTML = '';
-      if (!raw) { list.innerHTML = '<small style="color:var(--gray);">No history.</small>'; return; }
-      try {
-        const arr = JSON.parse(raw).slice().reverse();
-        if (!arr.length) { list.innerHTML = '<small style="color:var(--gray);">No history.</small>'; return; }
-        arr.forEach(h => {
-          const el = document.createElement('div');
-          el.style.borderBottom = '1px solid var(--border)';
-          el.style.padding = '8px 0';
-          el.innerHTML = `<div style="font-weight:600">${h.title || (h.text || '').slice(0,60)}</div><div style="font-size:0.9rem;color:var(--gray);">${new Date(h.timestamp||0).toLocaleString()}</div>`;
-          list.appendChild(el);
-        });
-      } catch (err) {
-        list.innerHTML = '<small style="color:var(--danger);">Unable to read history.</small>';
+function addAnnotationComment(id) {
+  showPrompt('Add comment', '', function(val) {
+    if (!val) return;
+    try {
+      const raw = localStorage.getItem('advancedAnnotations') || '[]';
+      const list = JSON.parse(raw);
+      const it = list.find(function(x) { return String(x.id) === String(id); });
+      if (it) {
+        it.comments = it.comments || [];
+        it.comments.push({ text: val, ts: Date.now() });
+        localStorage.setItem('advancedAnnotations', JSON.stringify(list));
+        showToast('Comment added', 'info');
+        renderAnnotationsFromStorage();
       }
+    } catch (e) {
+      console.warn(e);
     }
+  });
+}
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // If the annotations engine exposes an initializer, call it so the UI functions are available
-      if (typeof initializeAnnotationEngine === 'function') {
-        initializeAnnotationEngine();
-      }
-      renderAnnotationsFromStorage();
-      renderHistory();
-      // populate category filter from annotation engine categories when available
-      try {
-        const sel = document.getElementById('annCategoryFilter');
-        if (sel && window.annotationState && Array.isArray(window.annotationState.annotationCategories)) {
-          sel.innerHTML = window.annotationState.annotationCategories.map(c=>`<option value="${c}">${c}</option>`).join('');
-        }
-        const applyBtn = document.getElementById('applyAnnFilterBtn');
-        const resetBtn = document.getElementById('resetAnnFilterBtn');
-        if (applyBtn) applyBtn.addEventListener('click', ()=>{ const selopts = [...document.getElementById('annCategoryFilter').selectedOptions].map(o=>o.value); const min = parseInt(document.getElementById('annConf').value,10); applyAnnotationFilters(selopts, min); });
-        if (resetBtn) resetBtn.addEventListener('click', ()=>{ document.getElementById('annCategoryFilter').selectedIndex = -1; document.getElementById('annConf').value = 0; document.getElementById('annConfLabel').innerText='0'; renderAllAnnotations(); });
-      } catch(e){ console.warn('init ann filter', e); }
+// ==================== HISTORY ====================
+function renderHistory() {
+  const raw = localStorage.getItem('analysisHistory');
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  if (!raw) {
+    list.innerHTML = '<small style="color:var(--gray);">No history.</small>';
+    return;
+  }
+  try {
+    const arr = JSON.parse(raw).slice().reverse();
+    if (!arr.length) {
+      list.innerHTML = '<small style="color:var(--gray);">No history.</small>';
+      return;
+    }
+    arr.forEach(function(h) {
+      const el = document.createElement('div');
+      el.style.borderBottom = '1px solid var(--border)';
+      el.style.padding = '8px 0';
+      el.innerHTML = '<div style="font-weight:600">' + (h.title || (h.text || '').slice(0, 60)) + '</div><div style="font-size:0.9rem;color:var(--gray);">' + new Date(h.timestamp || 0).toLocaleString() + '</div>';
+      list.appendChild(el);
     });
-    // wire search
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const s = document.getElementById('annSearch');
-      if (s) s.addEventListener('input', ()=>{
-        const q = s.value.trim().toLowerCase();
-        const container = document.getElementById('annotations-container');
-        if (!container) return;
-        const cards = container.querySelectorAll('.annotation-card');
-        cards.forEach(c=>{ const txt = c.innerText.toLowerCase(); c.style.display = txt.includes(q)?'':'none'; });
-      });
+  } catch (err) {
+    list.innerHTML = '<small style="color:var(--danger);">Unable to read history.</small>';
+  }
+}
+
+function renderSampleButtons() {
+  const container = document.getElementById('history-list');
+  const box = document.createElement('div');
+  box.style.marginBottom = '12px';
+  box.innerHTML = '<strong>Quick Samples:</strong><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"></div>';
+  SAMPLE_TEXTS.forEach(function(s) {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = s.title;
+    b.onclick = function() {
+      localStorage.setItem('pendingExample', s.text);
+      showToast('Sample loaded - open Home', 'info', 1500);
+      window.location.href = 'sentiment-analyzer.html';
+    };
+    box.querySelector('div').appendChild(b);
+  });
+  const h = document.getElementById('history-list');
+  if (h) h.parentNode.insertBefore(box, h);
+}
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', function() {
+  const isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) {
+    document.body.classList.add('dark-mode');
+    const btn = document.querySelector('.theme-toggle');
+    if (btn) btn.setAttribute('aria-pressed', 'true');
+  }
+
+  if (typeof initializeAnnotationEngine === 'function') {
+    initializeAnnotationEngine();
+  }
+
+  renderSampleButtons();
+  renderAnnotationsFromStorage();
+  renderHistory();
+
+  try {
+    const sel = document.getElementById('annCategoryFilter');
+    if (sel && window.annotationState && Array.isArray(window.annotationState.annotationCategories)) {
+      sel.innerHTML = window.annotationState.annotationCategories.map(function(c) {
+        return '<option value="' + c + '">' + c + '</option>';
+      }).join('');
+    }
+    
+    const applyBtn = document.getElementById('applyAnnFilterBtn');
+    const resetBtn = document.getElementById('resetAnnFilterBtn');
+    
+    if (applyBtn) applyBtn.addEventListener('click', function() {
+      const selopts = Array.from(document.getElementById('annCategoryFilter').selectedOptions).map(function(o) { return o.value; });
+      const min = parseInt(document.getElementById('annConf').value, 10);
+      applyAnnotationFilters(selopts, min);
     });
-  </script>
+    
+    if (resetBtn) resetBtn.addEventListener('click', function() {
+      document.getElementById('annCategoryFilter').selectedIndex = -1;
+      document.getElementById('annConf').value = 0;
+      document.getElementById('annConfLabel').innerText = '0';
+      renderAllAnnotations();
+    });
+  } catch (e) {
+    console.warn('init ann filter', e);
+  }
+
+  const s = document.getElementById('annSearch');
+  if (s) s.addEventListener('input', function() {
+    const q = s.value.trim().toLowerCase();
+    const container = document.getElementById('annotations-container');
+    if (!container) return;
+    const cards = container.querySelectorAll('.annotation-card');
+    cards.forEach(function(c) {
+      const txt = c.innerText.toLowerCase();
+      c.style.display = txt.includes(q) ? '' : 'none';
+    });
+  });
+});
+</script>
+  <script src="annotations-engine.js"></script>
+  <script src="summary-manager.js"></script>
+  <script src="ui-tools.js"></script>
 </body>
 </html>
+```
