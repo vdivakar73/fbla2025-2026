@@ -399,6 +399,32 @@
 
   if (!window.dashCompare) window.dashCompare = function(){ try{ const a = document.getElementById('dashA')?.value || ''; const b = document.getElementById('dashB')?.value || ''; if(!a||!b) return showToast('Paste both texts to compare','error'); const ana = (typeof performAnalysis==='function')?performAnalysis(a):{wordCount:a.split(/\s+/).filter(Boolean).length}; const anb = (typeof performAnalysis==='function')?performAnalysis(b):{wordCount:b.split(/\s+/).filter(Boolean).length}; const out = `A: ${ana.wordCount} words • ${ana.sentiment||'unknown'}\nB: ${anb.wordCount} words • ${anb.sentiment||'unknown'}`; const el = document.getElementById('dashCompareResults'); if(el) el.innerText = out; else showToast(out,'info',3000); }catch(e){ showToast('Compare failed','error'); } };
 
+  // Study Guide button: enable only after an analysis exists
+  function updateStudyButton() {
+    try {
+      const btns = Array.from(document.querySelectorAll('#openStudyGuideBtn'));
+      if (!btns.length) return;
+      const hasAnalysis = !!(window.latestAnalysisData || (localStorage.getItem('analysisHistory') && JSON.parse(localStorage.getItem('analysisHistory')||'[]').length > 0) || localStorage.getItem('lastText'));
+      btns.forEach(btn => {
+        try {
+          btn.disabled = !hasAnalysis;
+          if (!btn.dataset._studyBound) {
+            btn.addEventListener('click', (ev) => {
+              if (btn.disabled) { showToast('Analyze a text first to enable Study Guide', 'info', 2000); return; }
+              // navigate to study companion
+              try { window.location.href = (window.location.pathname.includes('study-companion') ? 'study-guide.html' : 'study-companion/study-guide.html'); } catch(e) { window.location.href = 'study-companion/study-guide.html'; }
+            });
+            btn.dataset._studyBound = '1';
+          }
+        } catch (e) { console.warn('study button update error', e); }
+      });
+    } catch (e) { console.warn('updateStudyButton failed', e); }
+  }
+
+  // update on load, storage changes, and periodically until enabled
+  document.addEventListener('DOMContentLoaded', () => { updateStudyButton(); setInterval(updateStudyButton, 1200); });
+  window.addEventListener('storage', updateStudyButton);
+
   if (!window.openCompareModal) window.openCompareModal = _noopNotify('Compare modal');
   if (!window.openAPIStub) window.openAPIStub = _noopNotify('API Stub');
   if (!window.showHistory) window.showHistory = function(){ try{ const hist = JSON.parse(localStorage.getItem('analysisHistory')||'[]'); showToast('History entries: ' + hist.length, 'info', 1200); }catch(e){ showToast('No history','info'); } };

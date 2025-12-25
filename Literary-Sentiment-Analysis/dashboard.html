@@ -12,7 +12,7 @@
         <nav class="header-nav" role="navigation">
             <a href="sentiment-analyzer.html">Home</a>
             <a href="dashboard.html" aria-current="page">Dashboard</a>
-            <a href="tools.html">Tools</a>
+            <a href="tools-ingest.html">Tools</a>
             <a href="analysis.html">Analysis</a>
         </nav>
         <div class="header-right">
@@ -24,6 +24,7 @@
             <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
         </div>
     </header>
+    
     <main class="container" style="margin-top:12px;">
         <div class="main-grid">
             <aside class="card sidebar">
@@ -35,177 +36,292 @@
                 <h3 style="margin-bottom:8px; color:var(--muted);">Quick Compare</h3>
                 <div style="display:flex; gap:8px; flex-direction:column;">
                     <div style="display:flex; gap:8px;">
-                        <textarea id="dashA" style="flex:1;height:140px;border-radius:8px;padding:10px;background:transparent;border:1px solid var(--border);"></textarea>
-                        <textarea id="dashB" style="flex:1;height:140px;border-radius:8px;padding:10px;background:transparent;border:1px solid var(--border);"></textarea>
+                        <textarea id="dashA" style="flex:1;height:140px;border-radius:8px;padding:10px;background:transparent;border:1px solid var(--border);" placeholder="Text A"></textarea>
+                        <textarea id="dashB" style="flex:1;height:140px;border-radius:8px;padding:10px;background:transparent;border:1px solid var(--border);" placeholder="Text B"></textarea>
                     </div>
-                    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;"><button class="btn btn-primary" onclick="dashCompare()">Compare</button> <button class="btn btn-secondary" onclick="removeTopFixedOverlay()">Close Overlays</button></div>
+                    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+                        <button class="btn btn-primary" onclick="dashCompare()">Compare</button>
+                        <button class="btn btn-secondary" onclick="clearCompare()">Clear</button>
+                    </div>
                     <div id="dashCompareResults" style="margin-top:8px;"></div>
                 </div>
             </section>
 
             <aside class="card">
                 <h3 style="margin-bottom:6px; color:var(--muted);">Annotations</h3>
-                <div id="dashAnnotations" style="max-height:420px; overflow:auto;">Loading...</div>
+                <div style="margin-bottom:12px;">
+                    <button class="btn btn-primary" onclick="toggleAnnotations()">Show/Hide Annotations</button>
+                    <button class="btn btn-secondary" onclick="addNewAnnotation()">Add New</button>
+                    <button class="btn" onclick="exportAnnotationsJSON()">Export JSON</button>
+                </div>
+                <section id="annotationsSection" style="display:none;">
+                    <div id="annotations-container"></div>
+                </section>
+                <div id="dashAnnotations" style="max-height:420px; overflow:auto;"></div>
             </aside>
         </div>
     </main>
 
     <script src="ui-tools.js"></script>
+    <script src="summary-manager.js"></script>
     <script src="ai-qa.js"></script>
     <script src="annotations-engine.js"></script>
-    <script src="summary-manager.js"></script>
     <script>
+        // Initialize global state
+        let currentText = '';
+        let latestAnalysisData = null;
+
+        // Utility function
+        function notify(msg, type) {
+            type = type || 'info';
+            if (typeof showToast === 'function') {
+                showToast(msg, type);
+            } else {
+                console.log(msg);
+            }
+        }
+
+        // Render history
         function renderHistory() {
             try {
-                const hist = JSON.parse(localStorage.getItem('analysisHistory')||'[]');
+                const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
                 const el = document.getElementById('dashHistory');
-                if (!hist.length) { el.innerHTML = '<p style="color:#666;">No history yet.</p>'; return; }
-                el.innerHTML = hist.map(h=>`<div style="border-left:3px solid #667eea;padding:8px;margin-bottom:8px;"><strong>${new Date(h.timestamp).toLocaleString()}</strong><div style="margin-top:6px;">${(h.preview||'').substring(0,160)}</div><div style="margin-top:6px;"><button class=\"btn\" onclick=\"loadDash('${h.id}')\">Load</button></div></div>`).join('');
-            } catch (e) { document.getElementById('dashHistory').innerText = 'Load failed'; }
+                if (!hist.length) {
+                    el.innerHTML = '<p style="color:#666;">No history yet.</p>';
+                    return;
+                }
+                
+                let html = '';
+                hist.forEach(function(h) {
+                    html += '<div style="border-left:3px solid #667eea;padding:8px;margin-bottom:8px;">';
+                    html += '<strong>' + new Date(h.timestamp).toLocaleString() + '</strong>';
+                    html += '<div style="margin-top:6px;">' + (h.preview || '').substring(0, 160) + '</div>';
+                    html += '<div style="margin-top:6px;"><button class="btn" onclick="loadDash(\'' + h.id + '\')">Load</button></div>';
+                    html += '</div>';
+                });
+                el.innerHTML = html;
+            } catch (e) {
+                document.getElementById('dashHistory').innerText = 'Load failed';
+            }
         }
-        function loadDash(id){ try{ const hist = JSON.parse(localStorage.getItem('analysisHistory')||'[]'); const it = hist.find(h=>String(h.id)===String(id)); if(!it) return; window.latestAnalysisData = it.analysis || {}; window.currentText = it.analysis?.text || it.text || ''; if (typeof notify === 'function') notify('Loaded history into latestAnalysisData'); else console.log('Loaded history into latestAnalysisData'); }catch(e){console.warn(e);} }
 
-        // Render annotations using stored 'advancedAnnotations' as a robust fallback
-        function renderAnnotations(){
-            try{
+        // Load history item
+        function loadDash(id) {
+            try {
+                const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+                const it = hist.find(function(h) { return String(h.id) === String(id); });
+                if (!it) return;
+                
+                window.latestAnalysisData = it.analysis || {};
+                window.currentText = it.analysis && it.analysis.text ? it.analysis.text : it.text || '';
+                
+                notify('Loaded history into latestAnalysisData');
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        // Render annotations from localStorage
+        function renderAnnotations() {
+            try {
                 const raw = localStorage.getItem('advancedAnnotations');
                 const container = document.getElementById('dashAnnotations');
                 container.innerHTML = '';
-                if (!raw) { container.innerHTML = '<p style="color:#666;">No annotations saved yet.</p>'; return; }
+                
+                if (!raw) {
+                    container.innerHTML = '<p style="color:#666;">No annotations saved yet.</p>';
+                    return;
+                }
+                
                 const arr = JSON.parse(raw);
-                if (!Array.isArray(arr) || !arr.length) { container.innerHTML = '<p style="color:#666;">No annotations saved yet.</p>'; return; }
-                arr.forEach(a=>{
+                if (!Array.isArray(arr) || !arr.length) {
+                    container.innerHTML = '<p style="color:#666;">No annotations saved yet.</p>';
+                    return;
+                }
+                
+                arr.forEach(function(a) {
                     const r = document.createElement('div');
                     r.style.borderBottom = '1px solid #eee';
                     r.style.padding = '8px 6px';
-                    r.innerHTML = `<div style="font-weight:600">${a.title || 'Annotation'}</div><div style="color:#555;margin-top:6px;">${a.content || ''}</div>`;
+                    r.innerHTML = '<div style="font-weight:600">' + (a.title || 'Annotation') + '</div>' +
+                                  '<div style="color:#555;margin-top:6px;">' + (a.content || '') + '</div>';
                     container.appendChild(r);
                 });
-            } catch(e){ document.getElementById('dashAnnotations').innerText = 'Error loading annotations'; }
-        }
-
-        function dashCompare(){
-            const a=document.getElementById('dashA').value.trim();
-            const b=document.getElementById('dashB').value.trim();
-            if(!a||!b){ if(typeof notify==='function') notify('Paste both texts to compare'); else console.log('Paste both texts to compare'); return; }
-            const ana = (typeof performAnalysis==='function')?performAnalysis(a):{wordCount:a.split(/\s+/).length,sentiment:'unknown'};
-            const anb = (typeof performAnalysis==='function')?performAnalysis(b):{wordCount:b.split(/\s+/).length,sentiment:'unknown'};
-            document.getElementById('dashCompareResults').innerHTML = `<div style='display:flex;gap:12px;'><div style='flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;'>A: ${ana.wordCount} words • ${ana.sentiment}</div><div style='flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;'>B: ${anb.wordCount} words • ${anb.sentiment}</div></div>`;
-        }
-
-        document.addEventListener('DOMContentLoaded', ()=>{ renderHistory(); renderAnnotations(); });
-        function speakCurrentText() {
-    const text = document.getElementById('dashA').value || document.getElementById('dashB').value || '';
-    if (!text.trim()) { 
-        if (typeof notify === 'function') notify('No text to read');
-        else console.log('No text to read');
-        return; 
-    }
-    if (!window.speechSynthesis) { 
-        if (typeof notify === 'function') notify('Text-to-speech not available');
-        else console.log('Text-to-speech not available');
-        return; 
-    }
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-    }
-    function increaseFontSize() {
-    const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    document.documentElement.style.fontSize = Math.min(currentSize + 2, 24) + 'px';
-    }
-
-    function decreaseFontSize() {
-        const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        document.documentElement.style.fontSize = Math.max(currentSize - 2, 12) + 'px';
-    }
-
-    function resetFontSize() {
-        document.documentElement.style.fontSize = '16px';
-    }
-    function toggleDarkMode() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', isDark);
-        const btn = document.querySelector('.theme-toggle');
-        if (btn) btn.setAttribute('aria-pressed', isDark);
-    }
-    function openFeedbackModal() {
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
-    modal.innerHTML = `
-        <div style="background:white;width:90%;max-width:600px;padding:18px;border-radius:10px;">
-            <h3 style="margin-top:0;">Send Feedback</h3>
-            <textarea id="feedbackText" placeholder="Your feedback..." style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;"></textarea>
-            <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">
-                <button class="btn btn-primary" onclick="submitFeedback()">Send</button>
-                <button class="btn btn-secondary" onclick="this.closest('div').parentElement.remove()">Cancel</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-    function submitFeedback() {
-        const text = document.getElementById('feedbackText').value.trim();
-        if (!text) {
-            if (typeof notify === 'function') notify('Please enter feedback');
-            else alert('Please enter feedback');
-            return;
-        }
-        try {
-            const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-            fb.unshift({ id: Date.now(), text: text, timestamp: new Date().toISOString() });
-            while (fb.length > 200) fb.pop();
-            localStorage.setItem('localFeedback', JSON.stringify(fb));
-            if (typeof notify === 'function') notify('Feedback saved locally');
-            else console.log('Feedback saved');
-            document.querySelector('div[style*="z-index:10003"]').remove();
-        } catch (e) {
-            console.error('Feedback error:', e);
-        }
-    }
-    function removeTopFixedOverlay() {
-    try {
-        const els = Array.from(document.body.children).reverse();
-        for (const el of els) {
-            const cs = window.getComputedStyle(el);
-            if (cs && cs.position === 'fixed' && cs.display !== 'none' && parseInt(cs.zIndex || 0, 10) >= 10000) {
-                el.remove();
-                return true;
+            } catch (e) {
+                document.getElementById('dashAnnotations').innerText = 'Error loading annotations';
             }
         }
-    } catch (e) {
-        console.warn('removeTopFixedOverlay error', e);
-    }
-    return false;
-    }
-    function performAnalysis(text) {
-    const words = text.toLowerCase().split(/\s+/).filter(w => w);
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-    const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'dark'];
-    const positiveCount = words.filter(w => positiveWords.includes(w)).length;
-    const negativeCount = words.filter(w => negativeWords.includes(w)).length;
-    let sentiment = 'neutral';
-    if (positiveCount > negativeCount) sentiment = 'positive';
-    if (negativeCount > positiveCount) sentiment = 'negative';
-    return { 
-        wordCount: words.length, 
-        sentenceCount: sentences.length, 
-        sentiment: sentiment
-    };
-}
-    document.addEventListener('DOMContentLoaded', () => { 
-    renderHistory(); 
-    renderAnnotations(); 
-    
-    // Restore dark mode
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-        const btn = document.querySelector('.theme-toggle');
-        if (btn) btn.setAttribute('aria-pressed', 'true');
-    }
-});
+
+        // Compare texts
+        function dashCompare() {
+            const a = document.getElementById('dashA').value.trim();
+            const b = document.getElementById('dashB').value.trim();
+            
+            if (!a || !b) {
+                notify('Paste both texts to compare', 'error');
+                return;
+            }
+            
+            const ana = typeof performAnalysis === 'function' 
+                ? performAnalysis(a) 
+                : { wordCount: a.split(/\s+/).length, sentiment: 'unknown' };
+            const anb = typeof performAnalysis === 'function' 
+                ? performAnalysis(b) 
+                : { wordCount: b.split(/\s+/).length, sentiment: 'unknown' };
+            
+            const results = '<div style="display:flex;gap:12px;">' +
+                '<div style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;">A: ' + ana.wordCount + ' words • ' + ana.sentiment + '</div>' +
+                '<div style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;">B: ' + anb.wordCount + ' words • ' + anb.sentiment + '</div>' +
+                '</div>';
+            
+            document.getElementById('dashCompareResults').innerHTML = results;
+        }
+
+        // Clear compare
+        function clearCompare() {
+            document.getElementById('dashA').value = '';
+            document.getElementById('dashB').value = '';
+            document.getElementById('dashCompareResults').innerHTML = '';
+        }
+
+        // Text to speech
+        function speakCurrentText() {
+            const text = document.getElementById('dashA').value || document.getElementById('dashB').value || '';
+            if (!text.trim()) {
+                notify('No text to read', 'info');
+                return;
+            }
+            if (!window.speechSynthesis) {
+                notify('Text-to-speech not available', 'error');
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Font size controls
+        function increaseFontSize() {
+            const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            document.documentElement.style.fontSize = Math.min(currentSize + 2, 24) + 'px';
+        }
+
+        function decreaseFontSize() {
+            const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            document.documentElement.style.fontSize = Math.max(currentSize - 2, 12) + 'px';
+        }
+
+        function resetFontSize() {
+            document.documentElement.style.fontSize = '16px';
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            const btn = document.querySelector('.theme-toggle');
+            if (btn) btn.setAttribute('aria-pressed', isDark);
+        }
+
+        // Feedback modal
+        function openFeedbackModal() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
+            modal.innerHTML = '<div style="background:white;width:90%;max-width:600px;padding:18px;border-radius:10px;">' +
+                '<h3 style="margin-top:0;">Send Feedback</h3>' +
+                '<textarea id="feedbackText" placeholder="Your feedback..." style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;"></textarea>' +
+                '<div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">' +
+                '<button class="btn btn-primary" onclick="submitFeedback()">Send</button>' +
+                '<button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Cancel</button>' +
+                '</div></div>';
+            document.body.appendChild(modal);
+        }
+
+        function submitFeedback() {
+            const text = document.getElementById('feedbackText').value.trim();
+            if (!text) {
+                notify('Please enter feedback', 'error');
+                return;
+            }
+            try {
+                const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
+                fb.unshift({ id: Date.now(), text: text, timestamp: new Date().toISOString() });
+                while (fb.length > 200) fb.pop();
+                localStorage.setItem('localFeedback', JSON.stringify(fb));
+                notify('Feedback saved locally', 'success');
+                document.querySelector('div[style*="z-index:10003"]').remove();
+            } catch (e) {
+                console.error('Feedback error:', e);
+            }
+        }
+
+        // Simple analysis function
+        function performAnalysis(text) {
+            const words = text.toLowerCase().split(/\s+/).filter(function(w) { return w; });
+            const sentences = text.split(/[.!?]+/).filter(function(s) { return s.trim(); });
+            const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy'];
+            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'dark'];
+            const positiveCount = words.filter(function(w) { return positiveWords.includes(w); }).length;
+            const negativeCount = words.filter(function(w) { return negativeWords.includes(w); }).length;
+            
+            let sentiment = 'neutral';
+            if (positiveCount > negativeCount) sentiment = 'positive';
+            if (negativeCount > positiveCount) sentiment = 'negative';
+            
+            return {
+                wordCount: words.length,
+                sentenceCount: sentences.length,
+                sentiment: sentiment
+            };
+        }
+
+        // Show toast notification
+        function showToast(message, type, duration) {
+            type = type || 'info';
+            duration = duration || 3000;
+            
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:6px;color:white;z-index:10000;display:none;';
+                document.body.appendChild(toast);
+            }
+
+            const colors = {
+                info: '#2196F3',
+                error: '#ef4444',
+                success: '#10b981',
+                warning: '#f59e0b'
+            };
+
+            toast.style.background = colors[type] || colors.info;
+            toast.textContent = message;
+            toast.style.display = 'block';
+
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(function() {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHistory();
+            renderAnnotations();
+
+            // Restore dark mode
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                const btn = document.querySelector('.theme-toggle');
+                if (btn) btn.setAttribute('aria-pressed', 'true');
+            }
+
+            // Initialize summary-manager functions if available
+            if (typeof renderAnnotations === 'function') {
+                window.userAnnotations = window.userAnnotations || [];
+            }
+        });
     </script>
 </body>
 </html>

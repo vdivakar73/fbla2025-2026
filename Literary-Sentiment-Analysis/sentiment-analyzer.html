@@ -18,8 +18,8 @@
   <nav class="header-nav" aria-label="Main navigation">
     <a href="sentiment-analyzer.html" aria-current="page">Analyze</a>
     <a href="dashboard.html">Dashboard</a>
-    <a href="tools.html">Tools</a>
-    <a href="analysis.html">History</a>
+    <a href="tools-ingest.html">Tools</a>
+    <a href="analysis.html">Analysis</a>
   </nav>
 
   <div class="header-right">
@@ -34,6 +34,8 @@
     <button type="button" class="btn btn-primary" id="toolbarAnalyzeBtn" onclick="analyzeText(this)">
       Analyze
     </button>
+    <nav class="header-nav" role="navigation"><a href="study-guide.html">Study Guide</a></nav>
+        
   </div>
 </header>
         <section class="card intro-card">
@@ -221,6 +223,8 @@
     <script src="annotations-engine.js"></script>
     <script src="summary-manager.js"></script>
         <script>
+            let currentText = '';
+            let latestAnalysisData = null;
             // Apply AI suggestions into the annotation engine or local storage
             function applyAISuggestions(suggestions) {
                 if (!suggestions || !suggestions.length) return;

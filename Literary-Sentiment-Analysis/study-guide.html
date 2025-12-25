@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Guide — Literary Sentiment Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<header class="app-header">
+  <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
+
+  <nav class="header-nav" role="navigation">
+    <a href="sentiment-analyzer.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tools-ingest.html">Tools</a>
+    <a href="analysis.html">Analysis</a>
+    <a href="study-guide.html" aria-current="page">Study Guide</a>
+  </nav>
+
+  <div class="header-right">
+    <button class="icon-btn" id="ttsBtn" title="Read text">🔊</button>
+    <button class="icon-btn" onclick="decreaseFontSize()">A-</button>
+    <button class="icon-btn" onclick="resetFontSize()">A</button>
+    <button class="icon-btn" onclick="increaseFontSize()">A+</button>
+    <button class="icon-btn theme-toggle" id="themeToggle" aria-pressed="false">🌓</button>
+    <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
+  </div>
+</header>
+
+<main class="container" style="margin-top:12px;">
+  <div class="main-grid">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="card sidebar">
+      <h3 style="color:var(--muted);margin-bottom:6px;">Planner</h3>
+
+      <input id="taskTitle" placeholder="Task title" class="input"/>
+      <input id="taskDue" type="date" class="input"/>
+      <input id="taskEffort" type="number" placeholder="Minutes" class="input"/>
+
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
+        <button class="btn" id="autoPlanBtn">Auto-Plan</button>
+      </div>
+
+      <ul id="taskList" style="margin-top:12px;"></ul>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <section class="card panel active" id="notes">
+      <h3 style="color:var(--muted);margin-bottom:8px;">Study Notes</h3>
+
+      <input id="noteTitle" placeholder="Note title" class="input"/>
+      <textarea id="noteBody" placeholder="Write your study notes…" class="input" style="min-height:160px;"></textarea>
+      <input id="noteTags" placeholder="Tags (comma separated)" class="input"/>
+
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="saveNoteBtn">Save Note</button>
+        <button class="btn" id="summarizeBtn">Summarize</button>
+        <button class="btn" id="flashcardsFromNoteBtn">To Flashcards</button>
+      </div>
+
+      <ul id="notesList" style="margin-top:14px;"></ul>
+    </section>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="card">
+      <h3 style="color:var(--muted);margin-bottom:6px;">Progress</h3>
+
+      <canvas id="statsChart" width="260" height="160"></canvas>
+
+      <div id="statsArea" class="small" style="margin-top:8px;"></div>
+
+      <hr>
+
+      <h4 style="color:var(--muted);margin-bottom:6px;">Timer</h4>
+      <input id="timerMinutes" type="number" value="25" class="input"/>
+      <div id="timerDisplay" style="font-size:1.2rem;margin:6px 0;">00:00</div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" id="startTimerBtn">Start</button>
+        <button class="btn" id="stopTimerBtn">Stop</button>
+      </div>
+
+      <ul id="sessionLog" style="margin-top:10px;"></ul>
+    </aside>
+
+  </div>
+</main>
+
+<!-- APP LOGIC -->
+<script src="app.js"></script>
+
+<script>
+  let currentText = '';
+  let latestAnalysisData = null;
+/* Font + Dark Mode helpers (MATCH DASHBOARD) */
+function increaseFontSize(){
+  const s=parseFloat(getComputedStyle(document.documentElement).fontSize);
+  document.documentElement.style.fontSize=Math.min(s+2,24)+'px';
+}
+function decreaseFontSize(){
+  const s=parseFloat(getComputedStyle(document.documentElement).fontSize);
+  document.documentElement.style.fontSize=Math.max(s-2,12)+'px';
+}
+function resetFontSize(){
+  document.documentElement.style.fontSize='16px';
+}
+function openFeedbackModal(){
+  alert('Feedback modal handled elsewhere');
+}
+</script>
+
+</body>
+</html>

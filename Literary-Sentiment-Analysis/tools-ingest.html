@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tools — Ingest & Exports</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<header class="app-header">
+  <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
+  <nav class="header-nav">
+    <a href="sentiment-analyzer.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tools-ingest.html" aria-current="page">Tools</a>
+    <a href="analysis.html">Analysis</a>
+  </nav>
+  <div class="header-right">
+    <button class="icon-btn" onclick="speakCurrentText()">🔊</button>
+    <button class="icon-btn theme-toggle" onclick="toggleDarkMode()">🌓</button>
+  </div>
+</header>
+
+<main class="container" style="padding:12px;">
+  <div class="main-grid" style="grid-template-columns:320px 1fr 280px;gap:16px;">
+    <section class="card sidebar">
+      <h3>Tools</h3>
+      <input id="fileInputToolsIngest" type="file" accept=".txt">
+
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn" onclick="handleFileInputToolsIngest()">Upload</button>
+        <button class="btn" onclick="startOCRTools()">🖼️ OCR</button>
+        <button class="btn" onclick="generateAnnotations()">
+          Generate AI Annotations
+        </button>
+
+      </div>
+
+      <hr>
+      <h3>Exports</h3>
+      <button class="btn" onclick="exportAnnotations()">Export Annotations</button>
+      <button class="btn" onclick="downloadWordFreqCSV()">Download WordFreq</button>
+      <button class="btn" onclick="exportAnnotatedHTML()">Export Annotated HTML</button>
+      <button class="btn" onclick="copyAnnotationsToClipboard()">Copy Annotations</button>
+    </section>
+
+    <section class="card">
+      <h3>Annotations</h3>
+      <input id="annSearchPanel" placeholder="Search annotations..." style="width:100%;margin-bottom:10px;">
+      <div id="annotations-container-panel"></div>
+    </section>
+
+    <aside class="card">
+      <h3>History</h3>
+      <div id="history-list-ingest"></div>
+    </aside>
+  </div>
+</main>
+<script src="summary-manager.js"></script>
+<script>
+/* ============================================================
+   GLOBAL HELPERS
+============================================================ */
+function showToast(msg){ alert(msg); }
+
+function toggleDarkMode(){
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+}
+
+function speakCurrentText(){
+  const text = localStorage.getItem('lastText') || '';
+  if(!text) return showToast('No text available');
+  speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
+
+/* ============================================================
+   INGEST
+============================================================ */
+function handleFileInputToolsIngest(){
+  const f = document.getElementById('fileInputToolsIngest').files[0];
+  if(!f) return showToast('Select a file');
+  const r = new FileReader();
+  r.onload = e=>{
+    localStorage.setItem('lastText', e.target.result);
+    location.href = 'sentiment-analyzer.html';
+  };
+  r.readAsText(f);
+}
+
+function startOCRTools(){
+  showToast('OCR handled on Home page');
+  location.href = 'sentiment-analyzer.html';
+}
+
+/* ============================================================
+   EXPORTS
+============================================================ */
+function exportAnnotations(){
+  const raw = localStorage.getItem('advancedAnnotations');
+  if(!raw) return showToast('No annotations');
+  const blob = new Blob([raw],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='annotations.json';
+  a.click();
+}
+
+function downloadWordFreqCSV(){
+  const text = localStorage.getItem('lastText')||'';
+  if(!text) return showToast('No text');
+  const freq={};
+  text.toLowerCase().split(/\s+/).forEach(w=>{
+    w=w.replace(/[^a-z0-9]/g,'');
+    if(w) freq[w]=(freq[w]||0)+1;
+  });
+  let csv='Word,Count\n';
+  Object.entries(freq).forEach(([w,c])=>csv+=`${w},${c}\n`);
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='wordfreq.csv';
+  a.click();
+}
+
+function exportAnnotatedHTML(){
+  const text = localStorage.getItem('lastText')||'';
+  const anns = JSON.parse(localStorage.getItem('advancedAnnotations')||'[]');
+  let html=`<html><body><pre>${text}</pre><hr>`;
+  anns.forEach(a=>html+=`<h4>${a.title}</h4><p>${a.content}</p>`);
+  html+='</body></html>';
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='annotated.html';
+  a.click();
+}
+
+function copyAnnotationsToClipboard(){
+  const anns = JSON.parse(localStorage.getItem('advancedAnnotations')||'[]');
+  if(!anns.length) return showToast('No annotations');
+  navigator.clipboard.writeText(
+    anns.map((a,i)=>`${i+1}. ${a.title}\n${a.content}`).join('\n\n')
+  );
+  showToast('Copied');
+}
+
+/* ============================================================
+   ANNOTATIONS PANEL (FIXED)
+============================================================ */
+function renderAnnotationsFromStoragePanel(){
+  const container=document.getElementById('annotations-container-panel');
+  container.innerHTML='';
+  let arr=[];
+  try{
+    arr=JSON.parse(localStorage.getItem('advancedAnnotations')||'[]');
+  }catch{}
+  if(!arr.length){
+    container.innerHTML='<small>No annotations saved.</small>';
+    return;
+  }
+
+  arr.forEach(a=>{
+    const d=document.createElement('div');
+    d.className='annotation-card';
+    d.style.border='1px solid var(--border)';
+    d.style.padding='8px';
+    d.style.marginBottom='8px';
+    d.innerHTML=`<strong>${a.title||'Annotation'}</strong><div>${a.content||''}</div>`;
+    container.appendChild(d);
+  });
+}
+
+
+/* ============================================================
+   HISTORY
+============================================================ */
+function renderHistoryIngest(){
+  const el=document.getElementById('history-list-ingest');
+  const raw=localStorage.getItem('analysisHistory');
+  if(!raw){ el.innerHTML='<small>No history.</small>'; return; }
+  JSON.parse(raw).slice().reverse().forEach(h=>{
+    const d=document.createElement('div');
+    d.innerHTML=`<strong>${h.title||'Analysis'}</strong><br><small>${new Date(h.timestamp).toLocaleString()}</small>`;
+    el.appendChild(d);
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAnnotationsFromStoragePanel();
+  renderHistoryIngest();
+  if(localStorage.getItem('darkMode')==='true'){
+    document.body.classList.add('dark-mode');
+  }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const panel = document.getElementById('annotations-container-panel');
+
+  if (panel && !document.getElementById('annotations-container')) {
+    const alias = document.createElement('div');
+    alias.id = 'annotations-container';
+    panel.replaceWith(alias);
+  }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem('advancedAnnotations') || '[]');
+    if (Array.isArray(stored)) {
+      userAnnotations = stored;
+      renderAnnotations();
+    }
+  } catch {}
+});
+
+
+</script>
+</body>
+</html>

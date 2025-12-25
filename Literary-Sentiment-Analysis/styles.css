@@ -250,6 +250,23 @@ aside.card h3 {
 aside.card button {
     font-size: 0.9rem;
 }
+.annotation-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.annotation-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.annotation-actions button {
+    font-size: 0.85rem;
+}
 
 
 .metric-card{
