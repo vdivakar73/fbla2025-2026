@@ -1,117 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Study Guide — Literary Sentiment Analyzer</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Study & Practice Tool</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+<div class="container">
+
 <header class="app-header">
-  <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
-
-  <nav class="header-nav" role="navigation">
-    <a href="sentiment-analyzer.html">Home</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="tools-ingest.html">Tools</a>
-    <a href="analysis.html">Analysis</a>
-    <a href="study-guide.html" aria-current="page">Study Guide</a>
-  </nav>
-
-  <div class="header-right">
-    <button class="icon-btn" id="ttsBtn" title="Read text">🔊</button>
-    <button class="icon-btn" onclick="decreaseFontSize()">A-</button>
-    <button class="icon-btn" onclick="resetFontSize()">A</button>
-    <button class="icon-btn" onclick="increaseFontSize()">A+</button>
-    <button class="icon-btn theme-toggle" id="themeToggle" aria-pressed="false">🌓</button>
-    <button class="icon-btn" onclick="openFeedbackModal()">✉️</button>
-  </div>
+  <a class="logo" href="sentiment-analyzer.html">Study Tool</a>
 </header>
 
-<main class="container" style="margin-top:12px;">
-  <div class="main-grid">
+<section class="card">
+  <h1>Study & Practice Tool</h1>
+  <p>AP / College-level questions, flashcards, grading, and model answers.</p>
+</section>
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="card sidebar">
-      <h3 style="color:var(--muted);margin-bottom:6px;">Planner</h3>
+<section class="card">
+  <h2>Input Text</h2>
+  <textarea id="textInput" style="min-height:300px;"></textarea>
+  <button class="btn btn-primary" onclick="generateStudyMaterials()">Generate</button>
+</section>
 
-      <input id="taskTitle" placeholder="Task title" class="input"/>
-      <input id="taskDue" type="date" class="input"/>
-      <input id="taskEffort" type="number" placeholder="Minutes" class="input"/>
+<section id="studySection" class="card hidden">
+  <h2>Study Questions</h2>
+  <div id="questionsContainer"></div>
+</section>
 
-      <div style="margin-top:8px;display:flex;gap:8px;">
-        <button class="btn btn-primary" id="addTaskBtn">Add Task</button>
-        <button class="btn" id="autoPlanBtn">Auto-Plan</button>
-      </div>
+<section id="flashcardSection" class="card hidden">
+  <h2>Flashcards</h2>
+  <button class="btn btn-primary" onclick="generateFlashcards()">Generate Flashcards</button>
+  <button class="btn" onclick="shuffleCards()">Shuffle</button>
 
-      <ul id="taskList" style="margin-top:12px;"></ul>
-    </aside>
-
-    <!-- MAIN PANEL -->
-    <section class="card panel active" id="notes">
-      <h3 style="color:var(--muted);margin-bottom:8px;">Study Notes</h3>
-
-      <input id="noteTitle" placeholder="Note title" class="input"/>
-      <textarea id="noteBody" placeholder="Write your study notes…" class="input" style="min-height:160px;"></textarea>
-      <input id="noteTags" placeholder="Tags (comma separated)" class="input"/>
-
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="saveNoteBtn">Save Note</button>
-        <button class="btn" id="summarizeBtn">Summarize</button>
-        <button class="btn" id="flashcardsFromNoteBtn">To Flashcards</button>
-      </div>
-
-      <ul id="notesList" style="margin-top:14px;"></ul>
-    </section>
-
-    <!-- RIGHT SIDEBAR -->
-    <aside class="card">
-      <h3 style="color:var(--muted);margin-bottom:6px;">Progress</h3>
-
-      <canvas id="statsChart" width="260" height="160"></canvas>
-
-      <div id="statsArea" class="small" style="margin-top:8px;"></div>
-
-      <hr>
-
-      <h4 style="color:var(--muted);margin-bottom:6px;">Timer</h4>
-      <input id="timerMinutes" type="number" value="25" class="input"/>
-      <div id="timerDisplay" style="font-size:1.2rem;margin:6px 0;">00:00</div>
-
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" id="startTimerBtn">Start</button>
-        <button class="btn" id="stopTimerBtn">Stop</button>
-      </div>
-
-      <ul id="sessionLog" style="margin-top:10px;"></ul>
-    </aside>
-
+  <div id="flashcardStudy" style="margin-top:1rem;">
+    <div id="flashcard" onclick="flipCard()" style="cursor:pointer; padding:2rem; border:2px solid #667eea; border-radius:10px;">
+      <div id="flashcardContent"></div>
+    </div>
+    <div id="cardProgress"></div>
+    <button onclick="prevCard()">Prev</button>
+    <button onclick="nextCard()">Next</button>
   </div>
-</main>
+</section>
 
-<!-- APP LOGIC -->
-<script src="app.js"></script>
+</div>
 
 <script>
-  let currentText = '';
-  let latestAnalysisData = null;
-/* Font + Dark Mode helpers (MATCH DASHBOARD) */
-function increaseFontSize(){
-  const s=parseFloat(getComputedStyle(document.documentElement).fontSize);
-  document.documentElement.style.fontSize=Math.min(s+2,24)+'px';
+/* ===================== AI CALL ===================== */
+async function callAI(prompt) {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer YOUR_API_KEY_HERE"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7
+    })
+  });
+
+  const data = await res.json();
+  if (!data.choices) throw new Error("AI error");
+  return data.choices[0].message.content;
 }
-function decreaseFontSize(){
-  const s=parseFloat(getComputedStyle(document.documentElement).fontSize);
-  document.documentElement.style.fontSize=Math.max(s-2,12)+'px';
+
+/* ===================== STATE ===================== */
+let currentText = "";
+let questions = [];
+let flashcards = [];
+let cardIndex = 0;
+let flipped = false;
+
+/* ===================== QUESTIONS ===================== */
+const QUESTION_BANK = [
+  "Analyze how a specific word choice shapes meaning.",
+  "Explain how imagery frames reader judgment.",
+  "Analyze how tone evolves across the passage.",
+  "Explain how power operates implicitly.",
+  "Analyze a metaphor and its effect.",
+  "Explain how structure influences interpretation.",
+  "Analyze how omission creates meaning.",
+  "Explain how repetition reinforces ideas.",
+  "Analyze how perspective limits truth.",
+  "Explain how the author positions the reader.",
+  "Analyze how syntax controls emphasis.",
+  "Explain how ambiguity functions rhetorically.",
+  "Analyze how the opening frames expectations.",
+  "Explain how the conclusion reshapes meaning.",
+  "Analyze how form mirrors content.",
+  "Explain what the author refuses to state directly.",
+  "Analyze a sentence with thematic weight.",
+  "Explain how language conveys authority.",
+  "Analyze how emotional appeal is controlled.",
+  "Explain how conflict is embedded in language."
+];
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
 }
-function resetFontSize(){
-  document.documentElement.style.fontSize='16px';
+
+/* ===================== GENERATE STUDY ===================== */
+async function generateStudyMaterials() {
+  const text = document.getElementById("textInput").value.trim();
+  if (!text) return alert("Enter text first.");
+
+  currentText = text;
+  questions = [];
+
+  const selected = shuffle([...QUESTION_BANK]).slice(0, 20);
+
+  for (const q of selected) {
+    const modelAnswer = await callAI(`
+TEXT:
+${text}
+
+QUESTION:
+${q}
+
+Write a high-scoring AP-level response.
+Quote the text directly.
+Analyze language.
+Avoid summary.
+    `);
+
+    questions.push({ q, modelAnswer });
+  }
+
+  renderQuestions();
+  document.getElementById("studySection").classList.remove("hidden");
 }
-function openFeedbackModal(){
-  alert('Feedback modal handled elsewhere');
+
+/* ===================== RENDER QUESTIONS ===================== */
+function renderQuestions() {
+  const el = document.getElementById("questionsContainer");
+  el.innerHTML = "";
+
+  questions.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h4>Question ${i + 1}</h4>
+      <p>${item.q}</p>
+      <textarea id="ans-${i}" style="min-height:120px;"></textarea>
+      <button onclick="grade(${i})">Grade</button>
+      <button onclick="showModel(${i})">Model Answer</button>
+      <div id="res-${i}"></div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ===================== GRADING ===================== */
+function grade(i) {
+  const answer = document.getElementById(`ans-${i}`).value.trim();
+  if (!answer) return alert("Write something first.");
+
+  let score = 0;
+  const feedback = [];
+
+  if (/["“”]/.test(answer)) score += 40; else feedback.push("No quoted evidence.");
+  if (/analy|suggest|reveals|implies/.test(answer)) score += 30; else feedback.push("No language analysis.");
+  if (answer.split(/\s+/).length > 120) score += 30; else feedback.push("Underdeveloped.");
+
+  document.getElementById(`res-${i}`).innerHTML =
+    `<strong>Score:</strong> ${score}/100<br>${feedback.join("<br>")}`;
+}
+
+/* ===================== MODEL ANSWER ===================== */
+function showModel(i) {
+  document.getElementById(`res-${i}`).innerHTML =
+    `<em>${questions[i].modelAnswer}</em>`;
+}
+
+/* ===================== FLASHCARDS ===================== */
+async function generateFlashcards() {
+  const text = currentText;
+  if (!text) return alert("Generate questions first.");
+
+  const result = await callAI(`
+Create 12 Quizlet-style flashcards.
+Test understanding, not trivia.
+Return JSON only.
+
+TEXT:
+${text}
+  `);
+
+  flashcards = JSON.parse(result);
+  cardIndex = 0;
+  flipped = false;
+
+  document.getElementById("flashcardSection").classList.remove("hidden");
+  renderCard();
+}
+
+function renderCard() {
+  if (!flashcards.length) return;
+  const card = flashcards[cardIndex];
+  document.getElementById("flashcardContent").innerText =
+    flipped ? card.back : card.front;
+  document.getElementById("cardProgress").innerText =
+    `Card ${cardIndex + 1} of ${flashcards.length}`;
+}
+
+function flipCard() {
+  flipped = !flipped;
+  renderCard();
+}
+function nextCard() {
+  cardIndex = (cardIndex + 1) % flashcards.length;
+  flipped = false;
+  renderCard();
+}
+function prevCard() {
+  cardIndex = (cardIndex - 1 + flashcards.length) % flashcards.length;
+  flipped = false;
+  renderCard();
+}
+function shuffleCards() {
+  shuffle(flashcards);
+  cardIndex = 0;
+  flipped = false;
+  renderCard();
 }
 </script>
-
 </body>
 </html>

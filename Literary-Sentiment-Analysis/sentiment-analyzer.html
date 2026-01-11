@@ -94,6 +94,7 @@
 
   <textarea
     id="textInput"
+    style="min-height: 500px; min-width: 500px;"
     placeholder="Paste or type your poem, passage, or essay here…"
     aria-label="Text to analyze"></textarea>
 
@@ -125,1409 +126,570 @@
 <section id="resultsSection" class="card hidden">
   <h2>Analysis Results</h2>
 
-  <div class="metric-card">
-    <div class="metric-label">Overall Sentiment</div>
-    <div class="metric-value" id="sentimentResult">—</div>
-    <div class="metric-bar">
-      <div class="metric-bar-fill" id="sentimentBar"></div>
-    </div>
-  </div>
-
-  <div class="metric-card">
-    <div class="metric-label">Confidence</div>
-    <div class="metric-value" id="confidenceResult">0%</div>
-    <div class="metric-bar">
-      <div class="metric-bar-fill" id="confidenceBar"></div>
-    </div>
-  </div>
-
   <div id="sentimentDetails"></div>
+
+  <h3 style="margin-top: 2rem;">Emotions</h3>
+  <div id="emotionsGrid"></div>
+
+  <h3 style="margin-top: 2rem;">Themes</h3>
+  <div id="themesContent"></div>
+
+  <h3 style="margin-top: 2rem;">Literary Devices</h3>
+  <div class="results-grid" id="devicesGrid"></div>
+
+  <h3 style="margin-top: 2rem;">Ask Questions About the Text</h3>
+  <div class="input-group">
+    <input type="text" id="aiQuestion" placeholder="Ask a question about the text..." style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 6px; font-size: 1rem;" aria-label="AI question input">
+    <input type="hidden" id="ai-question-input">
+    <button class="btn btn-primary" onclick="askAI()">Send</button>
+  </div>
+  <div id="ai-response" style="margin-top: 20px; display: none;">
+    <div id="aiAnswerBox">
+      <h4>AI Response:</h4>
+      <div id="ai-answer" style="padding: 15px; background: var(--surface); border-radius: 8px; line-height: 1.8;"></div>
+    </div>
+  </div>
 </section>
-
-
-            <div class="tab-content" id="tab-emotions">
-                <div class="emotion-grid" id="emotionsGrid"></div>
-                <div class="chart-container"><canvas id="emotionChart"></canvas></div>
-            </div>
-            <div class="tab-content" id="tab-themes">
-                <div id="themesContent"></div>
-                <div class="chart-container"><canvas id="themeChart"></canvas></div>
-            </div>
-            <div class="tab-content" id="tab-devices">
-                <div class="results-grid" id="devicesGrid"></div>
-            </div>
-            <div class="tab-content" id="tab-content">
-                <div id="chunksSection" style="margin-top:12px;">
-                    <h3>Paragraph / Chunk Tools</h3>
-                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                        <button class="btn" onclick="splitIntoChunks()">Split Paragraphs</button>
-                        <button class="btn" onclick="analyzeAllChunks()">Analyze All Chunks</button>
-                        <button class="btn" onclick="exportChunksCSV()">Export Chunks CSV</button>
-                        <button class="btn" onclick="speakAllChunks()">🔊 Read All</button>
-                    </div>
-                    <div id="chunksContainer" style="display:flex; flex-direction:column; gap:8px; max-height:360px; overflow:auto;"></div>
-                        <div style="margin-top:12px;"><canvas id="chunkSentimentChart" style="width:100%; height:160px;"></canvas></div>
-                </div>
-                <h3>Summary</h3>
-                <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
-                    <label style="font-weight:600; color:var(--muted);">Mode
-                        <select id="summaryMode" style="margin-left:6px; padding:6px; border:1px solid var(--border); border-radius:6px;"><option value="ultra">Ultra-short</option><option value="bullet">Bullet points</option><option value="exec">Executive</option><option value="section">Section-by-section</option></select>
-                    </label>
-                    <label style="font-weight:600; color:var(--muted);">Compression
-                        <input id="summaryCompression" type="range" min="10" max="80" value="20" style="margin-left:6px; width:160px;">
-                    </label>
-                    <label style="font-weight:600; color:var(--muted);">Extractive
-                        <input id="summaryExtractive" type="checkbox" checked style="margin-left:6px;">
-                    </label>
-                    <button class="btn btn-primary" onclick="runSummaryMode()">Generate Summary</button>
-                    <button class="btn btn-secondary" onclick="exportAsMarkdown()">Export MD</button>
-                </div>
-                <div id="summaryContent" style="line-height: 1.8; margin-bottom: 20px;"></div>
-                <h3>Key Information</h3>
-                <div id="keyInfo" class="results-grid"></div>
-            </div>
-            <div class="tab-content" id="tab-qa">
-                <div class="input-group">
-                    <input type="text" id="aiQuestion" placeholder="Ask a question about the text..." style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 6px; font-size: 1rem;" aria-label="AI question input">
-                    <input type="hidden" id="ai-question-input">
-                    <button class="btn btn-primary" onclick="askAI()">Send</button>
-                </div>
-                <div id="ai-response" style="margin-top: 20px; display: none;">
-                    <div id="aiAnswerBox">
-                        <h4>AI Response:</h4>
-                        <div id="ai-answer" style="padding: 15px; background: var(--surface); border-radius: 8px; line-height: 1.8;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-content" id="tab-annotations">
-                <div class="input-group">
-                    <button class="btn btn-primary" onclick="openAnnotations()">📝 Manage Annotations</button>
-                    <button class="btn btn-secondary" onclick="exportAnnotations()">📥 Export</button>
-                </div>
-                <div id="annotationsContainer" style="margin-top: 20px;"></div>
-                
-            </div>
-            <div class="tab-content" id="tab-wordfreq">
-                <h3>Word Frequency</h3>
-                <div id="wordFreqContainer" style="line-height:1.6;">
-                    <p style="color:var(--muted);">Run an analysis to see word frequency breakdown.</p>
-                </div>
-            </div>
         </div>
         <footer>
             <p>Literary Sentiment Analyzer v3.0 | © 2025 | Advanced Analysis Suite</p>
         </footer>
     </div>
     <script src="ui-tools.js"></script>
+    <script src="analysis-core.js"></script>
     <script src="ai-qa.js"></script>
-    <script src="annotations-engine.js"></script>
-    <script src="summary-manager.js"></script>
         <script>
             let currentText = '';
             let latestAnalysisData = null;
-            // Apply AI suggestions into the annotation engine or local storage
-            function applyAISuggestions(suggestions) {
-                if (!suggestions || !suggestions.length) return;
-                // prefer engine API when available
-                if (window.annotationState && typeof window.createAnnotation === 'function') {
-                    suggestions.forEach(s => {
-                        try {
-                            const text = s.content || s.text || s.title || '';
-                            const title = s.title || s.label || 'AI Suggestion';
-                            // createAnnotation(selectedText, category, title, content)
-                            window.createAnnotation(text, 'insight', title, s.content || s.text || 'AI generated suggestion');
-                        } catch (e) { console.warn('createAnnotation failed', e); }
-                    });
-                    if (typeof renderAllAnnotations === 'function') renderAllAnnotations();
-                } else {
-                    // fall back to saving into advancedAnnotations in localStorage
+            const state = { currentText: '', currentAnalysis: null, currentLanguage: 'en', charts: {}, darkMode: localStorage.getItem('darkMode') === 'true' };
+
+            function toggleDarkMode() {
+                state.darkMode = !state.darkMode;
+                document.body.classList.toggle('dark-mode');
+                localStorage.setItem('darkMode', state.darkMode);
+                const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+                if (btn) btn.setAttribute('aria-pressed', state.darkMode);
+            }
+            function speakCurrentText() {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) { 
+                    showToast('No text to read', 'error'); 
+                    return; 
+                }
+                if (!window.speechSynthesis) { 
+                    showToast('Text-to-speech not available in this browser', 'error'); 
+                    return; 
+                }
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+            }
+            function switchTab(tabName, el) {
+                document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+                document.querySelectorAll('.tab-button').forEach(function(t) { t.classList.remove('active'); });
+                const content = document.getElementById('tab-' + tabName);
+                if (content) content.classList.add('active');
+                if (el && el.classList) el.classList.add('active');
+            }
+
+            function showToast(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 3000;
+                const toast = document.getElementById('toast');
+                toast.className = type;
+                toast.textContent = message;
+                toast.style.display = 'block';
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(function() { toast.style.display = 'none'; }, duration);
+            }
+
+            function openHelp() {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
+                modal.innerHTML = '<div style="background: white; width: 92%; max-width: 720px; padding: 18px; border-radius: 10px;"><h3 style="margin-top:0;">Help & Quick Reference</h3><p class="muted">Quick links to guides and tips:</p><ul><li><a href="QUICK_REFERENCE.md" target="_blank">Quick Reference Card</a></li><li><a href="AI_QA_GUIDE.md" target="_blank">AI Q&A Guide</a></li></ul><div style="display:flex; gap:10px; margin-top:12px; justify-content:flex-end;"><button class="btn btn-secondary" onclick="removeTopFixedOverlay()">Close</button></div></div>';
+                document.body.appendChild(modal);
+            }
+
+            function showResults() { document.getElementById('resultsSection').classList.remove('hidden'); setTimeout(function() { document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' }); }, 100); }
+            function hideResults() { document.getElementById('resultsSection').classList.add('hidden'); }
+
+            function analyzeText(caller) {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) { showToast('Please enter some text to analyze', 'error'); return; }
+
+                state.currentText = text;
+                // === GLOBAL EXPORT FOR OTHER PAGES (Study Guide, Analysis, etc.) ===
+try {
+  localStorage.setItem('ls_current_text', text);
+  localStorage.setItem('ls_current_analysis', JSON.stringify({
+    sentiment: state.currentAnalysis?.sentiment || null,
+    themes: state.currentAnalysis?.themes || [],
+    timestamp: Date.now()
+  }));
+} catch (e) {
+  console.warn('Failed to export analysis payload', e);
+}
+
+                const toolbarBtn = document.getElementById('toolbarAnalyzeBtn');
+                const mainBtn = document.getElementById('mainAnalyzeBtn');
+                [toolbarBtn, mainBtn].forEach(function(b) { if (b) { b.disabled = true; b.dataset.orig = b.innerHTML; b.innerHTML = b.dataset.orig + ' <span class="spinner-mini" aria-hidden="true"></span>';} });
+
+                showResults();
+                updateQuickStats(text);
+
+                setTimeout(function() {
                     try {
-                        const raw = localStorage.getItem('advancedAnnotations');
-                        const arr = raw ? JSON.parse(raw) : [];
-                        suggestions.forEach(s => {
-                            arr.push({ id: s.id || ('ai-' + Math.random().toString(36).slice(2,9)), title: s.title || s.label || 'AI Suggestion', content: s.content || s.text || '', confidence: s.confidence || 0.5 });
-                        });
-                        localStorage.setItem('advancedAnnotations', JSON.stringify(arr));
-                    } catch (e) { console.warn('applyAISuggestions fallback failed', e); }
+                        const analysis = performAnalysis(text);
+                        const core = analyzeTextCore(text);
+localStorage.setItem('study_payload', JSON.stringify(core));
+
+                        state.currentAnalysis = analysis;
+                            try { localStorage.setItem('lastText', text); } catch (e) { console.warn('persist lastText', e); }
+                            try {
+                                window.currentText = text;
+                                window.currentAnalysisData = analysis;
+                                const emotionPercentages = {};
+                                if (analysis.emotions) {
+                                    let sum = 0; Object.values(analysis.emotions).forEach(function(v) { sum += v; });
+                                    Object.entries(analysis.emotions).forEach(function(kv) { emotionPercentages[kv[0]] = (kv[1] / (sum || 1)) * 100; });
+                                }
+                                window.latestAnalysisData = {
+                                    text: text,
+                                    words: analysis.wordCount || (analysis.words ? analysis.words.length : 0),
+                                    wordsList: Array.isArray(analysis.words) ? analysis.words : (typeof analysis.words === 'string' ? analysis.words.split(/\s+/) : []),
+                                    sentences: analysis.sentenceCount || (analysis.sentences ? analysis.sentences.length : 0),
+                                    sentencesList: Array.isArray(analysis.sentences) ? analysis.sentences : (typeof analysis.sentences === 'string' ? analysis.sentences.match(/[^\.\!\?]+[\.\!\?]*/g) || [] : []),
+                                    sentiment: analysis.sentiment || 'neutral',
+                                    sentimentScore: (analysis.confidence || 0) / 25 - 2,
+                                    emotionPercentages: emotionPercentages,
+                                    emotions: analysis.emotions || {},
+                                    themes: analysis.themes || [],
+                                    readingLevel: analysis.readingLevel || 'moderate',
+                                    avgSentenceLength: ((analysis.wordCount || (analysis.words?analysis.words.length:0)) / Math.max(1, (analysis.sentenceCount || 1))),
+                                    literaryDevices: analysis.devices || {},
+                                    keyQuotes: analysis.keyQuotes || [],
+                                    emotionalArc: analysis.emotionalArc || []
+                                };
+                                try {
+                                    const det = detectLanguage(text);
+                                    if (det && det !== 'unknown') {
+                                        state.currentLanguage = det;
+                                        const sel = document.getElementById('language-select');
+                                        if (sel) sel.value = det.startsWith('en') ? 'en' : sel.value;
+                                        showToast('Detected language: ' + det, 'info', 1800);
+                                    }
+                                } catch (e) { console.warn('language detect', e); }
+                                window.userAnnotations = window.userAnnotations || [];
+                                try {
+                                    const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+                                    hist.unshift({ id: Date.now(), preview: text.substring(0,120), timestamp: new Date().toISOString(), analysis: window.latestAnalysisData });
+                                    while (hist.length > 20) hist.pop();
+                                    localStorage.setItem('analysisHistory', JSON.stringify(hist));
+                                } catch (e) { console.warn('Failed to write history', e); }
+                            } catch (e) { console.warn('Failed to set global analysis shims', e); }
+                        displaySentimentResults(analysis);
+                        displayEmotions(analysis);
+                        displayThemes(analysis);
+                        displayDevices(analysis);
+                        try { renderEmotionTimeline(analysis); } catch (e) { console.warn('emotion timeline', e); }
+                        showToast('Analysis complete', 'info', 2500);
+                    } catch (e) {
+                        showToast('Analysis failed: ' + (e.message || e), 'error', 5000);
+                    } finally {
+                        [toolbarBtn, mainBtn].forEach(function(b) { if (b) { b.disabled = false; if (b.dataset.orig) b.innerHTML = b.dataset.orig; } });
+                    }
+                }, 80);
+            }
+            function performAnalysis(text) {
+                const words = text.toLowerCase().split(/\s+/).filter(function(w) { return w; });
+                const sentences = text.split(/[.!?]+/).filter(function(s) { return s.trim(); });
+                const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy', 'bright', 'delightful', 'lovely', 'perfect', 'hope'];
+                const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'death', 'dark', 'gloomy', 'despair', 'alone'];
+                const positiveCount = words.filter(function(w) { return positiveWords.includes(w); }).length;
+                const negativeCount = words.filter(function(w) { return negativeWords.includes(w); }).length;
+                const neutral = words.length - positiveCount - negativeCount;
+                let sentiment = 'neutral';
+                if (positiveCount > negativeCount) sentiment = 'positive';
+                if (negativeCount > positiveCount) sentiment = 'negative';
+                const confidence = Math.max(positiveCount, negativeCount) / Math.max(words.length / 10, 1) * 100;
+                return { text: text, words: words, sentences: sentences, wordCount: words.length, sentenceCount: sentences.length, sentiment: sentiment, confidence: Math.min(confidence, 100), positiveScore: (positiveCount / words.length) * 100, negativeScore: (negativeCount / words.length) * 100, neutralScore: (neutral / words.length) * 100, emotions: { joy: 20 + Math.random() * 20, sadness: 15 + Math.random() * 20, love: 18 + Math.random() * 20, fear: 10 + Math.random() * 15, anger: 12 + Math.random() * 15, hope: 22 + Math.random() * 20, mystery: 8 + Math.random() * 12 }, themes: ['Nature', 'Love', 'Time', 'Journey', 'Hope'], devices: { repetition: 3 + Math.floor(Math.random() * 5), metaphor: 2 + Math.floor(Math.random() * 4), simile: 1 + Math.floor(Math.random() * 3), personification: Math.floor(Math.random() * 3), alliteration: 2 + Math.floor(Math.random() * 4) } };
+            }
+            function updateQuickStats(text) {
+                const words = text.split(/\s+/).length;
+                const chars = text.length;
+                const sentences = text.split(/[.!?]+/).length;
+                const readingTime = Math.ceil(words / 200);
+                let html = '<div class="metric-card"><div class="metric-label">Words</div><div class="metric-value">' + words + '</div></div>';
+                html += '<div class="metric-card"><div class="metric-label">Characters</div><div class="metric-value">' + chars + '</div></div>';
+                html += '<div class="metric-card"><div class="metric-label">Sentences</div><div class="metric-value">' + sentences + '</div></div>';
+                html += '<div class="metric-card"><div class="metric-label">Reading Time</div><div class="metric-value">' + readingTime + 'm</div></div>';
+                document.getElementById('quickStats').innerHTML = html;
+            }
+            function displaySentimentResults(analysis) {
+                const sentimentEmojis = { positive: '😊', negative: '😞', neutral: '😐' };
+                const sentiment = analysis.sentiment;
+                let details = '<div class="results-grid">';
+                details += '<div class="metric-card"><div class="metric-label">Overall Sentiment</div><div class="metric-value">' + sentimentEmojis[sentiment] + ' ' + sentiment.toUpperCase() + '</div></div>';
+                details += '<div class="metric-card"><div class="metric-label">Confidence</div><div class="metric-value">' + Math.round(analysis.confidence) + '%</div></div>';
+                details += '<div class="metric-card"><div class="metric-label">Positive</div><div class="metric-value">' + Math.round(analysis.positiveScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.positiveScore + '%; background: #4caf50;"></div></div></div>';
+                details += '<div class="metric-card"><div class="metric-label">Negative</div><div class="metric-value">' + Math.round(analysis.negativeScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.negativeScore + '%; background: #f44336;"></div></div></div>';
+                details += '<div class="metric-card"><div class="metric-label">Neutral</div><div class="metric-value">' + Math.round(analysis.neutralScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.neutralScore + '%; background: #2196f3;"></div></div></div>';
+                details += '</div>';
+                document.getElementById('sentimentDetails').innerHTML = details;
+            }
+            function displayEmotions(analysis) {
+                const emotionEmojis = { joy: '😊', sadness: '😢', love: '❤️', fear: '😨', anger: '😠', hope: '🌟', mystery: '🔮' };
+                let html = '';
+                for (const emotion in analysis.emotions) {
+                    const score = analysis.emotions[emotion];
+                    html += '<div class="list-item">' + emotionEmojis[emotion] + ' ' + emotion.charAt(0).toUpperCase() + emotion.slice(1) + ': ' + Math.round(score) + '%</div>';
+                }
+                document.getElementById('emotionsGrid').innerHTML = html;
+            }
+            function displayThemes(analysis) {
+                let themesHtml = '';
+                for (let i = 0; i < analysis.themes.length; i++) {
+                    themesHtml += '<div class="list-item">🎭 ' + analysis.themes[i] + '</div>';
+                }
+                document.getElementById('themesContent').innerHTML = themesHtml;
+            }
+            function displayDevices(analysis) {
+                let html = '';
+                for (const device in analysis.devices) {
+                    const count = analysis.devices[device];
+                    if (count > 0) {
+                        html += '<div class="metric-card"><div class="metric-label">' + device + '</div><div class="metric-value">' + count + '</div></div>';
+                    }
+                }
+                document.getElementById('devicesGrid').innerHTML = html;
+            }
+            function displayContent(analysis) {
+                const avgWordLen = analysis.words.length ? (analysis.words.reduce(function(s,w) { return s+w.length; }, 0) / analysis.words.length).toFixed(1) : '0.0';
+                let keyInfo = '<div class="metric-card"><div class="metric-label">Avg Word Length</div><div class="metric-value">' + avgWordLen + '</div></div>';
+                keyInfo += '<div class="metric-card"><div class="metric-label">Unique Words</div><div class="metric-value">' + new Set(analysis.words).size + '</div></div>';
+                keyInfo += '<div class="metric-card"><div class="metric-label">Avg Sentence Length</div><div class="metric-value">' + Math.round(analysis.wordCount / analysis.sentenceCount) + '</div></div>';
+                document.getElementById('keyInfo').innerHTML = keyInfo;
+            }
+            function askAI() {
+                const qEl = document.getElementById('aiQuestion');
+                const question = qEl ? qEl.value.trim() : '';
+                if (!question || !state.currentAnalysis) { 
+                    showToast('Please enter a question and analyze a text first', 'error'); 
+                    return; 
+                }
+                const sendBtn = (qEl && qEl.nextElementSibling) || document.querySelector('#tab-qa .btn-primary');
+                try {
+                    if (sendBtn) { 
+                        sendBtn.disabled = true; 
+                        sendBtn.dataset.orig = sendBtn.innerHTML; 
+                        sendBtn.innerHTML = 'Thinking... <span class="spinner-mini" aria-hidden="true"></span>'; 
+                    }
+                    var answer = 'AI module not available locally.';
+                    if (typeof window.askQuestion === 'function') {
+                        var maybe = window.askQuestion(question, state.currentText, state.currentAnalysis);
+                        answer = (maybe && typeof maybe.then === 'function') ? maybe : maybe;
+                    } else if (typeof window.askAI === 'function') {
+                        var maybe2 = window.askAI(question, state.currentAnalysis);
+                        answer = (maybe2 && typeof maybe2.then === 'function') ? maybe2 : maybe2;
+                    }
+                    const respBox = document.getElementById('ai-response');
+                    const ansEl = document.getElementById('ai-answer');
+                    if (respBox && ansEl) {
+                        respBox.style.display = 'block';
+                        ansEl.innerHTML = answer || 'No answer available.';
+                        respBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        showToast('AI response container missing', 'error');
+                    }
+                    document.getElementById('aiQuestion').value = '';
+                } catch (err) {
+                    console.error('askAI runtime error', err);
+                    showToast('AI error: ' + (err.message || err), 'error');
+                } finally {
+                    if (sendBtn && sendBtn.dataset.orig) sendBtn.innerHTML = sendBtn.dataset.orig; 
+                    if (sendBtn) sendBtn.disabled = false;
                 }
             }
-            // expose
-            window.applyAISuggestions = applyAISuggestions;
+            function loadExample() {
+                const example = "Shall I compare thee to a summer's day? Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer's lease hath all too short a date";
+                try {
+                    const el = document.getElementById('textInput');
+                    if (el) {
+                        el.value = example;
+                        showToast('Example loaded', 'info');
+                    } else {
+                        localStorage.setItem('pendingExample', example);
+                        showToast('Example saved; open Home to paste it', 'info');
+                        window.location.href = 'sentiment-analyzer.html';
+                    }
+                } catch (e) { console.warn('loadExample', e); }
+            }
+            function pasteFromClipboard() { navigator.clipboard.readText().then(function(text) { document.getElementById('textInput').value = text; showToast('Pasted from clipboard', 'info'); }).catch(function() { showToast('Unable to paste from clipboard', 'error'); }); }
+
+            function detectLanguage(text) {
+                try {
+                    if (!text || !text.trim()) return 'unknown';
+                    if (typeof franc === 'function') {
+                        const code = franc(text, { minLength: 20 });
+                        return code === 'und' ? 'unknown' : code;
+                    }
+                    const sample = text.slice(0, 2000).toLowerCase();
+                    const eng = /( the | and | of | to | in )/i.test(sample);
+                    return eng ? 'en' : 'unknown';
+                } catch (e) { return 'unknown'; }
+            }
+
+            function sentenceEmotionAnalysis(text) {
+                const sentences = text.match(/[^\.\!\?]+[\.\!\?]*/g) || [text];
+                const lex = {
+                    joy: ['joy', 'happy', 'delight', 'smile', 'love', 'wonderful', 'pleasure'],
+                    anger: ['angry', 'rage', 'fury', 'hate', 'outrage', 'annoy'],
+                    sadness: ['sad', 'sorrow', 'tears', 'grief', 'mourn', 'lonely'],
+                    fear: ['fear', 'afraid', 'scared', 'terror', 'panic', 'fright'],
+                    trust: ['trust', 'faith', 'believe', 'secure', 'confide'],
+                    disgust: ['disgust', 'repel', 'nausea', 'gross', 'sick'],
+                    surprise: ['surprise', 'astonish', 'startle', 'unexpected']
+                };
+                const results = sentences.map(function(s) {
+                    const r = { text: s.trim(), emotions: {}, top: null };
+                    const words = (s.toLowerCase().match(/\b[\w']+\b/g) || []);
+                    for (const emo in lex) {
+                        let count = 0; 
+                        lex[emo].forEach(function(k) { 
+                            words.forEach(function(w) { 
+                                if (w.includes(k)) count++; 
+                            }); 
+                        });
+                        const intensity = Math.min(100, Math.round((count / Math.max(1, words.length)) * 200));
+                        r.emotions[emo] = intensity;
+                    }
+                    r.top = Object.entries(r.emotions).sort(function(a,b) { return b[1]-a[1]; })[0][0];
+                    return r;
+                });
+                return results;
+            }
+
+            function renderEmotionTimeline(analysisResults) {
+                try {
+                    const data = sentenceEmotionAnalysis(analysisResults.text || state.currentText || document.getElementById('textInput').value || '');
+                    const labels = data.map(function(d,i) { return 'S' + (i+1); });
+                    const datasets = ['joy','anger','sadness','fear','trust','disgust','surprise'].map(function(emo, idx) { 
+                        return { 
+                            label: emo, 
+                            data: data.map(function(d) { return d.emotions[emo] || 0; }), 
+                            borderColor: ['#FFD54F','#F44336','#90CAF9','#EF9A9A','#66BB6A','#B39DDB','#FFB74D'][idx], 
+                            fill:false, 
+                            tension:0.2 
+                        }; 
+                    });
+                    const ctxId = 'emotionTimelineChart';
+                    let canvas = document.getElementById(ctxId);
+                    if (!canvas) {
+                        const container = document.getElementById('tab-emotions');
+                        const el = document.createElement('div'); 
+                        el.className = 'chart-container'; 
+                        el.innerHTML = '<canvas id="' + ctxId + '"></canvas>'; 
+                        container.appendChild(el);
+                        canvas = document.getElementById(ctxId);
+                    }
+                    const ctx = canvas.getContext('2d');
+                    if (state.charts.emotionTimeline) state.charts.emotionTimeline.destroy();
+                    state.charts.emotionTimeline = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { labels: labels, datasets: datasets }, 
+                        options: { 
+                            responsive:true, 
+                            maintainAspectRatio:false, 
+                            scales:{ y:{ min:0, max:100 } } 
+                        } 
+                    });
+                } catch (e) { console.warn('renderEmotionTimeline', e); }
+            }
+
+            function displayWordFreq(analysis) {
+                try {
+                    if (!analysis || !analysis.words) {
+                        document.getElementById('wordFreqContainer').innerHTML = '<p style="color:var(--muted);">No data</p>';
+                        return;
+                    }
+                    const freqs = {};
+                    analysis.words.forEach(function(w) { 
+                        const k = w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase(); 
+                        if (!k) return; 
+                        freqs[k] = (freqs[k] || 0) + 1; 
+                    });
+                    const arr = Object.entries(freqs).sort(function(a,b) { return b[1]-a[1]; }).slice(0, 60);
+                    let out = '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:8px;">';
+                    for (let i = 0; i < arr.length; i++) {
+                        out += '<div class="list-item">' + arr[i][0] + ' <strong style="float:right;">' + arr[i][1] + '</strong></div>';
+                    }
+                    out += '</div>';
+                    document.getElementById('wordFreqContainer').innerHTML = out;
+                } catch (e) { console.warn('displayWordFreq', e); }
+            }
+
+            function saveAnalysis() {
+                try {
+                    const data = window.latestAnalysisData || state.currentAnalysis;
+                    if (!data) { showToast('No analysis to save', 'error'); return; }
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); 
+                    a.href = url; 
+                    a.download = 'analysis-' + Date.now() + '.json'; 
+                    a.click();
+                    showToast('Analysis saved', 'info');
+                } catch (e) { showToast('Save failed', 'error'); }
+            }
+
+            function clearAll() {
+                const doClear = function() { 
+                    document.getElementById('textInput').value = ''; 
+                    hideResults(); 
+                    document.getElementById('quickStats').innerHTML = ''; 
+                };
+                try {
+                    if (typeof askConfirm === 'function') {
+                        askConfirm('Clear all?', doClear);
+                        return;
+                    }
+                } catch (e) { }
+                if (typeof showConfirm === 'function') { 
+                    showConfirm('Clear all?', doClear); 
+                } else if (confirm('Clear all?')) { 
+                    doClear(); 
+                }
+            }
+
+            function generatePermalink() {
+                const txt = document.getElementById('textInput').value || '';
+                if (!txt) { showToast('Nothing to share', 'error'); return; }
+                try {
+                    const encoded = encodeURIComponent(txt.slice(0, 20000));
+                    const url = window.location.origin + window.location.pathname + '#text=' + encoded;
+                    navigator.clipboard.writeText(url).then(function() { 
+                        showToast('Permalink copied to clipboard', 'info'); 
+                    });
+                } catch (e) { showToast('Unable to generate link', 'error'); }
+            }
+
+            function debounce(fn, wait) {
+                let t;
+                return function() { 
+                    const args = arguments;
+                    const context = this;
+                    clearTimeout(t); 
+                    t = setTimeout(function() { 
+                        fn.apply(context, args); 
+                    }, wait); 
+                };
+            }
+
+            function enableAutoAnalyze() {
+                const auto = document.getElementById('autoAnalyzeToggle');
+                const input = document.getElementById('textInput');
+                if (!input) return;
+                const handler = debounce(function() {
+                    if (auto && auto.checked) analyzeText();
+                }, 600);
+                input.removeEventListener('input', input._autoHandler || handler);
+                input.addEventListener('input', handler);
+                input._autoHandler = handler;
+            }
+
+            function enableShortcuts() {
+                document.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { 
+                        e.preventDefault(); 
+                        analyzeText(); 
+                    }
+                });
+            }
+
+            function removeTopFixedOverlay() {
+                try {
+                    const els = Array.from(document.body.children).reverse();
+                    for (let i = 0; i < els.length; i++) {
+                        const el = els[i];
+                        const cs = window.getComputedStyle(el);
+                        if (cs && cs.position === 'fixed' && cs.display !== 'none' && parseInt(cs.zIndex||0,10) >= 0) {
+                            el.remove();
+                            return true;
+                        }
+                    }
+                } catch (e) { console.warn('removeTopFixedOverlay', e); }
+                return false;
+            }
+
+            document.addEventListener('DOMContentLoaded', function() { 
+                if (state.darkMode) { 
+                    document.body.classList.add('dark-mode'); 
+                }
+                const visible = document.getElementById('aiQuestion');
+                const hidden = document.getElementById('ai-question-input');
+                if (visible && hidden) {
+                    visible.addEventListener('input', function() { 
+                        hidden.value = visible.value; 
+                    });
+                    hidden.value = visible.value || '';
+                }
+
+                const aiAnswer = document.getElementById('ai-answer');
+                const aiAnswerBox = document.getElementById('aiAnswerBox');
+                if (aiAnswer && aiAnswerBox) {
+                    const observer = new MutationObserver(function() {
+                        if (aiAnswer.innerHTML && aiAnswerBox.style.display === 'none') {
+                            aiAnswerBox.style.display = 'block';
+                        }
+                    });
+                    observer.observe(aiAnswer, { childList: true, subtree: true, characterData: true });
+                }
+                
+                try { enableAutoAnalyze(); enableShortcuts(); } catch (e) { console.warn('init extras', e); }
+                
+                const aiToggle = document.getElementById('aiSuggestionsToggle');
+                if (aiToggle) {
+                    aiToggle.addEventListener('change', function() { 
+                        showToast('AI suggestions ' + (aiToggle.checked ? 'enabled' : 'disabled'), 'info'); 
+                    });
+                }
+                
+                try {
+                    const pending = localStorage.getItem('pendingExample');
+                    if (pending) {
+                        const ti = document.getElementById('textInput');
+                        if (ti) { 
+                            ti.value = pending; 
+                            localStorage.removeItem('pendingExample'); 
+                            showToast('Loaded pending example', 'info'); 
+                        }
+                    }
+                } catch (e) { console.warn('pendingExample', e); }
+                
+                try {
+                    if (typeof autosaveDraft === 'function') {
+                        autosaveDraft('textInput', 'lastText', 1200);
+                        const saved = localStorage.getItem('lastText');
+                        if (saved && document.getElementById('textInput') && !document.getElementById('textInput').value) {
+                            document.getElementById('textInput').value = saved;
+                            showToast('Restored saved draft', 'info', 1200);
+                        }
+                    }
+                } catch (e) { console.warn('autosave init', e); }
+            });
+
+            document.addEventListener('click', function(ev) {
+                try {
+                    const t = ev.target;
+                    if (!t) return;
+                    if (t.tagName === 'BUTTON') {
+                        const txt = (t.textContent || '').trim().toLowerCase();
+                        const shouldClose = txt === 'close' || txt === 'close ' || txt.includes('close') || (t.dataset && t.dataset.close === 'true');
+                        if (shouldClose) removeTopFixedOverlay();
+                    }
+                } catch (e) { console.warn('modal close delegate', e); }
+            }, true);
         </script>
-    <!-- Optional libs for OCR and language detection -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v4.0.2/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/franc@6.1.0/build/franc.min.js"></script>
-    <script>
-        const state = { currentText: '', currentAnalysis: null, currentLanguage: 'en', charts: {}, darkMode: localStorage.getItem('darkMode') === 'true' };
-
-        function toggleDarkMode() {
-            state.darkMode = !state.darkMode;
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', state.darkMode);
-            const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
-            if (btn) btn.setAttribute('aria-pressed', state.darkMode);
-        }
-        function speakCurrentText() {
-            const text = document.getElementById('textInput').value.trim();
-            if (!text) { 
-                showToast('No text to read', 'error'); 
-                return; 
-            }
-            if (!window.speechSynthesis) { 
-                showToast('Text-to-speech not available in this browser', 'error'); 
-                return; 
-            }
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        }
-        function switchTab(tabName, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
-            const content = document.getElementById('tab-' + tabName);
-            if (content) content.classList.add('active');
-            if (el && el.classList) el.classList.add('active');
-        }
-
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.getElementById('toast');
-            toast.className = type;
-            toast.textContent = message;
-            toast.style.display = 'block';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, duration);
-        }
-
-        function openHelp() {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
-            modal.innerHTML = `
-                <div style="background: white; width: 92%; max-width: 720px; padding: 18px; border-radius: 10px;">
-                    <h3 style="margin-top:0;">Help & Quick Reference</h3>
-                    <p class="muted">Quick links to guides and tips:</p>
-                    <ul>
-                        <li><a href="QUICK_REFERENCE.md" target="_blank">Quick Reference Card</a></li>
-                        <li><a href="AI_QA_GUIDE.md" target="_blank">AI Q&A Guide</a></li>
-                        <li><a href="ANNOTATIONS_QUICK_REFERENCE.md" target="_blank">Annotations Quick Reference</a></li>
-                    </ul>
-                    <div style="display:flex; gap:10px; margin-top:12px; justify-content:flex-end;">
-                        <button class="btn btn-secondary" onclick="removeTopFixedOverlay()">Close</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function showResults() { document.getElementById('resultsSection').classList.remove('hidden'); setTimeout(() => document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' }), 100); }
-        function hideResults() { document.getElementById('resultsSection').classList.add('hidden'); }
-
-        function analyzeText(caller) {
-            const text = document.getElementById('textInput').value.trim();
-            if (!text) { showToast('Please enter some text to analyze', 'error'); return; }
-
-            state.currentText = text;
-            // UI: disable analyze buttons and show spinner
-            const toolbarBtn = document.getElementById('toolbarAnalyzeBtn');
-            const mainBtn = document.getElementById('mainAnalyzeBtn');
-            [toolbarBtn, mainBtn].forEach(b => { if (b) { b.disabled = true; b.dataset.orig = b.innerHTML; b.innerHTML = b.dataset.orig + ' <span class="spinner-mini" aria-hidden="true"></span>';} });
-
-            showResults();
-            updateQuickStats(text);
-
-            // allow UI to update spinner before heavy work
-            setTimeout(() => {
-                try {
-                    const analysis = performAnalysis(text);
-                    state.currentAnalysis = analysis;
-                        // persist lastText so analysis.html can run it
-                        try { localStorage.setItem('lastText', text); } catch (e) { console.warn('persist lastText', e); }
-                        // Expose globals expected by other modules
-                        try {
-                            window.currentText = text;
-                            window.currentAnalysisData = analysis;
-                            // Build a compatible `latestAnalysisData` object for ai-qa.js / summary-manager
-                            const emotionPercentages = {};
-                            if (analysis.emotions) {
-                                let sum = 0; Object.values(analysis.emotions).forEach(v => sum += v);
-                                Object.entries(analysis.emotions).forEach(([k, v]) => { emotionPercentages[k] = (v / (sum || 1)) * 100; });
-                            }
-                            window.latestAnalysisData = {
-                                text: text,
-                                words: analysis.wordCount || (analysis.words ? analysis.words.length : 0),
-                                wordsList: Array.isArray(analysis.words) ? analysis.words : (typeof analysis.words === 'string' ? analysis.words.split(/\s+/) : []),
-                                sentences: analysis.sentenceCount || (analysis.sentences ? analysis.sentences.length : 0),
-                                sentencesList: Array.isArray(analysis.sentences) ? analysis.sentences : (typeof analysis.sentences === 'string' ? analysis.sentences.match(/[^\.\!\?]+[\.\!\?]*/g) || [] : []),
-                                sentiment: analysis.sentiment || 'neutral',
-                                sentimentScore: (analysis.confidence || 0) / 25 - 2, // rough numeric mapping
-                                emotionPercentages: emotionPercentages,
-                                emotions: analysis.emotions || {},
-                                themes: analysis.themes || [],
-                                readingLevel: analysis.readingLevel || 'moderate',
-                                avgSentenceLength: ((analysis.wordCount || (analysis.words?analysis.words.length:0)) / Math.max(1, (analysis.sentenceCount || 1))),
-                                literaryDevices: analysis.devices || {},
-                                keyQuotes: analysis.keyQuotes || [],
-                                emotionalArc: analysis.emotionalArc || []
-                            };
-                            // detect language and update UI (unless manually overridden)
-                            try {
-                                const det = detectLanguage(text);
-                                if (det && det !== 'unknown') {
-                                    state.currentLanguage = det;
-                                    const sel = document.getElementById('language-select');
-                                    if (sel) sel.value = det.startsWith('en') ? 'en' : sel.value;
-                                    showToast('Detected language: ' + det, 'info', 1800);
-                                }
-                            } catch (e) { console.warn('language detect', e); }
-                            window.userAnnotations = window.userAnnotations || [];
-                            // Auto-generate AI annotation suggestions (if available)
-                            try {
-                                const aiToggle = document.getElementById('aiSuggestionsToggle');
-                                if (aiToggle && !aiToggle.checked) {
-                                    // user disabled AI suggestions
-                                } else {
-                                    if (typeof generateSmartAnnotations === 'function') {
-                                        const suggestions = generateSmartAnnotations(window.latestAnalysisData) || [];
-                                        // respect user threshold slider for confidence
-                                        const thresholdEl = document.getElementById('aiConfidence');
-                                        const threshold = thresholdEl ? parseInt(thresholdEl.value, 10) : 40;
-                                        const filtered = suggestions.filter(s => {
-                                            const conf = (typeof s.confidence === 'number') ? s.confidence : (s.score || 50);
-                                            return conf >= threshold;
-                                        });
-                                        if (Array.isArray(filtered) && filtered.length) {
-                                            try {
-                                                if (typeof window.applyAISuggestions === 'function') {
-                                                    window.applyAISuggestions(filtered);
-                                                } else {
-                                                    // fallback: push into local storage
-                                                    const raw = localStorage.getItem('advancedAnnotations');
-                                                    const arr = raw ? JSON.parse(raw) : [];
-                                                    filtered.forEach(s => arr.push(s));
-                                                    localStorage.setItem('advancedAnnotations', JSON.stringify(arr));
-                                                }
-                                                showToast('AI annotation suggestions added', 'info', 3000);
-                                            } catch (e) { console.warn('applyAISuggestions error', e); }
-                                        }
-                                    }
-                                }
-                            } catch (e) { console.warn('AI annotation suggestion error', e); }
-
-                            // Save analysis to local history
-                            try {
-                                const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-                                hist.unshift({ id: Date.now(), preview: text.substring(0,120), timestamp: new Date().toISOString(), analysis: window.latestAnalysisData });
-                                while (hist.length > 20) hist.pop();
-                                localStorage.setItem('analysisHistory', JSON.stringify(hist));
-                            } catch (e) { console.warn('Failed to write history', e); }
-                        } catch (e) { console.warn('Failed to set global analysis shims', e); }
-                    displaySentimentResults(analysis);
-                    displayEmotions(analysis);
-                    displayThemes(analysis);
-                    displayDevices(analysis);
-                    displayContent(analysis);
-                    displayWordFreq(analysis);
-                    // render sentence-level emotion timeline
-                    try { renderEmotionTimeline(analysis); } catch (e) { console.warn('emotion timeline', e); }
-                    showToast('Analysis complete', 'info', 2500);
-                } catch (e) {
-                    showToast('Analysis failed: ' + (e.message || e), 'error', 5000);
-                } finally {
-                    [toolbarBtn, mainBtn].forEach(b => { if (b) { b.disabled = false; if (b.dataset.orig) b.innerHTML = b.dataset.orig; } });
-                }
-            }, 80);
-        }
-        function performAnalysis(text) {
-            const words = text.toLowerCase().split(/\s+/).filter(w => w);
-            const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-            const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy', 'bright', 'delightful', 'lovely', 'perfect', 'hope'];
-            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'death', 'dark', 'gloomy', 'despair', 'alone'];
-            const positiveCount = words.filter(w => positiveWords.includes(w)).length;
-            const negativeCount = words.filter(w => negativeWords.includes(w)).length;
-            const neutral = words.length - positiveCount - negativeCount;
-            let sentiment = 'neutral';
-            if (positiveCount > negativeCount) sentiment = 'positive';
-            if (negativeCount > positiveCount) sentiment = 'negative';
-            const confidence = Math.max(positiveCount, negativeCount) / Math.max(words.length / 10, 1) * 100;
-            return { text, words, sentences, wordCount: words.length, sentenceCount: sentences.length, sentiment, confidence: Math.min(confidence, 100), positiveScore: (positiveCount / words.length) * 100, negativeScore: (negativeCount / words.length) * 100, neutralScore: (neutral / words.length) * 100, emotions: { joy: 20 + Math.random() * 20, sadness: 15 + Math.random() * 20, love: 18 + Math.random() * 20, fear: 10 + Math.random() * 15, anger: 12 + Math.random() * 15, hope: 22 + Math.random() * 20, mystery: 8 + Math.random() * 12 }, themes: ['Nature', 'Love', 'Time', 'Journey', 'Hope'], devices: { repetition: 3 + Math.floor(Math.random() * 5), metaphor: 2 + Math.floor(Math.random() * 4), simile: 1 + Math.floor(Math.random() * 3), personification: Math.floor(Math.random() * 3), alliteration: 2 + Math.floor(Math.random() * 4) } };
-        }
-        function updateQuickStats(text) {
-            const words = text.split(/\s+/).length;
-            const chars = text.length;
-            const sentences = text.split(/[.!?]+/).length;
-            const readingTime = Math.ceil(words / 200);
-            let html = '<div class="metric-card"><div class="metric-label">Words</div><div class="metric-value">' + words + '</div></div>';
-            html += '<div class="metric-card"><div class="metric-label">Characters</div><div class="metric-value">' + chars + '</div></div>';
-            html += '<div class="metric-card"><div class="metric-label">Sentences</div><div class="metric-value">' + sentences + '</div></div>';
-            html += '<div class="metric-card"><div class="metric-label">Reading Time</div><div class="metric-value">' + readingTime + 'm</div></div>';
-            document.getElementById('quickStats').innerHTML = html;
-        }
-        function displaySentimentResults(analysis) {
-            const sentimentEmojis = { positive: '😊', negative: '😞', neutral: '😐' };
-            const sentiment = analysis.sentiment;
-            document.getElementById('sentimentResult').innerHTML = sentimentEmojis[sentiment] + ' ' + sentiment.toUpperCase();
-            document.getElementById('confidenceResult').innerHTML = Math.round(analysis.confidence) + '%';
-            document.getElementById('sentimentBar').style.width = analysis.confidence + '%';
-            document.getElementById('confidenceBar').style.width = analysis.confidence + '%';
-            let details = '<div class="results-grid">';
-            details += '<div class="metric-card"><div class="metric-label">Positive</div><div class="metric-value">' + Math.round(analysis.positiveScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.positiveScore + '%; background: #4caf50;"></div></div></div>';
-            details += '<div class="metric-card"><div class="metric-label">Negative</div><div class="metric-value">' + Math.round(analysis.negativeScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.negativeScore + '%; background: #f44336;"></div></div></div>';
-            details += '<div class="metric-card"><div class="metric-label">Neutral</div><div class="metric-value">' + Math.round(analysis.neutralScore) + '%</div><div class="metric-bar"><div class="metric-bar-fill" style="width: ' + analysis.neutralScore + '%; background: #2196f3;"></div></div></div>';
-            details += '</div>';
-            document.getElementById('sentimentDetails').innerHTML = details;
-        }
-        function displayEmotions(analysis) {
-            const emotionEmojis = { joy: '😊', sadness: '😢', love: '❤️', fear: '😨', anger: '😠', hope: '🌟', mystery: '🔮' };
-            let html = '';
-            for (const [emotion, score] of Object.entries(analysis.emotions)) {
-                html += '<div class="emotion-item"><div class="emotion-emoji">' + emotionEmojis[emotion] + '</div><div class="emotion-name">' + emotion.charAt(0).toUpperCase() + emotion.slice(1) + '</div><div class="emotion-percent">' + Math.round(score) + '%</div></div>';
-            }
-            document.getElementById('emotionsGrid').innerHTML = html;
-            const ctx = document.getElementById('emotionChart').getContext('2d');
-            if (state.charts.emotion) state.charts.emotion.destroy();
-            state.charts.emotion = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(analysis.emotions).map(e => e.charAt(0).toUpperCase() + e.slice(1)), datasets: [{ data: Object.values(analysis.emotions), backgroundColor: ['#FFD54F', '#EF5350', '#E91E63', '#9C27B0', '#F44336', '#4CAF50', '#2196F3'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
-        }
-        function displayThemes(analysis) {
-            let themesHtml = '';
-            for (const theme of analysis.themes) {
-                themesHtml += '<div class="list-item">🎭 ' + theme + '</div>';
-            }
-            document.getElementById('themesContent').innerHTML = themesHtml;
-        }
-        function displayDevices(analysis) {
-            let html = '';
-            for (const [device, count] of Object.entries(analysis.devices)) {
-                if (count > 0) {
-                    html += '<div class="metric-card"><div class="metric-label">' + device + '</div><div class="metric-value">' + count + '</div></div>';
-                }
-            }
-            document.getElementById('devicesGrid').innerHTML = html;
-        }
-        function displayContent(analysis) {
-            let summary = '<p>This text contains <strong>' + analysis.wordCount + '</strong> words across <strong>' + analysis.sentenceCount + '</strong> sentences. The overall sentiment is <strong>' + analysis.sentiment + '</strong> with a confidence score of <strong>' + Math.round(analysis.confidence) + '%</strong>.</p>';
-            document.getElementById('summaryContent').innerHTML = summary;
-            const avgWordLen = analysis.words.length
-    ? (analysis.words.reduce((s,w)=>s+w.length,0) / analysis.words.length).toFixed(1)
-    : '0.0';
-
-let keyInfo = '<div class="metric-card"><div class="metric-label">Avg Word Length</div><div class="metric-value">' + avgWordLen + '</div></div>';
-
-            keyInfo += '<div class="metric-card"><div class="metric-label">Unique Words</div><div class="metric-value">' + new Set(analysis.words).size + '</div></div>';
-            keyInfo += '<div class="metric-card"><div class="metric-label">Avg Sentence Length</div><div class="metric-value">' + Math.round(analysis.wordCount / analysis.sentenceCount) + '</div></div>';
-            document.getElementById('keyInfo').innerHTML = keyInfo;
-        }
-        async function askAI() {
-            const qEl = document.getElementById('aiQuestion');
-            const question = qEl ? qEl.value.trim() : '';
-            if (!question || !state.currentAnalysis) { showToast('Please enter a question and analyze a text first', 'error'); return; }
-            const sendBtn = (qEl && qEl.nextElementSibling) || document.querySelector('#tab-qa .btn-primary');
-            try {
-                if (sendBtn) { sendBtn.disabled = true; sendBtn.dataset.orig = sendBtn.innerHTML; sendBtn.innerHTML = 'Thinking... <span class="spinner-mini" aria-hidden="true"></span>'; }
-                let answer = 'AI module not available locally.';
-                if (typeof window.askQuestion === 'function') {
-                    const maybe = window.askQuestion(question, state.currentText, state.currentAnalysis);
-                    answer = (maybe && typeof maybe.then === 'function') ? await maybe : maybe;
-                } else if (typeof window.askAI === 'function') {
-                    const maybe = window.askAI(question, state.currentAnalysis);
-                    answer = (maybe && typeof maybe.then === 'function') ? await maybe : maybe;
-                }
-                const respBox = document.getElementById('ai-response');
-                const ansEl = document.getElementById('ai-answer');
-                if (respBox && ansEl) {
-                    respBox.style.display = 'block';
-                    ansEl.innerHTML = answer || 'No answer available.';
-                    respBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                } else {
-                    showToast('AI response container missing', 'error');
-                }
-                // clear visible input but keep hidden field in sync
-                document.getElementById('aiQuestion').value = '';
-            } catch (err) {
-                console.error('askAI runtime error', err);
-                showToast('AI error: ' + (err.message || err), 'error');
-            } finally {
-                if (sendBtn && sendBtn.dataset.orig) sendBtn.innerHTML = sendBtn.dataset.orig; if (sendBtn) sendBtn.disabled = false;
-            }
-        }
-        function openAnnotations() {
-            if (typeof window.createAnnotation === 'function' || typeof window.getAllAnnotations === 'function') {
-                const annotations = (typeof window.getAllAnnotations === 'function') ? window.getAllAnnotations() : [];
-                let html = '<div style="max-height: 400px; overflow-y: auto;">';
-                if (annotations.length === 0) {
-                    html += '<p>No annotations yet. Use the form below to create one.</p>';
-                } else {
-                    html += '<div style="margin-bottom: 20px;">';
-                    for (const ann of annotations) {
-                        html += '<div style="background: var(--surface); padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid var(--primary);">';
-                        html += '<strong style="color: var(--primary);">' + (ann.category || 'Note') + '</strong><br>';
-                        html += '<em>' + (ann.text || '') + '</em><br>';
-                        html += '<small style="color: #999;">Line: ' + (ann.lineNumber || 'N/A') + ' | Sentiment: ' + (ann.sentiment || 'neutral') + '</small>';
-                        html += '</div>';
-                    }
-                    html += '</div>';
-                }
-                html += '<div style="margin-top: 15px; padding: 15px; background: var(--surface); border-radius: 6px;">';
-                html += '<h4>Add New Annotation</h4>';
-                html += '<textarea id="annotationText" placeholder="Your annotation..." style="width: 100%; height: 80px; margin: 10px 0; padding: 8px; border: 1px solid var(--border); border-radius: 4px;"></textarea>';
-                html += '<select id="annotationCategory" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid var(--border); border-radius: 4px;">';
-                html += '<option value="general">General Note</option><option value="theme">Theme</option><option value="character">Character</option><option value="symbolism">Symbolism</option><option value="literary-device">Literary Device</option>';
-                html += '</select>';
-                html += '<button class="btn btn-primary" onclick="saveAnnotation()" style="width: 100%; margin-top: 10px;">Save Annotation</button>';
-                html += '</div></div>';
-                document.getElementById('annotationsContainer').innerHTML = html;
-            } else {
-                showToast('Annotations module not loaded', 'error');
-            }
-        }
-        function saveAnnotation() {
-            const text = document.getElementById('annotationText').value.trim();
-            const category = document.getElementById('annotationCategory').value;
-            if (!text) { showToast('Please enter annotation text', 'error'); return; }
-            if (typeof window.createAnnotation === 'function') {
-                window.createAnnotation({
-                    text: text,
-                    category: category,
-                    originalText: state.currentText.substring(0, 100),
-                    sentiment: state.currentAnalysis ? state.currentAnalysis.sentiment : 'unknown',
-                    timestamp: new Date().toISOString()
-                });
-                document.getElementById('annotationText').value = '';
-                showToast('Annotation saved', 'info');
-                openAnnotations();
-            }
-        }
-        function exportAnnotations() {
-            if (typeof window.exportAnnotationsJSON === 'function') {
-                window.exportAnnotationsJSON();
-            } else if (typeof window.getAllAnnotations === 'function') {
-                const annotations = window.getAllAnnotations();
-                const dataStr = JSON.stringify(annotations, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'annotations.json';
-                link.click();
-                showToast('Annotations exported', 'info');
-            } else {
-                showToast('No annotations to export', 'error');
-            }
-        }
-        function loadExample() {
-            const example = "Shall I compare thee to a summer's day? Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer's lease hath all too short a date";
-            try {
-                const el = document.getElementById('textInput');
-                if (el) {
-                    el.value = example;
-                    showToast('Example loaded', 'info');
-                } else {
-                    // store for next page
-                    localStorage.setItem('pendingExample', example);
-                    showToast('Example saved; open Home to paste it', 'info');
-                    window.location.href = 'sentiment-analyzer.html';
-                }
-            } catch (e) { console.warn('loadExample', e); }
-        }
-        function pasteFromClipboard() { navigator.clipboard.readText().then(text => { document.getElementById('textInput').value = text; showToast('Pasted from clipboard', 'info'); }).catch(() => showToast('Unable to paste from clipboard', 'error')); }
-
-        // --- File / URL / OCR ingestion ---
-        function handleFileInput() {
-            const inp = document.getElementById('fileInput');
-            if (!inp || !inp.files || !inp.files.length) { showToast('Choose a file first', 'error'); return; }
-            const f = inp.files[0];
-            const name = f.name || '';
-            if (/\.txt$/i.test(name)) {
-                const r = new FileReader(); r.onload = () => { document.getElementById('textInput').value = String(r.result); showToast('Text file loaded', 'info'); }; r.readAsText(f);
-            } else if (/^image\//.test(f.type)) {
-                // image -> OCR suggestion
-                const url = URL.createObjectURL(f);
-                document.getElementById('textInput').value = '';
-                Tesseract.recognize(url, 'eng').then(({ data }) => { document.getElementById('textInput').value = data.text; showToast('OCR complete', 'info'); URL.revokeObjectURL(url); }).catch(e => { console.warn('OCR', e); showToast('OCR failed', 'error'); });
-            } else if (/\.pdf$/i.test(name)) {
-                showToast('PDF upload: not fully supported in-browser. Please paste text or use server convert.', 'warning', 5000);
-            } else if (/\.docx$/i.test(name)) {
-                showToast('DOCX upload: not supported in this build. Use copy/paste for now.', 'warning', 5000);
-            } else {
-                showToast('Unsupported file type', 'error');
-            }
-        }
-
-        async function ingestURL() {
-            const url = document.getElementById('urlInput').value.trim();
-            if (!url) { showToast('Paste a URL first', 'error'); return; }
-            try {
-                const resp = await fetch(url);
-                const ct = resp.headers.get('content-type') || '';
-                if (ct.includes('text/html')) {
-                    const txt = await resp.text();
-                    // extract visible text from HTML
-                    const parser = new DOMParser(); const doc = parser.parseFromString(txt, 'text/html');
-                    const bodyText = doc.body ? doc.body.innerText.replace(/\s+/g, ' ').trim() : '';
-                    document.getElementById('textInput').value = bodyText.substring(0, 200000);
-                    showToast('URL content fetched', 'info');
-                } else if (ct.includes('text/plain')) {
-                    const t = await resp.text(); document.getElementById('textInput').value = t; showToast('URL text loaded', 'info');
-                } else {
-                    showToast('URL returned non-text content', 'error');
-                }
-            } catch (e) { console.warn('ingestURL', e); showToast('Failed to fetch URL', 'error'); }
-        }
-
-        function startOCR() {
-            const inp = document.getElementById('fileInput');
-            if (!inp || !inp.files || !inp.files.length) { showToast('Choose an image file first', 'error'); return; }
-            const f = inp.files[0]; if (!/^image\//.test(f.type)) { showToast('Select an image for OCR', 'error'); return; }
-            const url = URL.createObjectURL(f);
-            showToast('Running OCR...', 'info');
-            Tesseract.recognize(url, 'eng').then(({ data }) => { document.getElementById('textInput').value = data.text; showToast('OCR complete', 'info'); URL.revokeObjectURL(url); }).catch(e => { console.warn('OCR', e); showToast('OCR failed', 'error'); });
-        }
-
-        // --- Language detection ---
-        function detectLanguage(text) {
-            try {
-                if (!text || !text.trim()) return 'unknown';
-                // use franc if available
-                if (typeof franc === 'function') {
-                    const code = franc(text, { minLength: 20 });
-                    return code === 'und' ? 'unknown' : code;
-                }
-                // fallback simple: check for presence of common english words
-                const sample = text.slice(0, 2000).toLowerCase();
-                const eng = /( the | and | of | to | in )/i.test(sample);
-                return eng ? 'en' : 'unknown';
-            } catch (e) { return 'unknown'; }
-        }
-
-        // --- Summarization (extractive) ---
-        function summarizeText(mode = 'ultra', compression = 20, extractive = true) {
-            const txt = document.getElementById('textInput').value || '';
-            if (!txt.trim()) return '';
-            // split into sentences
-            const sentences = txt.match(/[^\.\!\?]+[\.\!\?]*/g) || [txt];
-            const words = txt.toLowerCase().match(/\b[\w']+\b/g) || [];
-            const freq = {}; words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
-            const scores = sentences.map(s => {
-                const ws = (s.toLowerCase().match(/\b[\w']+\b/g) || []);
-                let sc = 0; ws.forEach(w => { sc += (freq[w] || 0); });
-                return sc / Math.max(1, ws.length);
-            });
-            // choose top N sentences based on compression
-            const keep = Math.max(1, Math.round(sentences.length * (compression / 100)));
-            const idx = scores.map((s,i)=>[s,i]).sort((a,b)=>b[0]-a[0]).slice(0,keep).map(x=>x[1]).sort((a,b)=>a-b);
-            const summary = idx.map(i=>sentences[i].trim()).join(' ');
-            if (mode === 'bullet') return idx.map(i=>'- ' + sentences[i].trim()).join('\n');
-            if (mode === 'section') return idx.map((i, j) => `Section ${j+1}: ${sentences[i].trim()}`).join('\n\n');
-            if (mode === 'exec') return summary; // executive = concise
-            if (mode === 'ultra') return summary.split(' ').slice(0,30).join(' ') + '...';
-            return summary;
-        }
-
-        // --- Inline annotated view: render sentences as clickable spans ---
-        function renderAnnotatedText(text) {
-            const container = document.getElementById('summaryContent');
-            if (!container) return;
-            const sentences = text.match(/[^\.\!\?]+[\.\!\?]*/g) || [text];
-            let html = '';
-            sentences.forEach((s, i) => {
-                const clean = s.trim();
-                if (!clean) return;
-                html += `<span class=\"sentence\" data-idx=\"${i}\" style=\"cursor:pointer; padding:3px; border-radius:4px;\">${clean}</span> `;
-            });
-            container.innerHTML = html;
-            // attach listeners
-            container.querySelectorAll('.sentence').forEach(el => {
-                el.addEventListener('mouseenter', () => { el.style.background = 'rgba(255,245,157,0.7)'; });
-                el.addEventListener('mouseleave', () => { el.style.background = ''; });
-                el.addEventListener('click', () => {
-                    const idx = parseInt(el.dataset.idx, 10);
-                    const stext = (text.match(/[^\.\!\?]+[\.\!\?]*/g) || [])[idx] || '';
-                    openInlineAnnotationDialog(idx, stext);
-                });
-            });
-        }
-
-        function openInlineAnnotationDialog(idx, stext) {
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;';
-            modal.innerHTML = `<div style=\"background:white; padding:12px; border-radius:8px; width:90%; max-width:560px;\">` +
-                `<h4>Annotate sentence</h4><div style=\"margin-bottom:8px; color:#333;\">${stext}</div>` +
-                `<textarea id=\"inlineAnnText\" style=\"width:100%; min-height:80px;\"></textarea>` +
-                `<div style=\"display:flex; gap:8px; margin-top:8px; justify-content:flex-end;\"><button class=\"btn btn-primary\" id=\"saveInlineAnn\">Save</button><button class=\"btn btn-secondary\" onclick=\"removeTopFixedOverlay()\">Cancel</button></div></div>`;
-            document.body.appendChild(modal);
-            document.getElementById('saveInlineAnn').addEventListener('click', () => {
-                const note = document.getElementById('inlineAnnText').value.trim();
-                if (!note) { showToast('Enter annotation text', 'error'); return; }
-                // create annotation via engine if present
-                const payload = { text: note, sentenceIndex: idx, original: stext, timestamp: new Date().toISOString() };
-                if (typeof window.createAnnotation === 'function') {
-                    window.createAnnotation(payload);
-                    showToast('Annotation added', 'info');
-                } else {
-                    window.userAnnotations = window.userAnnotations || []; window.userAnnotations.push(payload); showToast('Annotation stored locally', 'info');
-                }
-                modal.remove();
-            });
-        }
-
-        // --- Sentence-level emotion tagging (simple keyword-based) ---
-        function sentenceEmotionAnalysis(text) {
-            const sentences = text.match(/[^\.\!\?]+[\.\!\?]*/g) || [text];
-            const lex = {
-                joy: ['joy', 'happy', 'delight', 'smile', 'love', 'wonderful', 'pleasure'],
-                anger: ['angry', 'rage', 'fury', 'hate', 'outrage', 'annoy'],
-                sadness: ['sad', 'sorrow', 'tears', 'grief', 'mourn', 'lonely'],
-                fear: ['fear', 'afraid', 'scared', 'terror', 'panic', 'fright'],
-                trust: ['trust', 'faith', 'believe', 'secure', 'confide'],
-                disgust: ['disgust', 'repel', 'nausea', 'gross', 'sick'],
-                surprise: ['surprise', 'astonish', 'startle', 'unexpected']
-            };
-            const results = sentences.map(s => {
-                const r = { text: s.trim(), emotions: {}, top: null };
-                const words = (s.toLowerCase().match(/\b[\w']+\b/g) || []);
-                for (const [emo, kws] of Object.entries(lex)) {
-                    let count = 0; kws.forEach(k => { words.forEach(w => { if (w.includes(k)) count++; }); });
-                    const intensity = Math.min(100, Math.round((count / Math.max(1, words.length)) * 200));
-                    r.emotions[emo] = intensity;
-                }
-                // top emotion
-                r.top = Object.entries(r.emotions).sort((a,b)=>b[1]-a[1])[0][0];
-                return r;
-            });
-            return results;
-        }
-
-        function renderEmotionTimeline(analysisResults) {
-            try {
-                const data = sentenceEmotionAnalysis(analysisResults.text || state.currentText || document.getElementById('textInput').value || '');
-                const labels = data.map((d,i) => 'S' + (i+1));
-                const datasets = ['joy','anger','sadness','fear','trust','disgust','surprise'].map((emo, idx) => ({ label: emo, data: data.map(d => d.emotions[emo] || 0), borderColor: ['#FFD54F','#F44336','#90CAF9','#EF9A9A','#66BB6A','#B39DDB','#FFB74D'][idx], fill:false, tension:0.2 }));
-                const ctxId = 'emotionTimelineChart';
-                let canvas = document.getElementById(ctxId);
-                if (!canvas) {
-                    const container = document.getElementById('tab-emotions');
-                    const el = document.createElement('div'); el.className = 'chart-container'; el.innerHTML = `<canvas id='${ctxId}'></canvas>`; container.appendChild(el);
-                    canvas = document.getElementById(ctxId);
-                }
-                const ctx = canvas.getContext('2d');
-                if (state.charts.emotionTimeline) state.charts.emotionTimeline.destroy();
-                state.charts.emotionTimeline = new Chart(ctx, { type: 'line', data: { labels, datasets }, options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ min:0, max:100 } } } });
-            } catch (e) { console.warn('renderEmotionTimeline', e); }
-        }
-
-        // --- Export to Markdown (summary + annotations) ---
-        function exportAsMarkdown() {
-            try {
-                const title = (document.querySelector('header h1') || {}).innerText || 'Analysis';
-                const summary = document.getElementById('summaryContent').innerText || '';
-                const annotations = (typeof window.getAllAnnotations === 'function') ? window.getAllAnnotations() : (window.userAnnotations||[]);
-                let md = `# ${title}\n\n`;
-                md += `## Summary\n\n${summary}\n\n`;
-                md += `## Annotations\n\n`;
-                annotations.forEach(a => { md += `- ${a.text || a.note || a.original || ''} (${a.category||a.sentenceIndex||''})\n`; });
-                const blob = new Blob([md], { type: 'text/markdown' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'analysis.md'; a.click();
-                showToast('Exported Markdown', 'info');
-            } catch (e) { showToast('Export failed', 'error'); }
-        }
-
-        // Hook summarization UI controls
-        function runSummaryMode() {
-            const modeEl = document.getElementById('summaryMode');
-            const compressionEl = document.getElementById('summaryCompression');
-            const extractiveEl = document.getElementById('summaryExtractive');
-            const mode = modeEl ? modeEl.value : 'ultra';
-            const compression = compressionEl ? parseInt(compressionEl.value,10) : 20;
-            const extractive = extractiveEl ? extractiveEl.checked : true;
-            const out = summarizeText(mode, compression, extractive);
-            document.getElementById('summaryContent').innerText = out;
-            // also render annotated text view for inline annotations
-            renderAnnotatedText(document.getElementById('textInput').value || '');
-        }
-
-
-        // Sync AI input and outputs so external modules find expected IDs
-        document.addEventListener('DOMContentLoaded', () => {
-            const visible = document.getElementById('aiQuestion');
-            const hidden = document.getElementById('ai-question-input');
-            if (visible && hidden) {
-                visible.addEventListener('input', () => { hidden.value = visible.value; });
-                // initialize
-                hidden.value = visible.value || '';
-            }
-
-            // Mirror ai-answer content for modules expecting other IDs
-            const aiAnswer = document.getElementById('ai-answer');
-            const aiAnswerBox = document.getElementById('aiAnswerBox');
-            if (aiAnswer && aiAnswerBox) {
-                const observer = new MutationObserver(() => {
-                    // keep both containers visually consistent
-                    if (aiAnswer.innerHTML && aiAnswerBox.style.display === 'none') aiAnswerBox.style.display = 'block';
-                });
-                observer.observe(aiAnswer, { childList: true, subtree: true, characterData: true });
-            }
-            // Initialize auto-analyze and shortcuts
-            try { enableAutoAnalyze(); enableShortcuts(); } catch (e) { console.warn('init extras', e); }
-            // Initialize annotation engine so annotations panel works immediately
-            try { if (typeof initializeAnnotationEngine === 'function') { initializeAnnotationEngine(); } if (typeof renderAllAnnotations === 'function') { renderAllAnnotations(); } } catch (e) { console.warn('init annotation engine', e); }
-            // when AI suggestions toggle changes, show quick toast
-            const aiToggle = document.getElementById('aiSuggestionsToggle');
-            if (aiToggle) aiToggle.addEventListener('change', () => showToast('AI suggestions ' + (aiToggle.checked ? 'enabled' : 'disabled'), 'info'));
-            // apply pending example if any
-            try {
-                const pending = localStorage.getItem('pendingExample');
-                if (pending) {
-                    const ti = document.getElementById('textInput');
-                    if (ti) { ti.value = pending; localStorage.removeItem('pendingExample'); showToast('Loaded pending example', 'info'); }
-                }
-            } catch (e) { console.warn('pendingExample', e); }
-            // Autosave drafts for main input (uses ui-tools.autosaveDraft)
-            try {
-                if (typeof autosaveDraft === 'function') {
-                    autosaveDraft('textInput', 'lastText', 1200);
-                    const saved = localStorage.getItem('lastText');
-                    if (saved && document.getElementById('textInput') && !document.getElementById('textInput').value) {
-                        document.getElementById('textInput').value = saved;
-                        showToast('Restored saved draft', 'info', 1200);
-                    }
-                }
-            } catch (e) { console.warn('autosave init', e); }
-        });
-
-        // Feedback modal and submission
-        function openFeedback() {
-            const modal = document.createElement('div');
-            modal.id = 'feedbackModal';
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
-            modal.innerHTML = `
-                <div style="background: white; width: 92%; max-width: 600px; padding: 18px; border-radius: 10px;">
-                    <h3 style="margin-top:0;">Send Feedback</h3>
-                    <p class="muted">Tell us what you liked or what could be improved.</p>
-                    <textarea id="feedbackText" style="width:100%; min-height:120px; padding:10px; border:1px solid #ddd; border-radius:6px;"></textarea>
-                    <div style="display:flex; gap:10px; margin-top:12px;">
-                        <button class="btn btn-primary" onclick="submitFeedback()">Send</button>
-                        <button class="btn btn-secondary" onclick="document.getElementById('feedbackModal').remove()">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        // -------------------- Paragraph / Chunk helpers --------------------
-        function splitIntoChunks() {
-            const text = document.getElementById('textInput').value || '';
-            if (!text.trim()) { showToast('No text to split', 'info', 1200); return; }
-            // split by double newlines or by paragraph markers
-            const parts = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length);
-            window.paragraphChunks = parts;
-            renderChunks();
-            showToast('Split into ' + parts.length + ' chunk(s)', 'info', 1200);
-        }
-
-        function renderChunks() {
-            const container = document.getElementById('chunksContainer');
-            container.innerHTML = '';
-            const chunks = window.paragraphChunks || [];
-            if (!chunks.length) { container.innerHTML = '<small style="color:var(--muted);">No chunks. Click "Split Paragraphs" to generate chunks.</small>'; return; }
-            chunks.forEach((c, idx) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.display = 'flex';
-                card.style.flexDirection = 'column';
-                card.innerHTML = `
-                    <div style="display:flex; gap:8px; align-items:start;">
-                        <div style="font-weight:700; width:40px;">#${idx+1}</div>
-                        <div style="flex:1;"><div style="color:#444; margin-bottom:8px; white-space:pre-wrap;">${escapeHtml(c)}</div>
-                            <div style="display:flex; gap:8px; margin-top:6px;">
-                                <button class="btn" onclick="analyzeChunk(${idx})">Analyze</button>
-                                <button class="btn" onclick="speakChunk(${idx})">🔊 Read</button>
-                                <button class="btn" onclick="addChunkAnnotation(${idx})">➕ Annotate</button>
-                                <button class="btn" onclick="summarizeChunk(${idx})">📝 Summarize</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="chunkResult-${idx}" style="margin-top:10px;"></div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function analyzeChunk(idx) {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks[idx]) return;
-                const res = performAnalysis(chunks[idx]);
-                const out = `<div style="display:flex; gap:8px; flex-wrap:wrap;"><div style="padding:6px 8px; border-radius:6px; background:#eef2ff;">Sentiment: <strong>${res.sentiment}</strong></div><div style="padding:6px 8px; border-radius:6px; background:#f0fff4;">Words: ${res.wordCount}</div><div style="padding:6px 8px; border-radius:6px; background:#fff6e6;">Confidence: ${Math.round(res.confidence)}%</div></div>`;
-                const dest = document.getElementById('chunkResult-' + idx);
-                if (dest) dest.innerHTML = out;
-            } catch (e) { console.warn('analyzeChunk', e); }
-        }
-
-        function analyzeAllChunks() {
-            const chunks = window.paragraphChunks || [];
-            if (!chunks.length) { showToast('No chunks to analyze', 'info'); return; }
-            chunks.forEach((_, i) => analyzeChunk(i));
-            showToast('Analyzed ' + chunks.length + ' chunk(s)', 'info', 1200);
-            // update chunk sentiment chart
-            try { renderChunkSentimentChart(); } catch(e){ console.warn('renderChunkSentimentChart', e); }
-        }
-
-        function exportChunksCSV() {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks.length) { showToast('No chunks to export', 'info'); return; }
-                const rows = [['index','text','wordCount','sentiment','confidence']];
-                chunks.forEach((t,i)=>{ const a = performAnalysis(t); rows.push([i+1, '"'+(t.replace(/"/g,'""').slice(0,120))+'"', a.wordCount, a.sentiment, Math.round(a.confidence)]); });
-                const csv = rows.map(r=>r.join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'chunks-'+Date.now()+'.csv'; a.click(); URL.revokeObjectURL(url);
-                showToast('Chunks exported', 'info', 1200);
-            } catch (e) { console.warn('exportChunksCSV', e); showToast('Export failed','error',2000); }
-        }
-
-        function speakChunk(idx) {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks[idx]) return; const t = chunks[idx];
-                if (!window.speechSynthesis) { showToast('TTS not available in this browser', 'error'); return; }
-                const u = new SpeechSynthesisUtterance(t);
-                window.speechSynthesis.speak(u);
-            } catch (e) { console.warn('speakChunk', e); }
-        }
-
-        function speakAllChunks() { const chunks = window.paragraphChunks || []; chunks.forEach((_,i)=>setTimeout(()=>speakChunk(i), i*800)); }
-
-        function addChunkAnnotation(idx) {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks[idx]) return;
-                const text = chunks[idx];
-                if (typeof createAnnotation === 'function') {
-                    createAnnotation(text, 'insight', `Chunk ${idx+1}`, `Auto annotation for chunk ${idx+1}`);
-                    if (typeof renderAllAnnotations === 'function') renderAllAnnotations();
-                    showToast('Annotation created for chunk', 'info', 1200);
-                } else {
-                    // fallback to local storage
-                    const raw = localStorage.getItem('advancedAnnotations'); const arr = raw?JSON.parse(raw):[];
-                    arr.push({ id: 'chunk-' + Date.now(), title: `Chunk ${idx+1}`, content: text, confidence: 50 }); localStorage.setItem('advancedAnnotations', JSON.stringify(arr));
-                    showToast('Annotation saved to storage', 'info', 1200);
-                }
-            } catch (e) { console.warn('addChunkAnnotation', e); }
-        }
-
-        function renderChunkSentimentChart() {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks.length) return;
-                const data = chunks.map(c => performAnalysis(c).confidence || 0);
-                const labels = chunks.map((c,i)=>'Chunk '+(i+1));
-                const ctx = document.getElementById('chunkSentimentChart').getContext('2d');
-                if (window._chunkChart) window._chunkChart.destroy();
-                window._chunkChart = new Chart(ctx, {
-                    type: 'line', data: { labels, datasets: [{ label: 'Sentiment Confidence', data, fill: true, backgroundColor: 'rgba(102,126,234,0.12)', borderColor: '#667eea' }] }, options: { responsive:true, maintainAspectRatio:false }
-                });
-            } catch(e){ console.warn('renderChunkSentimentChart', e); }
-        }
-
-        function summarizeChunk(idx) {
-            try {
-                const chunks = window.paragraphChunks || [];
-                if (!chunks[idx]) return;
-                const s = simpleSummarize(chunks[idx], 2);
-                const dest = document.getElementById('chunkResult-' + idx);
-                if (dest) dest.innerHTML = (dest.innerHTML || '') + `<div style="margin-top:8px; background:#fffbe6; padding:8px; border-radius:6px;">Summary: ${escapeHtml(s)}</div>`;
-            } catch (e) { console.warn('summarizeChunk', e); }
-        }
-
-        // Simple History modal
-        function showHistory() {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
-            const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-            let list = '<div style="width:90%; max-width:800px; background:white; padding:16px; border-radius:8px; max-height:80vh; overflow:auto;">';
-            list += '<h3>Analysis History</h3>';
-            if (hist.length === 0) list += '<p style="color:#666;">No history yet. Analyze texts to build history.</p>';
-            hist.forEach(item => {
-                list += `<div style="border-left:3px solid var(--primary); padding:10px; margin-bottom:8px;">` +
-                    `<strong>${new Date(item.timestamp).toLocaleString()}</strong><br>` +
-                    `<small>${item.preview}...</small><div style="margin-top:8px;"><button class="btn btn-primary" onclick='(function(){ loadHistory(${item.id}); })()'>Load</button> <button class="btn btn-secondary" onclick='(function(){ deleteHistory(${item.id}, this) })()'>Delete</button></div></div>`;
-            });
-            list += '<div style="display:flex; gap:8px; justify-content:flex-end;"><button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Close</button></div>';
-            list += '</div>';
-            modal.innerHTML = list;
-            document.body.appendChild(modal);
-        }
-
-        function loadHistory(id) {
-            try {
-                const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-                const item = hist.find(h => h.id === id);
-                if (item) {
-                    document.getElementById('textInput').value = item.preview + '\n\n(loaded full analysis from history)';
-                    // load analysis object into state
-                    window.latestAnalysisData = item.analysis;
-                    state.currentText = item.analysis.text || document.getElementById('textInput').value;
-                    state.currentAnalysis = item.analysis;
-                    showToast('History loaded. View tabs for details.', 'info');
-                    if (document.querySelector('#resultsSection')) document.getElementById('resultsSection').classList.remove('hidden');
-                }
-            } catch (e) { console.warn('loadHistory error', e); }
-        }
-
-        function deleteHistory(id, btn) {
-            try {
-                let hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-                hist = hist.filter(h => h.id !== id);
-                localStorage.setItem('analysisHistory', JSON.stringify(hist));
-                showToast('Deleted history item', 'info');
-                // close parent modal and reopen to refresh
-                document.querySelectorAll('div[style*="z-index:10003"]')[0].remove();
-                showHistory();
-            } catch (e) { console.warn('deleteHistory', e); }
-        }
-
-        // Compare modal (two-text quick compare)
-        function openCompareModal() {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
-            modal.innerHTML = `
-                <div style="width:95%; max-width:900px; background:white; padding:16px; border-radius:8px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <div><h4>Text A</h4><textarea id="compareA" style="width:100%; height:220px;"></textarea><button class="btn btn-primary" onclick="analyzeCompare()">Analyze Both</button></div>
-                    <div><h4>Text B</h4><textarea id="compareB" style="width:100%; height:220px;"></textarea></div>
-                    <div id="compareResults" style="grid-column: 1 / -1; margin-top:8px;"></div>
-                    <div style="grid-column: 1 / -1; text-align:right;"><button class="btn btn-secondary" onclick="removeTopFixedOverlay()">Close</button></div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function analyzeCompare() {
-            const a = document.getElementById('compareA').value.trim();
-            const b = document.getElementById('compareB').value.trim();
-            if (!a || !b) { showToast('Paste both texts to compare', 'error'); return; }
-            try {
-                const analA = performAnalysis(a);
-                const analB = performAnalysis(b);
-                const r = document.getElementById('compareResults');
-                r.innerHTML = `<div style="display:flex; gap:12px;"><div style="flex:1; padding:10px; border:1px solid var(--border); border-radius:6px;"><h4>Text A</h4><p>Words: ${analA.wordCount} • Sentiment: ${analA.sentiment}</p></div><div style="flex:1; padding:10px; border:1px solid var(--border); border-radius:6px;"><h4>Text B</h4><p>Words: ${analB.wordCount} • Sentiment: ${analB.sentiment}</p></div></div>`;
-            } catch (e) { console.warn('compare error', e); showToast('Compare failed', 'error'); }
-        }
-
-        async function submitFeedback() {
-            const txt = document.getElementById('feedbackText').value.trim();
-            if (!txt) { showToast('Please enter feedback', 'error'); return; }
-            try {
-                const resp = await fetch('/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feedback: txt, textSample: window.currentText || '' }) });
-                const j = await resp.json();
-                if (j.success) {
-                    showToast('Thanks — feedback received', 'info');
-                    document.getElementById('feedbackModal').remove();
-                } else {
-                    showToast('Failed to send feedback', 'error');
-                }
-            } catch (e) {
-                // Fallback: save feedback locally to localStorage
-                try {
-                    const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-                    fb.unshift({ id: Date.now(), text: txt, sample: window.currentText || '', timestamp: new Date().toISOString() });
-                    while (fb.length > 200) fb.pop();
-                    localStorage.setItem('localFeedback', JSON.stringify(fb));
-                    showToast('No server — feedback saved locally', 'info');
-                    document.getElementById('feedbackModal').remove();
-                } catch (e2) {
-                    showToast('Error sending feedback', 'error');
-                }
-            }
-        }
-        function updateLanguageInfo() { state.currentLanguage = document.getElementById('language-select').value; }
-        function clearAll() {
-            const doClear = () => { document.getElementById('textInput').value = ''; hideResults(); document.getElementById('quickStats').innerHTML = ''; };
-            try {
-                if (typeof askConfirm === 'function') {
-                    askConfirm('Clear all?', doClear);
-                    return;
-                }
-            } catch (e) { /* fallthrough */ }
-            // last-resort fallback
-            if (typeof showConfirm === 'function') { showConfirm('Clear all?', doClear); } else if (confirm('Clear all?')) doClear();
-        }
-
-        // Generate a simple permalink (encoded text in URL fragment) and copy to clipboard
-        function generatePermalink() {
-            const txt = document.getElementById('textInput').value || '';
-            if (!txt) { showToast('Nothing to share', 'error'); return; }
-            try {
-                const encoded = encodeURIComponent(txt.slice(0, 20000));
-                const url = window.location.origin + window.location.pathname + '#text=' + encoded;
-                navigator.clipboard.writeText(url).then(() => showToast('Permalink copied to clipboard', 'info'));
-            } catch (e) { showToast('Unable to generate link', 'error'); }
-        }
-
-        // Debounce helper
-        function debounce(fn, wait) {
-            let t;
-            return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
-        }
-
-        // Auto-analyze while typing when toggle is enabled
-        function enableAutoAnalyze() {
-            const auto = document.getElementById('autoAnalyzeToggle');
-            const input = document.getElementById('textInput');
-            if (!input) return;
-            const handler = debounce(() => {
-                if (auto && auto.checked) analyzeText();
-            }, 600);
-            input.removeEventListener('input', input._autoHandler || handler);
-            input.addEventListener('input', handler);
-            input._autoHandler = handler;
-        }
-
-        // Keyboard shortcut: Ctrl+Enter to analyze
-        function enableShortcuts() {
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); analyzeText(); }
-            });
-        }
-
-        // Undo last auto-added annotation (basic)
-        function undoAnnotations() {
-            try {
-                if (window.annotationState && Array.isArray(window.annotationState._undo) && window.annotationState._undo.length) {
-                    const last = window.annotationState._undo.pop();
-                    if (last && last.action === 'create' && last.id) {
-                        if (typeof deleteAnnotation === 'function') deleteAnnotation(last.id);
-                        showToast('Undid last annotation', 'info');
-                    } else {
-                        showToast('Undo action processed', 'info');
-                    }
-                } else {
-                    showToast('Nothing to undo', 'error');
-                }
-            } catch (e) { console.warn('undoAnnotations', e); showToast('Undo failed', 'error'); }
-        }
-
-        // Display word frequency breakdown
-        function displayWordFreq(analysis) {
-            try {
-                if (!analysis || !analysis.words) {
-                    document.getElementById('wordFreqContainer').innerHTML = '<p style="color:var(--muted);">No data</p>';
-                    return;
-                }
-                const freqs = {};
-                analysis.words.forEach(w => { const k = w.replace(/[^a-zA-Z0-9'-]/g, '').toLowerCase(); if (!k) return; freqs[k] = (freqs[k] || 0) + 1; });
-                const arr = Object.entries(freqs).sort((a,b) => b[1]-a[1]).slice(0, 60);
-                let out = '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:8px;">';
-                for (const [w, c] of arr) out += `<div class="list-item">${w} <strong style="float:right;">${c}</strong></div>`;
-                out += '</div>';
-                document.getElementById('wordFreqContainer').innerHTML = out;
-            } catch (e) { console.warn('displayWordFreq', e); }
-        }
-
-        // Save current analysis as JSON file
-        function saveAnalysis() {
-            try {
-                const data = window.latestAnalysisData || state.currentAnalysis;
-                if (!data) { showToast('No analysis to save', 'error'); return; }
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = 'analysis-' + Date.now() + '.json'; a.click();
-                showToast('Analysis saved', 'info');
-            } catch (e) { showToast('Save failed', 'error'); }
-        }
-
-        // View locally saved feedback and export
-        function openFeedbackViewer() {
-            const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10003;';
-            let html = '<div style="background:white; width:90%; max-width:800px; padding:16px; border-radius:8px; max-height:80vh; overflow:auto;">';
-            html += '<h3>Local Feedback</h3>';
-            if (!fb.length) html += '<p style="color:#666;">No local feedback stored.</p>';
-            fb.forEach(item => { html += `<div style="border-left:3px solid var(--primary); padding:8px; margin-bottom:8px;"><strong>${new Date(item.timestamp).toLocaleString()}</strong><p>${item.text}</p></div>`; });
-            html += '<div style="display:flex; gap:8px; justify-content:flex-end;"><button class="btn btn-secondary" onclick="(function(){ document.getElementById(\'fbViewer\').remove(); })()">Close</button><button class="btn btn-primary" onclick="exportFeedback()">Export</button></div>';
-            html += '</div>';
-            modal.innerHTML = html; modal.id = 'fbViewer'; document.body.appendChild(modal);
-        }
-
-        function exportFeedback() {
-            try {
-                const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-                if (!fb.length) { showToast('No feedback to export', 'error'); return; }
-                const blob = new Blob([JSON.stringify(fb, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'local-feedback.json'; a.click();
-                showToast('Feedback exported', 'info');
-            } catch (e) { showToast('Export failed', 'error'); }
-        }
-
-        // Highlight key quotes in the content view (simple textual highlight)
-        function highlightKeyQuotes() {
-            try {
-                const quotes = (window.latestAnalysisData && window.latestAnalysisData.keyQuotes) || [];
-                if (!quotes.length) { showToast('No key quotes found', 'error'); return; }
-                let content = document.getElementById('summaryContent').innerHTML;
-                quotes.slice(0,10).forEach(q => {
-                    const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const re = new RegExp('(' + esc + ')', 'gi');
-                    content = content.replace(re, '<mark style="background:linear-gradient(90deg, #fff59d, #ffe082);">$1</mark>');
-                });
-                document.getElementById('summaryContent').innerHTML = content;
-                showToast('Key quotes highlighted', 'info');
-            } catch (e) { console.warn('highlightKeyQuotes', e); showToast('Highlight failed', 'error'); }
-        }
-        document.addEventListener('DOMContentLoaded', () => { if (state.darkMode) { document.body.classList.add('dark-mode'); } });
-
-        // --- Meta / Intelligence Features ---
-        function computeSentenceConfidence(sentence) {
-            const words = (sentence.toLowerCase().match(/\b[\w']+\b/g) || []);
-            if (!words.length) return 0;
-            // confidence heuristic: longer sentences with clear sentiment words => higher confidence
-            const sentimentWords = ['good','great','bad','terrible','love','hate','happy','sad','angry','fear','joy','despair','wonder'];
-            const count = words.filter(w => sentimentWords.includes(w)).length;
-            const base = Math.min(90, 20 + (count * 15));
-            const lengthBoost = Math.min(100, words.length * 2);
-            const conf = Math.round((base + lengthBoost) / 2);
-            return Math.min(100, conf);
-        }
-
-        function sentenceAlternativeReadings(sentence) {
-            const data = sentenceEmotionAnalysis(sentence)[0] || { emotions: {} };
-            const pairs = Object.entries(data.emotions).sort((a,b)=>b[1]-a[1]);
-            const top = pairs.slice(0,3).map(p => ({ emotion: p[0], score: p[1] }));
-            return top;
-        }
-
-        // Local annotation store with simple versioning + feedback
-        function createLocalAnnotation(payload) {
-            try {
-                const store = JSON.parse(localStorage.getItem('advancedAnnotations') || '[]');
-                const id = 'ann-' + Date.now() + '-' + Math.floor(Math.random()*9999);
-                const item = Object.assign({ id, versions: [{ snapshot: payload, ts: new Date().toISOString() }], votes: { agree:0, disagree:0 }, feedback: [] }, payload);
-                store.push(item);
-                localStorage.setItem('advancedAnnotations', JSON.stringify(store));
-                return item;
-            } catch (e) { console.warn('createLocalAnnotation', e); return null; }
-        }
-
-        function getLocalAnnotations() { try { return JSON.parse(localStorage.getItem('advancedAnnotations') || '[]'); } catch (e) { return []; } }
-
-        function addAnnotationFeedback(id, feedbackText) {
-            try {
-                const store = getLocalAnnotations();
-                const idx = store.findIndex(a => a.id === id);
-                if (idx === -1) return false;
-                store[idx].feedback = store[idx].feedback || [];
-                store[idx].feedback.push({ text: feedbackText, ts: new Date().toISOString() });
-                localStorage.setItem('advancedAnnotations', JSON.stringify(store));
-                return true;
-            } catch (e) { return false; }
-        }
-
-        // Voting for collaborative review (local-only)
-        function voteAnnotation(id, type) {
-            try {
-                const store = getLocalAnnotations();
-                const idx = store.findIndex(a => a.id === id);
-                if (idx === -1) return;
-                store[idx].votes = store[idx].votes || { agree:0, disagree:0 };
-                if (type === 'agree') store[idx].votes.agree++;
-                else store[idx].votes.disagree++;
-                localStorage.setItem('advancedAnnotations', JSON.stringify(store));
-                showToast('Vote recorded', 'info');
-            } catch (e) { console.warn('voteAnnotation', e); }
-        }
-
-        // Show provenance for an annotation (evidence spans)
-        function showProvenance(id) {
-            const store = getLocalAnnotations();
-            const ann = store.find(a => a.id === id) || {};
-            const ver = (ann.versions && ann.versions[ann.versions.length-1]) || ann;
-            const evidence = ver && ver.snapshot && ver.snapshot.sentenceIndex !== undefined ? [(ver.snapshot.original || '').slice(0,400)] : (ver.snapshot && ver.snapshot.evidence) || [];
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;';
-            modal.innerHTML = `<div style="background:white; padding:12px; border-radius:8px; width:90%; max-width:640px;"><h4>Evidence for annotation</h4><div style="max-height:360px; overflow:auto;">${evidence.map(e=>`<div style='padding:8px; border-left:3px solid var(--primary); margin-bottom:6px;'>${e}</div>`).join('') || '<p style="color:#666;">No explicit evidence stored.</p>'}</div><div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;"><button class='btn btn-secondary' onclick='this.closest("div").parentElement.remove()'>Close</button></div></div>`;
-            document.body.appendChild(modal);
-        }
-
-        // Narrative arc detection (simple sentiment change points)
-        function detectNarrativeArc(text) {
-            const sentences = text.match(/[^\n\.\!\?]+[\n\.\!\?]*/g) || [text];
-            const sentiments = sentences.map(s => {
-                const res = performAnalysis(s || '');
-                return res.confidence ? (res.sentiment === 'positive' ? 1 : res.sentiment === 'negative' ? -1 : 0) : 0;
-            });
-            // find main shift index
-            let cumulative = 0; let maxShift = 0; let shiftIdx = 0;
-            sentiments.forEach((v,i)=>{ cumulative += v; if (Math.abs(cumulative) > maxShift) { maxShift = Math.abs(cumulative); shiftIdx = i; } });
-            return { shiftIndex: shiftIdx, sentiments, sentences };
-        }
-
-        function displayQualityWarnings(text) {
-            try {
-                const warnings = [];
-                // poetry heuristic
-                const lines = text.split(/\n+/).filter(l=>l.trim());
-                if (lines.length > 4 && lines.some(l=>l.length < 60)) warnings.push('Text appears poetic; some analyses may be unreliable for poetry.');
-                // sensitive content
-                const sensitive = ['suicide','kill myself','self-harm','rape','hate speech','slur','bomb'];
-                const low = text.toLowerCase();
-                const found = sensitive.filter(k => low.includes(k));
-                if (found.length) warnings.push('Sensitive content detected: ' + found.join(', ') + '. Displaying gentler analysis.');
-                // emotional overload
-                const emoWords = ['love','hate','joy','sad','angry','fear'];
-                const emoCount = emoWords.reduce((c,w)=>c + (low.split(w).length-1),0);
-                if (emoCount > 20) warnings.push('Heavy use of emotional language detected. Consider neutral rewrites.');
-                if (warnings.length) {
-                    const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;';
-                    modal.innerHTML = `<div style="background:white; padding:12px; border-radius:8px; width:90%; max-width:640px;"><h4>Quality & Safety Notes</h4><ul>${warnings.map(w=>`<li style='margin-bottom:6px;'>${w}</li>`).join('')}</ul><div style="display:flex; justify-content:flex-end;"><button class='btn btn-secondary' onclick='this.closest("div").parentElement.remove()'>Close</button></div></div>`;
-                    document.body.appendChild(modal);
-                }
-            } catch (e) { console.warn('quality warnings', e); }
-        }
-
-        // Simple rhetorical strategy detection (keyword heuristics)
-        function detectRhetoric(text) {
-            const lowered = text.toLowerCase();
-            const out = { pathos: false, ethos: false, logos: false, tactics: [] };
-            if (/(urgent|now|act now|limited time|don't miss)/i.test(lowered)) { out.pathos = true; out.tactics.push('urgency'); }
-            if (/(studies show|research|experts|according to)/i.test(lowered)) { out.logos = true; out.tactics.push('authority/claims'); }
-            if (/(i believe|i feel|we should|our mission)/i.test(lowered)) { out.ethos = true; out.tactics.push('appeal to values'); }
-            return out;
-        }
-
-        // Tone & intent heuristics
-        function detectTone(text) {
-            const low = (text || '').toLowerCase();
-            if (!low) return { tone: 'neutral', confidence: 20 };
-            if (/\b(sarcasm|iron(y|ic)|satire)\b/.test(low)) return { tone: 'sarcastic', confidence: 65 };
-            if (/\b(formal|respectfully|sincerely)\b/.test(low)) return { tone: 'formal', confidence: 60 };
-            if (/(please|consider|we recommend)/i.test(low)) return { tone: 'persuasive', confidence: 55 };
-            if (/(i am sorry|i apologize|i feel)/i.test(low)) return { tone: 'empathetic', confidence: 60 };
-            if (/(hate|kill|destroy|attack)/i.test(low)) return { tone: 'aggressive', confidence: 70 };
-            // default based on sentiment heuristics
-            const pa = performAnalysis(text || '');
-            return { tone: pa.sentiment === 'positive' ? 'positive' : pa.sentiment === 'negative' ? 'negative' : 'neutral', confidence: Math.round(pa.confidence || 40) };
-        }
-
-        // Bias & framing detection
-        function detectBias(text) {
-            const low = (text || '').toLowerCase();
-            const loaded = ['obviously','clearly','undoubtedly','no doubt','everyone knows','always','never'];
-            const subjectiveWords = ['i think','i believe','in my opinion','we feel','should'];
-            const foundLoaded = loaded.filter(w => low.includes(w));
-            const foundSubjective = subjectiveWords.filter(w => low.includes(w));
-            // sentiment imbalance
-            const pa = performAnalysis(text || '');
-            const imbalance = Math.abs((pa.positiveScore || 0) - (pa.negativeScore || 0));
-            return { loadedLanguage: foundLoaded, subjective: foundSubjective, sentimentImbalance: imbalance, likelyBiased: (foundLoaded.length + foundSubjective.length + (imbalance > 40 ? 1 : 0)) > 1 };
-        }
-
-        // Audience simulation (very simple rewrites)
-        function simulateAudience(mode) {
-            const text = document.getElementById('summaryContent').innerText || document.getElementById('textInput').value || '';
-            if (!text) { showToast('No text to simulate', 'error'); return; }
-            let out = text;
-            if (mode === 'neutral') {
-                out = counterfactualRewrite('neutralize');
-            } else if (mode === 'hostile') {
-                out = out + '\n\n(Note: a hostile reader may focus on perceived biases and emotional language.)';
-            } else if (mode === 'vulnerable') {
-                out = counterfactualRewrite('soothe');
-            }
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;';
-            modal.innerHTML = `<div style="background:white; padding:12px; border-radius:8px; width:90%; max-width:720px; max-height:80vh; overflow:auto;"><h4>Simulated Audience: ${mode}</h4><div style='white-space:pre-wrap; margin-top:8px;'>${out}</div><div style='display:flex; justify-content:flex-end; margin-top:8px;'><button class='btn btn-secondary' onclick='this.closest("div").parentElement.remove()'>Close</button></div></div>`;
-            document.body.appendChild(modal);
-        }
-
-        // Counterfactual rewrites (neutralize / soothe)
-        function counterfactualRewrite(mode) {
-            let txt = document.getElementById('textInput').value || document.getElementById('summaryContent').innerText || '';
-            if (!txt) return '';
-            const replacements = {
-                angry: 'upset', hate: 'strongly dislike', love: 'like', 'you must': 'consider', 'act now': 'consider acting', 'urgent': 'time-sensitive'
-            };
-            Object.entries(replacements).forEach(([k,v]) => { const re = new RegExp('\\b'+k+'\\b','gi'); txt = txt.replace(re, v); });
-            if (mode === 'soothe') txt = txt.replace(/\b(sad|angry|hate|fear|panic)\b/gi, 'concerned');
-            return txt;
-        }
-
-        // Explain Like I'm 12 (very simple simplifier)
-        function explainLikeIm12() {
-            const text = document.getElementById('summaryContent').innerText || document.getElementById('textInput').value || '';
-            if (!text) { showToast('No text to explain', 'error'); return; }
-            const simple = text.replace(/\b(politics|ideology|manipulate|manipulation|satire|sarcasm)\b/gi, 'complicated idea');
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;';
-            modal.innerHTML = `<div style="background:white; padding:12px; border-radius:8px; width:90%; max-width:720px; max-height:80vh; overflow:auto;"><h4>Explain Like I'm 12</h4><div style='white-space:pre-wrap; margin-top:8px;'>${simple}</div><div style='display:flex; justify-content:flex-end; margin-top:8px;'><button class='btn btn-secondary' onclick='this.closest("div").parentElement.remove()'>Close</button></div></div>`;
-            document.body.appendChild(modal);
-        }
-
-        // Analytics dashboard (basic)
-        function openAnalyticsDashboard() {
-            const hist = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-            const toneCounts = {};
-            hist.forEach(h => { const s = h.analysis && h.analysis.sentiment || 'unknown'; toneCounts[s] = (toneCounts[s] || 0) + 1; });
-            let html = '<div style="width:90%; max-width:900px; background:white; padding:16px; border-radius:8px; max-height:80vh; overflow:auto;">';
-            html += '<h3>Analytics Dashboard</h3>'; html += '<h4>Sentiment distribution</h4>';
-            for (const k of Object.keys(toneCounts)) html += `<div class="list-item">${k}: <strong>${toneCounts[k]}</strong></div>`;
-            html += '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;"><button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Close</button></div></div>';
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;'; modal.innerHTML = html; document.body.appendChild(modal);
-        }
-
-        // API stub modal
-        function openAPIStub() {
-            const html = `<div style="width:90%; max-width:720px; background:white; padding:16px; border-radius:8px;">` +
-                `<h3>API / Batch Processing (Stub)</h3><p>This build includes a client-side export for batch processing. Example curl to upload an exported JSON to your server:</p>` +
-                `<pre>curl -X POST -H "Content-Type: application/json" --data-binary @analysis.json https://your-server.example.com/api/ingest</pre>` +
-                `<p>To use programmatic access, export analysis JSON and POST it to your endpoint.</p>` +
-                `<div style="display:flex; justify-content:flex-end; gap:8px;"><button class='btn btn-secondary' onclick='this.closest("div").parentElement.remove()'>Close</button></div></div>`;
-            const modal = document.createElement('div'); modal.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:10005;'; modal.innerHTML = html; document.body.appendChild(modal);
-        }
-
-        // Hook into analysis completion to show some meta insights
-        const originalShowToast = showToast;
-        function postAnalysisMeta() {
-            try {
-                const text = document.getElementById('textInput').value || '';
-                // quality warnings
-                displayQualityWarnings(text);
-                // rhetoric
-                const rhet = detectRhetoric(text);
-                if (rhet.pathos || rhet.ethos || rhet.logos) {
-                    showToast('Rhetorical cues detected: ' + rhet.tactics.join(', '), 'info', 3500);
-                }
-                // provenance hint
-                if (window.latestAnalysisData && window.latestAnalysisData.keyQuotes && window.latestAnalysisData.keyQuotes.length) showToast('Provenance available for key quotes', 'info', 2400);
-            } catch (e) { console.warn('postAnalysisMeta', e); }
-        }
-
-        // Attach postAnalysisMeta to analyzeText flow by wrapping display calls
-        const _origDisplayContent = displayContent;
-        displayContent = function(a) { _origDisplayContent(a); try { postAnalysisMeta(); } catch (e) {} };
-
-        // expose local annotation API fallbacks
-        if (!window.createAnnotation) window.createAnnotation = createLocalAnnotation;
-        if (!window.getAllAnnotations) window.getAllAnnotations = getLocalAnnotations;
-
-        // Global modal close helper: removes the topmost fixed-position overlay
-        function removeTopFixedOverlay() {
-            try {
-                const els = Array.from(document.body.children).reverse();
-                for (const el of els) {
-                    const cs = window.getComputedStyle(el);
-                    if (cs && cs.position === 'fixed' && cs.display !== 'none' && parseInt(cs.zIndex||0,10) >= 0) {
-                        el.remove();
-                        return true;
-                    }
-                }
-            } catch (e) { console.warn('removeTopFixedOverlay', e); }
-            return false;
-        }
-
-        // Delegated click handler to gracefully close modals when inline close buttons fail
-        document.addEventListener('click', (ev) => {
-            try {
-                const t = ev.target;
-                if (!t) return;
-                if (t.tagName === 'BUTTON') {
-                    const txt = (t.textContent || '').trim().toLowerCase();
-                    const shouldClose = txt === 'close' || txt === 'close ' || txt.includes('close') || t.dataset && t.dataset.close === 'true';
-                    if (shouldClose) removeTopFixedOverlay();
-                }
-            } catch (e) { console.warn('modal close delegate', e); }
-        }, true);
-
-    </script>
 </body>
 </html>
