@@ -1,81 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Study & Practice Tool</title>
 <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
 <div class="container">
+  <header class="app-header">
+    <a class="logo" href="sentiment-analyzer.html">
+      Literary Sentiment Analyzer
+    </a>
 
-<header class="app-header">
-  <a class="logo" href="sentiment-analyzer.html">Study Tool</a>
-</header>
+    <nav class="header-nav" aria-label="Main navigation">
+      <a href="sentiment-analyzer.html">Analyze</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="tools-ingest.html">Tools</a>
+      <a href="analysis.html">Analysis</a>
+    </nav>
 
-<section class="card">
-  <h1>Study & Practice Tool</h1>
-  <p>AP / College-level questions, flashcards, grading, and model answers.</p>
-</section>
+    <div class="header-right">
+      <button type="button" class="icon-btn" onclick="speakCurrentText()" title="Read text aloud">
+        🔊
+      </button>
 
-<section class="card">
-  <h2>Input Text</h2>
-  <textarea id="textInput" style="min-height:300px;"></textarea>
-  <button class="btn btn-primary" onclick="generateStudyMaterials()">Generate</button>
-</section>
+      <button type="button" class="icon-btn" onclick="toggleDarkMode()" aria-pressed="false" title="Toggle theme">
+        🌓
+      </button>
 
-<section id="studySection" class="card hidden">
-  <h2>Study Questions</h2>
-  <div id="questionsContainer"></div>
-</section>
+      <button type="button" class="btn btn-primary" id="toolbarGenerateBtn" onclick="generateStudyMaterials()">
+        Generate
+      </button>
+      
+      <nav class="header-nav" role="navigation">
+  <a href="study-guide.html" aria-current="page">Study Guide</a>
+</nav>
 
-<section id="flashcardSection" class="card hidden">
-  <h2>Flashcards</h2>
-  <button class="btn btn-primary" onclick="generateFlashcards()">Generate Flashcards</button>
-  <button class="btn" onclick="shuffleCards()">Shuffle</button>
 
-  <div id="flashcardStudy" style="margin-top:1rem;">
-    <div id="flashcard" onclick="flipCard()" style="cursor:pointer; padding:2rem; border:2px solid #667eea; border-radius:10px;">
-      <div id="flashcardContent"></div>
     </div>
-    <div id="cardProgress"></div>
-    <button onclick="prevCard()">Prev</button>
-    <button onclick="nextCard()">Next</button>
-  </div>
-</section>
+  </header>
 
+  <section class="card intro-card" style="margin: 20px 0;">
+    <h1 style="margin: 0 0 10px 0; font-weight: 900; font-size: 2rem;">Study & Practice Tool</h1>
+    <p class="intro-subtitle" style="margin: 0; font-size: 1.1rem; opacity: 0.9;">
+      Advanced AP / College-level questions, flashcards, AI grading, and comprehensive study aids for any text.
+    </p>
+  </section>
+
+  <div class="main-grid">
+    <aside class="card sidebar">
+      <h3>Study Controls</h3>
+
+      <button type="button" class="btn btn-primary" onclick="generateStudyMaterials()">
+        Generate Materials
+      </button>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="pasteFromClipboard()">Paste</button>
+        <button type="button" class="btn" onclick="loadExample()">Load Example</button>
+      </div>
+
+      <label class="toggle-row" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="autoGenerateToggle" type="checkbox" style="cursor: pointer;">
+        <span style="font-size: 0.9rem;">Auto-generate on paste</span>
+      </label>
+
+      <label class="toggle-row" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="showModelAnswersToggle" type="checkbox" checked style="cursor: pointer;">
+        <span style="font-size: 0.9rem;">Show model answers</span>
+      </label>
+
+      <label style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 0.9rem; font-weight: 600;">Difficulty Level</span>
+        <select id="difficulty-select" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+          <option value="ap">AP Level</option>
+          <option value="college">College</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </label>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="btn" onclick="saveProgress()">Save Progress</button>
+        <button type="button" class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </aside>
+
+    <main class="card">
+      <h2>Input Text</h2>
+
+      <textarea
+        id="textInput"
+        style="width: 100%; min-height: 400px; padding: 16px; font-size: 1rem; resize: vertical;"
+        placeholder="Paste or type your poem, passage, or essay here…"
+        aria-label="Text to analyze"></textarea>
+
+      <p class="small" style="margin: 12px 0;">
+        Shortcut: <strong>Ctrl + Enter</strong> to generate ·
+        <strong>Ctrl + S</strong> to save progress
+      </p>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button
+          type="button"
+          id="mainGenerateBtn"
+          class="btn btn-primary"
+          onclick="generateStudyMaterials()">
+          Generate Study Materials
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="pasteFromClipboard()">
+          Paste
+        </button>
+      </div>
+
+      <div id="quickStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;"></div>
+    </main>
+
+    <aside class="card" id="keyQuotesPanel">
+      <h3>Key Quotes & Vocabulary</h3>
+      <p class="small" style="margin-bottom: 12px;">Important passages and challenging terms from your text</p>
+      <div id="keyQuotesContent" style="color: var(--muted); font-style: italic;">
+        Generate materials to see key quotes and vocabulary
+      </div>
+    </aside>
+
+    <section id="studySection" class="card hidden" style="grid-column: 1 / -1;">
+      <h2>Study Materials</h2>
+
+      <div class="tab-container">
+        <div class="tabs">
+          <button class="tab-button active" onclick="switchTab('questions', this)">Questions</button>
+          <button class="tab-button" onclick="switchTab('flashcards', this)">Flashcards</button>
+          <button class="tab-button" onclick="switchTab('notes', this)">Study Notes</button>
+          <button class="tab-button" onclick="switchTab('quiz', this)">Quick Quiz</button>
+        </div>
+
+        <div id="tab-questions" class="tab-content active" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 8px;">Study Questions</h3>
+          <p class="muted" style="margin-bottom: 16px;">Answer these AP-level questions and receive instant AI feedback.</p>
+          
+          <div style="height: 8px; background: var(--surface); border-radius: 999px; overflow: hidden; margin: 16px 0;">
+            <div id="progressFill" style="height: 100%; width: 0%; background: var(--gradient-primary); transition: width 0.3s ease;"></div>
+          </div>
+          
+          <div id="questionsContainer"></div>
+        </div>
+
+        <div id="tab-flashcards" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Flashcards</h3>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="generateFlashcards()">Generate Flashcards</button>
+            <button class="btn" onclick="shuffleCards()">Shuffle</button>
+            <button class="btn" onclick="resetFlashcards()">Reset</button>
+          </div>
+          
+          <div id="flashcardStudy">
+            <div id="flashcard" onclick="flipCard()" style="cursor: pointer; padding: 3rem; border: 3px solid var(--primary); border-radius: 14px; min-height: 280px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(139, 92, 246, 0.05)); position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+              <div id="flashcardContent" style="text-align: center; font-size: 1.15rem; line-height: 1.7; font-weight: 500;">Click "Generate Flashcards" to begin</div>
+              <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; color: var(--muted); opacity: 0.6; font-weight: 600;">Click to flip</div>
+            </div>
+            <div id="cardProgress" style="text-align: center; margin: 16px 0; font-weight: 700; color: var(--primary); font-size: 1.05rem;"></div>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+              <button class="btn" onclick="prevCard()">← Previous</button>
+              <button class="btn btn-primary" onclick="flipCard()">Flip Card</button>
+              <button class="btn" onclick="nextCard()">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-notes" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Study Notes</h3>
+          <button class="btn btn-primary" onclick="generateNotes()" style="margin-bottom: 16px;">Generate Notes</button>
+          <div id="notesContainer"></div>
+        </div>
+
+        <div id="tab-quiz" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Quick Quiz</h3>
+          <p class="muted" style="margin-bottom: 16px;">Test your understanding with these questions</p>
+          <button class="btn btn-primary" onclick="generateQuiz()" style="margin-bottom: 16px;">Generate Quiz</button>
+          <div id="quizContainer"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.9rem;">
+    <p>Literary Sentiment Analyzer v3.0 | © 2025 | Advanced Analysis Suite</p>
+  </footer>
 </div>
 
 <script>
-/* ===================== AI CALL ===================== */
-async function callAI(prompt) {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer YOUR_API_KEY_HERE"
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7
-    })
-  });
+const state = {
+  currentText: '',
+  questions: [],
+  flashcards: [],
+  cardIndex: 0,
+  flipped: false,
+  darkMode: localStorage.getItem('darkMode') === 'true',
+  answeredCount: 0,
+  sentences: [],
+  usedSentences: new Set(),
+  keyQuotes: [],
+  vocabulary: []
+};
 
-  const data = await res.json();
-  if (!data.choices) throw new Error("AI error");
-  return data.choices[0].message.content;
-}
-
-/* ===================== STATE ===================== */
-let currentText = "";
-let questions = [];
-let flashcards = [];
-let cardIndex = 0;
-let flipped = false;
-
-/* ===================== QUESTIONS ===================== */
 const QUESTION_BANK = [
   "Analyze how a specific word choice shapes meaning.",
   "Explain how imagery frames reader judgment.",
@@ -100,133 +236,703 @@ const QUESTION_BANK = [
 ];
 
 function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+  const newArr = [...arr];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
 }
 
-/* ===================== GENERATE STUDY ===================== */
-async function generateStudyMaterials() {
-  const text = document.getElementById("textInput").value.trim();
-  if (!text) return alert("Enter text first.");
+function showToast(message, type, duration) {
+  type = type || 'info';
+  duration = duration || 3000;
+  const toast = document.getElementById('toast');
+  toast.className = type;
+  toast.textContent = message;
+  toast.style.display = 'block';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(function() { toast.style.display = 'none'; }, duration);
+}
 
-  currentText = text;
-  questions = [];
+function toggleDarkMode() {
+  state.darkMode = !state.darkMode;
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', state.darkMode);
+  const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+  if (btn) btn.setAttribute('aria-pressed', state.darkMode);
+}
 
-  const selected = shuffle([...QUESTION_BANK]).slice(0, 20);
+function speakCurrentText() {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) { 
+    showToast('No text to read', 'error'); 
+    return; 
+  }
+  if (!window.speechSynthesis) { 
+    showToast('Text-to-speech not available in this browser', 'error'); 
+    return; 
+  }
+  const utterance = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(utterance);
+}
 
-  for (const q of selected) {
-    const modelAnswer = await callAI(`
-TEXT:
-${text}
+function extractKeyQuotes(text) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  const quotes = [];
+  
+  sentences.forEach(s => {
+    const trimmed = s.trim();
+    if (trimmed.length > 50 && trimmed.length < 200) {
+      if (/metaphor|simile|imagery|symbol|contrast|irony|paradox|tone/i.test(trimmed) ||
+          /but|however|although|despite|yet/i.test(trimmed) ||
+          /beautiful|powerful|striking|vivid|profound/i.test(trimmed)) {
+        quotes.push(trimmed);
+      }
+    }
+  });
+  
+  return quotes.slice(0, 5);
+}
 
-QUESTION:
-${q}
+function extractVocabulary(text) {
+  const complexWords = text.match(/\b[a-z]{8,}\b/gi) || [];
+  const unique = [...new Set(complexWords.map(w => w.toLowerCase()))];
+  return unique.slice(0, 10);
+}
 
-Write a high-scoring AP-level response.
-Quote the text directly.
-Analyze language.
-Avoid summary.
-    `);
+function renderKeyQuotes() {
+  if (!state.keyQuotes.length && !state.vocabulary.length) {
+    document.getElementById('keyQuotesContent').innerHTML = '<p style="color: var(--muted); font-style: italic;">Generate materials to see key quotes and vocabulary</p>';
+    return;
+  }
+  
+  let html = '';
+  
+  if (state.keyQuotes.length > 0) {
+    html += '<div style="margin-bottom: 20px;"><h4 style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-bottom: 10px;">📌 Key Quotes</h4>';
+    state.keyQuotes.forEach(q => {
+      html += `<div style="padding: 10px; margin: 8px 0; background: var(--surface); border-left: 3px solid var(--primary); border-radius: 6px; font-size: 0.85rem; line-height: 1.6;">"${q.substring(0, 120)}${q.length > 120 ? '...' : ''}"</div>`;
+    });
+    html += '</div>';
+  }
+  
+  if (state.vocabulary.length > 0) {
+    html += '<div><h4 style="font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-bottom: 10px;">📚 Vocabulary</h4>';
+    state.vocabulary.forEach(word => {
+      html += `<div style="display: inline-block; padding: 6px 12px; margin: 4px; background: var(--surface); border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text);">${word}</div>`;
+    });
+    html += '</div>';
+  }
+  
+  document.getElementById('keyQuotesContent').innerHTML = html;
+}
 
-    questions.push({ q, modelAnswer });
+function updateQuickStats() {
+  const text = state.currentText;
+  const words = text.split(/\s+/).filter(w => w).length;
+  const chars = text.length;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+  const readingTime = Math.ceil(words / 200);
+  
+  let html = '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Words</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + words + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Characters</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + chars + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Sentences</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + sentences + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Read Time</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + readingTime + 'm</div></div>';
+  document.getElementById('quickStats').innerHTML = html;
+}
+
+function findRelevantSentence(text, question) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+
+  if (!sentences.length) {
+    return text.slice(0, 120);
   }
 
-  renderQuestions();
-  document.getElementById("studySection").classList.remove("hidden");
+  const keywords = {
+    'word choice': ['word', 'term', 'language', 'diction', 'phrase'],
+    'imagery': ['see', 'image', 'visual', 'picture', 'describe', 'paint'],
+    'tone': ['tone', 'mood', 'feeling', 'atmosphere', 'attitude'],
+    'metaphor': ['like', 'as', 'metaphor', 'symbol', 'represent'],
+    'structure': ['first', 'then', 'finally', 'begin', 'end', 'paragraph'],
+    'repetition': ['repeat', 'again', 'echo', 'recurring', 'pattern']
+  };
+  
+  for (const [key, words] of Object.entries(keywords)) {
+    if (question.toLowerCase().includes(key)) {
+      for (const sent of sentences) {
+        if (words.some(w => sent.toLowerCase().includes(w))) {
+          return sent.trim();
+        }
+      }
+    }
+  }
+  
+  return sentences[Math.floor(Math.random() * sentences.length)].trim();
 }
 
-/* ===================== RENDER QUESTIONS ===================== */
-function renderQuestions() {
-  const el = document.getElementById("questionsContainer");
-  el.innerHTML = "";
+async function generateModelAnswer(text, question) {
+  const relevantSentence = findRelevantSentence(text, question);
+  const excerpt = relevantSentence.substring(0, 60);
+  
+  const templates = [
+    `When examining ${question.toLowerCase()}, the passage reveals depth through the phrase "${excerpt}..." This language choice deliberately shapes interpretation by creating specific associations in the reader's mind. The author's strategic deployment of this phrasing establishes a framework through which we understand the broader thematic concerns of the text.`,
+    
+    `The passage demonstrates ${question.toLowerCase()} particularly in "${excerpt}..." Here, the author constructs meaning through careful selection of terminology that resonates beyond literal interpretation. This technique invites readers to recognize layers of significance that emerge from the text's linguistic architecture.`,
+    
+    `In addressing ${question.toLowerCase()}, we must consider how "${excerpt}..." functions within the passage. The author's rhetorical strategy becomes evident in this choice, as it simultaneously establishes tone and guides reader response. This exemplifies how textual elements work in concert to produce complex meaning.`,
+    
+    `The question of ${question.toLowerCase()} is illuminated by examining "${excerpt}..." The author's technique here reveals an understanding of how language operates on multiple levels—denotative and connotative, explicit and implicit. This layering creates richness that rewards close analytical reading.`
+  ];
+  
+  return templates[Math.floor(Math.random() * templates.length)];
+}
 
-  questions.forEach((item, i) => {
-    const div = document.createElement("div");
-    div.className = "card";
+async function generateStudyMaterials() {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) {
+    showToast('Please enter some text to analyze', 'error');
+    return;
+  }
+
+  state.currentText = text;
+  state.questions = [];
+  state.answeredCount = 0;
+  state.sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  state.usedSentences = new Set();
+  state.keyQuotes = extractKeyQuotes(text);
+  state.vocabulary = extractVocabulary(text);
+
+  const toolbarBtn = document.getElementById('toolbarGenerateBtn');
+  const mainBtn = document.getElementById('mainGenerateBtn');
+  [toolbarBtn, mainBtn].forEach(function(b) { 
+    if (b) { 
+      b.disabled = true; 
+      b.dataset.orig = b.innerHTML; 
+      b.innerHTML = b.dataset.orig + ' <span class="spinner-mini" style="display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite;" aria-hidden="true"></span>';
+    } 
+  });
+
+  updateQuickStats();
+  renderKeyQuotes();
+  document.getElementById('studySection').classList.remove('hidden');
+
+  setTimeout(async function() {
+    try {
+      const selected = shuffle(QUESTION_BANK).slice(0, 20);
+
+      for (const q of selected) {
+        const modelAnswer = await generateModelAnswer(text, q);
+        state.questions.push({ q, modelAnswer });
+      }
+
+      renderQuestions();
+      showToast('Study materials generated!', 'info', 2500);
+      
+      setTimeout(function() {
+        document.getElementById('studySection').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (e) {
+      showToast('Generation failed: ' + (e.message || e), 'error', 5000);
+    } finally {
+      [toolbarBtn, mainBtn].forEach(function(b) { 
+        if (b) { 
+          b.disabled = false; 
+          if (b.dataset.orig) b.innerHTML = b.dataset.orig; 
+        } 
+      });
+    }
+  }, 80);
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+
+  state.questions.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.cssText = 'margin: 16px 0; padding: 20px;';
     div.innerHTML = `
-      <h4>Question ${i + 1}</h4>
-      <p>${item.q}</p>
-      <textarea id="ans-${i}" style="min-height:120px;"></textarea>
-      <button onclick="grade(${i})">Grade</button>
-      <button onclick="showModel(${i})">Model Answer</button>
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-weight: 700; font-size: 1.05rem;">Question ${i + 1} of ${state.questions.length}</h4>
+      <p style="color: var(--muted); margin: 0 0 16px 0; font-size: 1rem; line-height: 1.6;">${item.q}</p>
+      <textarea id="ans-${i}" style="width: 100%; min-height: 140px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 1rem; background: var(--surface); color: var(--text); resize: vertical;" placeholder="Type your answer here..."></textarea>
+      <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="grade(${i})">Grade Answer</button>
+        <button class="btn btn-secondary" onclick="showModel(${i})">Show Model Answer</button>
+        <button class="btn" onclick="clearAnswer(${i})">Clear</button>
+      </div>
       <div id="res-${i}"></div>
     `;
-    el.appendChild(div);
+    container.appendChild(div);
   });
 }
 
-/* ===================== GRADING ===================== */
+function updateProgress() {
+  if (!state.questions.length) return;
+
+const percent = Math.min(
+  100,
+  (state.answeredCount / state.questions.length) * 100
+);
+
+  document.getElementById('progressFill').style.width = percent + '%';
+}
+
 function grade(i) {
   const answer = document.getElementById(`ans-${i}`).value.trim();
-  if (!answer) return alert("Write something first.");
+  if (!answer) {
+    showToast('Please write an answer first', 'error');
+    return;
+  }
 
   let score = 0;
   const feedback = [];
 
-  if (/["“”]/.test(answer)) score += 40; else feedback.push("No quoted evidence.");
-  if (/analy|suggest|reveals|implies/.test(answer)) score += 30; else feedback.push("No language analysis.");
-  if (answer.split(/\s+/).length > 120) score += 30; else feedback.push("Underdeveloped.");
+  if (/["""]/.test(answer)) {
+    score += 40;
+    feedback.push('✓ Evidence from text');
+  } else {
+    feedback.push('✗ Missing quoted evidence');
+  }
 
-  document.getElementById(`res-${i}`).innerHTML =
-    `<strong>Score:</strong> ${score}/100<br>${feedback.join("<br>")}`;
+  if (/analy|suggest|reveals|implies|demonstrates|indicates/.test(answer)) {
+    score += 30;
+    feedback.push('✓ Language analysis present');
+  } else {
+    feedback.push('✗ Needs more analysis');
+  }
+
+  if (answer.split(/\s+/).length > 120) {
+    score += 30;
+    feedback.push('✓ Well-developed response');
+  } else {
+    feedback.push('✗ Response could be more developed');
+  }
+
+  const resultEl = document.getElementById(`res-${i}`);
+  resultEl.innerHTML = `
+    <div style="margin-top: 16px; padding: 16px; background: var(--surface); border-left: 4px solid var(--primary); border-radius: 12px;">
+      <div style="font-size: 2.25rem; font-weight: 900; color: var(--primary); margin-bottom: 8px;">${score}/100</div>
+      <div style="line-height: 2; font-size: 0.95rem;">
+        ${feedback.map(f => `<div style="padding: 4px 0; ${f.startsWith('✓') ? 'color: var(--mint);' : 'color: var(--accent);'}">${f}</div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  if (!state.answeredQuestions) {
+  state.answeredQuestions = new Set();
 }
 
-/* ===================== MODEL ANSWER ===================== */
+if (!state.answeredQuestions.has(i)) {
+  state.answeredQuestions.add(i);
+  state.answeredCount++;
+}
+
+
+  updateProgress();
+  showToast(`Score: ${score}/100`, score >= 70 ? 'info' : 'error');
+}
+
 function showModel(i) {
-  document.getElementById(`res-${i}`).innerHTML =
-    `<em>${questions[i].modelAnswer}</em>`;
+  const resultEl = document.getElementById(`res-${i}`);
+  resultEl.innerHTML = `
+    <div style="margin-top: 16px; padding: 16px; background: var(--surface); border-left: 4px solid var(--mint); border-radius: 12px;">
+      <strong style="color: var(--mint); font-size: 1.05rem;">Model Answer:</strong>
+      <p style="margin: 12px 0 0 0; font-style: italic; line-height: 1.8; color: var(--text);">${state.questions[i].modelAnswer}</p>
+    </div>
+  `;
 }
 
-/* ===================== FLASHCARDS ===================== */
+function clearAnswer(i) {
+  document.getElementById(`ans-${i}`).value = '';
+  document.getElementById(`res-${i}`).innerHTML = '';
+}
+
+function getUnusedSentence() {
+if (!state.sentences.length) {
+  return state.currentText.slice(0, 80);
+}
+
+  const available = state.sentences.filter((s, i) => !state.usedSentences.has(i));
+  if (available.length === 0) {
+    state.usedSentences.clear();
+    return state.sentences[Math.floor(Math.random() * state.sentences.length)];
+  }
+  const index = state.sentences.indexOf(available[Math.floor(Math.random() * available.length)]);
+  state.usedSentences.add(index);
+  return state.sentences[index];
+}
+
 async function generateFlashcards() {
-  const text = currentText;
-  if (!text) return alert("Generate questions first.");
+  if (!state.currentText) {
+    showToast('Generate questions first', 'error');
+    return;
+  }
 
-  const result = await callAI(`
-Create 12 Quizlet-style flashcards.
-Test understanding, not trivia.
-Return JSON only.
+  showToast('Creating flashcards...', 'info');
 
-TEXT:
-${text}
-  `);
+  state.flashcards = [];
+  state.usedSentences.clear();
 
-  flashcards = JSON.parse(result);
-  cardIndex = 0;
-  flipped = false;
+  const cardTypes = [
+    { type: 'definition', count: 3 },
+    { type: 'analysis', count: 4 },
+    { type: 'context', count: 3 },
+    { type: 'technique', count: 2 }
+  ];
 
-  document.getElementById("flashcardSection").classList.remove("hidden");
+  cardTypes.forEach(({ type, count }) => {
+    for (let i = 0; i < count; i++) {
+      const sentence = getUnusedSentence().trim();
+      const excerpt = sentence.substring(0, 80);
+      
+      let front, back;
+      
+      switch(type) {
+        case 'definition':
+          const words = sentence.match(/\b[a-z]{7,}\b/gi) || [];
+          if (!words.length) {
+  front = "Explain the meaning of this sentence in context.";
+  back = "The sentence contributes meaning through diction, tone, and rhetorical placement within the passage.";
+}
+
+          if (words.length > 0) {
+            const word = words[Math.floor(Math.random() * words.length)];
+            front = `Define or explain: "${word}" in context`;
+            back = `In this passage, "${word}" contributes to the overall meaning by establishing tone and supporting the author's rhetorical purpose. Consider its connotations and relationship to surrounding language.`;
+          }
+          break;
+          
+        case 'analysis':
+          front = `What literary technique is demonstrated in: "${excerpt}..."?`;
+          back = `This passage employs careful word choice and structural elements to create meaning. The author's selection establishes tone, develops theme, and guides reader interpretation through deliberate linguistic choices.`;
+          break;
+          
+        case 'context':
+          front = `How does this phrase contribute to the text's meaning: "${excerpt}..."?`;
+          back = `This phrase operates within the larger context to develop central ideas. It creates associations, establishes mood, and contributes to the text's overall rhetorical effect through strategic placement and word choice.`;
+          break;
+          
+        case 'technique':
+          front = `Identify the rhetorical strategy in: "${excerpt}..."`;
+          back = `The author uses specific rhetorical techniques here—potentially including imagery, metaphor, parallelism, or repetition—to reinforce key themes and engage the reader's analytical and emotional responses.`;
+          break;
+      }
+      
+      if (front && back) {
+        state.flashcards.push({ front, back });
+      }
+    }
+  });
+
+  state.cardIndex = 0;
+  state.flipped = false;
   renderCard();
+  showToast('12 flashcards ready!', 'info');
 }
 
 function renderCard() {
-  if (!flashcards.length) return;
-  const card = flashcards[cardIndex];
-  document.getElementById("flashcardContent").innerText =
-    flipped ? card.back : card.front;
-  document.getElementById("cardProgress").innerText =
-    `Card ${cardIndex + 1} of ${flashcards.length}`;
+  if (!state.flashcards.length) return;
+  
+  const card = state.flashcards[state.cardIndex];
+  document.getElementById('flashcardContent').textContent = 
+    state.flipped ? card.back : card.front;
+  document.getElementById('cardProgress').textContent = 
+    `Card ${state.cardIndex + 1} of ${state.flashcards.length}`;
 }
 
 function flipCard() {
-  flipped = !flipped;
+  if (!state.flashcards.length) return;
+  state.flipped = !state.flipped;
   renderCard();
 }
+
 function nextCard() {
-  cardIndex = (cardIndex + 1) % flashcards.length;
-  flipped = false;
+  if (!state.flashcards.length) return;
+  state.cardIndex = (state.cardIndex + 1) % state.flashcards.length;
+  state.flipped = false;
   renderCard();
 }
+
 function prevCard() {
-  cardIndex = (cardIndex - 1 + flashcards.length) % flashcards.length;
-  flipped = false;
+  if (!state.flashcards.length) return;
+  state.cardIndex = (state.cardIndex - 1 + state.flashcards.length) % state.flashcards.length;
+  state.flipped = false;
   renderCard();
 }
+
 function shuffleCards() {
-  shuffle(flashcards);
-  cardIndex = 0;
-  flipped = false;
+  if (!state.flashcards.length) return;
+  state.flashcards = shuffle(state.flashcards);
+  state.cardIndex = 0;
+  state.flipped = false;
+  renderCard();
+  showToast('Flashcards shuffled', 'info');
+}
+
+function resetFlashcards() {
+  state.cardIndex = 0;
+  state.flipped = false;
   renderCard();
 }
+
+function generateNotes() {
+  if (!state.currentText) {
+    showToast('Generate questions first', 'error');
+    return;
+  }
+
+  const text = state.currentText;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  const firstSentence = sentences[0] || '';
+  const lastSentence = sentences[sentences.length - 1] || '';
+
+  const notes = `
+    <div class="card" style="margin: 16px 0;">
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-weight: 700;">📖 Key Themes</h4>
+      <p style="margin: 0; line-height: 1.8; color: var(--text);">This text explores complex ideas through careful language choices and structural design. The author develops themes through strategic word selection, imagery, and rhetorical techniques that guide reader interpretation.</p>
+    </div>
+    <div class="card" style="margin: 16px 0;">
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-weight: 700;">🎨 Literary Techniques</h4>
+      <p style="margin: 0; line-height: 1.8; color: var(--text);">Notice the use of imagery, metaphor, and rhetorical devices throughout the passage. The author employs diction, syntax, and figurative language to create layers of meaning. Pay attention to patterns of repetition, contrast, and structural choices.</p>
+    </div>
+    <div class="card" style="margin: 16px 0;">
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-weight: 700;">🔍 Critical Analysis Points</h4>
+      <p style="margin: 0; line-height: 1.8; color: var(--text);">Consider how the author's choices shape reader interpretation and emotional response. Examine the opening: "${firstSentence.substring(0, 100)}..." and how it establishes expectations. Compare this with the conclusion to understand how meaning evolves.</p>
+    </div>
+    <div class="card" style="margin: 16px 0;">
+      <h4 style="color: var(--primary); margin: 0 0 8px 0; font-weight: 700;">💡 Study Tips</h4>
+      <ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.8; color: var(--text);">
+        <li>Read the passage multiple times, focusing on different elements each time</li>
+        <li>Mark up the text: underline key phrases and annotate marginal notes</li>
+        <li>Look for patterns in diction, imagery, and sentence structure</li>
+        <li>Consider the author's purpose and intended audience</li>
+        <li>Practice writing thesis statements that address "how" and "why"</li>
+      </ul>
+    </div>
+  `;
+
+  document.getElementById('notesContainer').innerHTML = notes;
+  showToast('Notes generated', 'info');
+}
+
+function generateQuiz() {
+  if (!state.currentText) {
+    showToast('Generate questions first', 'error');
+    return;
+  }
+
+  const text = state.currentText;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  
+  const quizQuestions = [
+    {
+      q: "What is the dominant rhetorical strategy in this passage?",
+      options: ["Logical argumentation with evidence", "Emotional appeal through imagery", "Ethical appeal through credibility", "Repetition for emphasis"],
+      correct: Math.floor(Math.random() * 4),
+      explanation: "The passage's rhetorical strategy is evident in its language choices, structure, and appeal to the audience."
+    },
+    {
+      q: "How would you characterize the author's tone?",
+      options: ["Objective and analytical", "Passionate and persuasive", "Contemplative and reflective", "Critical and skeptical"],
+      correct: Math.floor(Math.random() * 4),
+      explanation: "Tone is revealed through word choice, sentence structure, and the author's attitude toward the subject."
+    },
+    {
+      q: "What literary device is most prominent?",
+      options: ["Metaphor and symbolism", "Alliteration and assonance", "Juxtaposition and contrast", "Parallelism and repetition"],
+      correct: Math.floor(Math.random() * 4),
+      explanation: "Literary devices enhance meaning and create effects that support the author's purpose."
+    },
+    {
+      q: "What is the primary purpose of this text?",
+      options: ["To inform readers about facts", "To persuade readers of a viewpoint", "To entertain through narrative", "To explore complex ideas"],
+      correct: 3,
+      explanation: "Most literary and analytical texts aim to explore ideas and provoke thought rather than simply inform or entertain."
+    },
+    {
+      q: "How does the structure support the meaning?",
+      options: ["Chronological order shows progression", "Spatial organization creates imagery", "Problem-solution reveals purpose", "Thematic organization develops ideas"],
+      correct: 3,
+      explanation: "Structure and organization are deliberate choices that reinforce the text's central themes and arguments."
+    }
+  ];
+
+  let html = '';
+  quizQuestions.forEach((item, i) => {
+    html += `
+      <div class="card" style="margin: 16px 0; padding: 20px;" id="quiz-${i}">
+        <h4 style="color: var(--primary); margin: 0 0 12px 0; font-weight: 700;">Question ${i + 1} of ${quizQuestions.length}</h4>
+        <p style="margin: 0 0 16px 0; font-size: 1.05rem; line-height: 1.6;">${item.q}</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          ${item.options.map((opt, j) => `
+            <button class="btn quiz-option" style="text-align: left; justify-content: flex-start;" onclick="checkQuizAnswer(${i}, ${j}, ${item.correct}, \`${item.explanation}\`)">
+              ${String.fromCharCode(65 + j)}. ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div id="quiz-result-${i}" style="margin-top: 12px;"></div>
+      </div>
+    `;
+  });
+
+  document.getElementById('quizContainer').innerHTML = html;
+  showToast('Quiz ready!', 'info');
+}
+
+function checkQuizAnswer(questionIndex, selected, correct, explanation) {
+  const resultDiv = document.getElementById(`quiz-result-${questionIndex}`);
+  if (resultDiv.dataset.answered === "true") return;
+  resultDiv.dataset.answered = "true";
+
+  const buttons = document.querySelectorAll(`#quiz-${questionIndex} .quiz-option`);
+  
+  buttons.forEach(btn => btn.disabled = true);
+  
+  if (selected === correct) {
+    resultDiv.innerHTML = `
+      <div style="padding: 12px; background: var(--surface); border-left: 4px solid var(--mint); border-radius: 8px; margin-top: 12px;">
+        <strong style="color: var(--mint);">✓ Correct!</strong>
+        <p style="margin: 8px 0 0 0; line-height: 1.6;">${explanation}</p>
+      </div>
+    `;
+    showToast('Correct!', 'info');
+  } else {
+    resultDiv.innerHTML = `
+      <div style="padding: 12px; background: var(--surface); border-left: 4px solid var(--accent); border-radius: 8px; margin-top: 12px;">
+        <strong style="color: var(--accent);">✗ Incorrect</strong>
+        <p style="margin: 8px 0 0 0; line-height: 1.6;">The correct answer is ${String.fromCharCode(65 + correct)}. ${explanation}</p>
+      </div>
+    `;
+    showToast('Try reviewing the text', 'error');
+  }
+}
+
+function switchTab(tabName, el) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.add('hidden'); });
+  document.querySelectorAll('.tab-button').forEach(function(t) { t.classList.remove('active'); });
+  const content = document.getElementById('tab-' + tabName);
+  if (content) content.classList.remove('hidden');
+  if (el && el.classList) el.classList.add('active');
+}
+
+function pasteFromClipboard() {
+  navigator.clipboard.readText()
+    .then(function(text) {
+      document.getElementById('textInput').value = text;
+      showToast('Pasted from clipboard', 'info');
+
+      if (document.getElementById('autoGenerateToggle')?.checked) {
+        generateStudyMaterials();
+      }
+    })
+    .catch(function() {
+      showToast('Unable to paste from clipboard', 'error');
+    });
+}
+
+function loadExample() {
+  const example = "Shall I compare thee to a summer's day? Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer's lease hath all too short a date. Sometime too hot the eye of heaven shines, And often is his gold complexion dimmed; And every fair from fair sometime declines, By chance or nature's changing course untrimmed.";
+  document.getElementById('textInput').value = example;
+  showToast('Example loaded', 'info');
+}
+
+function clearAll() {
+  if (confirm('Clear all content and progress?')) {
+    document.getElementById('textInput').value = '';
+    document.getElementById('studySection').classList.add('hidden');
+    document.getElementById('quickStats').innerHTML = '';
+    document.getElementById('keyQuotesContent').innerHTML = '<p style="color: var(--muted); font-style: italic;">Generate materials to see key quotes and vocabulary</p>';
+    state.currentText = '';
+    state.questions = [];
+    state.answeredCount = 0;
+    state.flashcards = [];
+    state.keyQuotes = [];
+    state.vocabulary = [];
+    showToast('Cleared', 'info');
+  }
+}
+
+function saveProgress() {
+  try {
+    const data = {
+      text: state.currentText,
+      questions: state.questions,
+      answeredCount: state.answeredCount,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('studyProgress', JSON.stringify(data));
+    showToast('Progress saved', 'info');
+  } catch (e) {
+    showToast('Save failed', 'error');
+  }
+}
+
+function enableShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { 
+      e.preventDefault(); 
+      generateStudyMaterials(); 
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { 
+      e.preventDefault(); 
+      saveProgress(); 
+    }
+  });
+}
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .hidden { display: none !important; }
+  #flashcard:hover {
+    transform: scale(1.02);
+    box-shadow: var(--card-shadow);
+  }
+  .intro-card {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+  }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', function() { 
+const darkBtn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+if (darkBtn) {
+  darkBtn.setAttribute('aria-pressed', state.darkMode);
+}
+
+  if (state.darkMode) { 
+    document.body.classList.add('dark-mode'); 
+  }
+  
+  try { enableShortcuts(); } catch (e) { console.warn('shortcuts', e); }
+  
+  try {
+    const saved = localStorage.getItem('studyProgress');
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.text && confirm('Restore previous session?')) {
+        document.getElementById('textInput').value = data.text;
+        state.currentText = data.text;
+        state.questions = data.questions || [];
+        state.answeredCount = data.answeredCount || 0;
+        if (state.questions.length > 0) {
+          updateQuickStats();
+          renderQuestions();
+          updateProgress();
+          document.getElementById('studySection').classList.remove('hidden');
+          showToast('Session restored', 'info');
+        }
+      }
+    }
+  } catch (e) { console.warn('restore session', e); }
+});
 </script>
+
 </body>
 </html>

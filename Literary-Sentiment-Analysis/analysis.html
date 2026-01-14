@@ -1,96 +1,775 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Analysis — Literary Sentiment</title>
-
-  <link rel="stylesheet" href="styles.css">
-
-  <style>
-    /* --- ANALYSIS LAYOUT FIX --- */
-
-    .analysis-layout {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    .analysis-section {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
-      background: var(--panel);
-    }
-
-    .analysis-section h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
-    }
-
-    .summary-card {
-      line-height: 1.7;
-      font-size: 1rem;
-      white-space: normal;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .analysis-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis — Literary Sentiment Analyzer</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-<header class="app-header">
-  <a class="logo" href="sentiment-analyzer.html">Literary Sentiment</a>
 
-  <nav class="header-nav">
-    <a href="sentiment-analyzer.html">Home</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="tools-ingest.html">Tools</a>
-    <a href="analysis.html" aria-current="page">Analysis</a>
-  </nav>
+<div id="toast" role="status" aria-live="polite"></div>
 
-  <div class="header-right">
-    <button class="btn" onclick="generateSummary()">Generate Summary</button>
-    <button class="icon-btn theme-toggle" onclick="toggleTheme()">🌓</button>
-  </div>
-</header>
+<div class="container">
+  <header class="app-header">
+    <a class="logo" href="sentiment-analyzer.html">
+      Literary Sentiment Analyzer
+    </a>
 
-<main class="analysis-layout">
+    <nav class="header-nav" aria-label="Main navigation">
+      <a href="sentiment-analyzer.html">Analyze</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="tools-ingest.html">Tools</a>
+      <a href="analysis.html" aria-current="page">Analysis</a>
+    </nav>
 
-  <!-- CONTENT SUMMARY -->
-  <section class="analysis-section">
-    <h3>Content Summary</h3>
-    <p class="muted">
-      A concrete explanation of what happens in the text, written in natural language.
-    </p>
+    <div class="header-right">
+      <button type="button" class="icon-btn" onclick="speakSummary()" title="Read summary aloud">
+        🔊
+      </button>
 
-    <div id="summary-container">
-      <small class="muted">No summary generated yet.</small>
+      <button type="button" class="icon-btn" onclick="toggleDarkMode()" aria-pressed="false" title="Toggle theme">
+        🌓
+      </button>
+
+      <button type="button" class="btn btn-primary" id="toolbarGenerateBtn" onclick="generateAnalysis()">
+        Generate Analysis
+      </button>
+      
+      <nav class="header-nav" role="navigation">
+        <a href="study-guide.html">Study Guide</a>
+      </nav>
     </div>
+  </header>
+
+  <section class="card intro-card" style="margin: 20px 0;">
+    <h1 style="margin: 0 0 10px 0; font-weight: 900; font-size: 2rem;">Advanced Text Analysis</h1>
+    <p class="intro-subtitle" style="margin: 0; font-size: 1.1rem; opacity: 0.9;">
+      Generate comprehensive summaries, extract key arguments, identify rhetorical strategies, and analyze text structure with AI-powered insights.
+    </p>
   </section>
 
-  <!-- RESERVED: FUTURE SECTIONS -->
-  <section class="analysis-section" style="display:none;">
-    <h3>Observations</h3>
-  </section>
+  <div class="main-grid">
+    <aside class="card sidebar">
+      <h3>Analysis Settings</h3>
 
-</main>
+      <label style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 0.9rem; font-weight: 600;">Summary Length</span>
+        <select id="summaryLevel" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+          <option value="brief">Brief (2-3 sentences)</option>
+          <option value="standard" selected>Standard (4-5 sentences)</option>
+          <option value="comprehensive">Comprehensive (6-8 sentences)</option>
+        </select>
+      </label>
 
-<!-- CORE SCRIPTS ONLY -->
-<script src="ui-tools.js"></script>
-<script src="content-summary.js"></script>
+      <label style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 0.9rem; font-weight: 600;">Analysis Focus</span>
+        <select id="analysisFocus" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+          <option value="general">General Analysis</option>
+          <option value="rhetorical">Rhetorical Strategies</option>
+          <option value="argumentative">Argument Structure</option>
+          <option value="literary">Literary Elements</option>
+        </select>
+      </label>
+
+      <label class="toggle-row" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="includeQuotesToggle" type="checkbox" checked style="cursor: pointer;">
+        <span style="font-size: 0.9rem;">Include key quotes</span>
+      </label>
+
+      <label class="toggle-row" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input id="showStructureToggle" type="checkbox" checked style="cursor: pointer;">
+        <span style="font-size: 0.9rem;">Analyze structure</span>
+      </label>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="pasteFromClipboard()">Paste</button>
+        <button type="button" class="btn" onclick="loadFromAnalyzer()">Load from Analyzer</button>
+        <button type="button" class="btn" onclick="exportAnalysis()">Export Analysis</button>
+        <button type="button" class="btn" onclick="clearAll()">Clear</button>
+      </div>
+    </aside>
+
+    <main class="card">
+      <h2>Input Text</h2>
+
+      <textarea
+        id="inputText"
+        style="width: 100%; min-height: 400px; padding: 16px; font-size: 1rem; resize: vertical;"
+        placeholder="Paste or type your text here for comprehensive analysis..."
+        aria-label="Text to analyze"></textarea>
+
+      <p class="small" style="margin: 12px 0;">
+        Shortcut: <strong>Ctrl + Enter</strong> to analyze ·
+        <strong>Ctrl + L</strong> to load from analyzer
+      </p>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button
+          type="button"
+          id="mainGenerateBtn"
+          class="btn btn-primary"
+          onclick="generateAnalysis()">
+          Generate Analysis
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="pasteFromClipboard()">
+          Paste
+        </button>
+
+        <button
+          type="button"
+          class="btn"
+          onclick="copySummary()">
+          Copy Summary
+        </button>
+      </div>
+
+      <div id="quickStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;"></div>
+    </main>
+
+    <aside class="card" id="outlinePanel">
+      <h3>Text Outline</h3>
+      <p class="small" style="margin-bottom: 12px;">Hierarchical structure of the text</p>
+      <div id="outlineContent" style="color: var(--muted); font-style: italic;">
+        Generate analysis to see text outline
+      </div>
+    </aside>
+
+    <section id="analysisResults" class="card hidden" style="grid-column: 1 / -1;">
+      <h2>Analysis Results</h2>
+
+      <div class="tab-container">
+        <div class="tabs">
+          <button class="tab-button active" onclick="switchTab('summary', this)">Summary</button>
+          <button class="tab-button" onclick="switchTab('arguments', this)">Key Arguments</button>
+          <button class="tab-button" onclick="switchTab('rhetoric', this)">Rhetorical Analysis</button>
+          <button class="tab-button" onclick="switchTab('thesis', this)">Thesis Generator</button>
+          <button class="tab-button" onclick="switchTab('citations', this)">Citation Helper</button>
+        </div>
+
+        <div id="tab-summary" class="tab-content active" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Content Summary</h3>
+          <div id="summaryContainer"></div>
+        </div>
+
+        <div id="tab-arguments" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Key Arguments & Claims</h3>
+          <div id="argumentsContainer"></div>
+        </div>
+
+        <div id="tab-rhetoric" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Rhetorical Strategies</h3>
+          <div id="rhetoricContainer"></div>
+        </div>
+
+        <div id="tab-thesis" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Thesis Statement Generator</h3>
+          <p class="muted" style="margin-bottom: 16px;">Generate potential thesis statements for essays about this text</p>
+          <button class="btn btn-primary" onclick="generateThesis()" style="margin-bottom: 16px;">Generate Thesis Statements</button>
+          <div id="thesisContainer"></div>
+        </div>
+
+        <div id="tab-citations" class="tab-content hidden" style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px;">Citation Helper</h3>
+          <p class="muted" style="margin-bottom: 16px;">Generate citations for this text in multiple formats</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+            <label style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 0.9rem; font-weight: 600;">Author Name</span>
+              <input type="text" id="authorName" placeholder="e.g., Shakespeare, William" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+            </label>
+            
+            <label style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 0.9rem; font-weight: 600;">Title</span>
+              <input type="text" id="workTitle" placeholder="e.g., Hamlet" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+            </label>
+            
+            <label style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 0.9rem; font-weight: 600;">Publication Year</span>
+              <input type="text" id="pubYear" placeholder="e.g., 1603" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-family: inherit;">
+            </label>
+          </div>
+          
+          <button class="btn btn-primary" onclick="generateCitations()" style="margin-bottom: 16px;">Generate Citations</button>
+          <div id="citationsContainer"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.9rem;">
+    <p>Literary Sentiment Analyzer v3.0 | © 2025 | Advanced Analysis Suite</p>
+  </footer>
+</div>
+
+<script>
+const state = {
+  currentText: '',
+  darkMode: localStorage.getItem('darkMode') === 'true',
+  analysis: null
+};
+
+function showToast(message, type, duration) {
+  type = type || 'info';
+  duration = duration || 3000;
+  const toast = document.getElementById('toast');
+  toast.className = type;
+  toast.textContent = message;
+  toast.style.display = 'block';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(function() { toast.style.display = 'none'; }, duration);
+}
+
+function toggleDarkMode() {
+  state.darkMode = !state.darkMode;
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', state.darkMode);
+  const btn = document.querySelector('.icon-btn[onclick="toggleDarkMode()"]');
+  if (btn) btn.setAttribute('aria-pressed', state.darkMode);
+}
+
+function speakSummary() {
+  const summaryText = document.querySelector('#summaryContainer .summary-card')?.textContent;
+  if (!summaryText) {
+    showToast('Generate analysis first', 'error');
+    return;
+  }
+  if (!window.speechSynthesis) {
+    showToast('Text-to-speech not available', 'error');
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(summaryText);
+  window.speechSynthesis.speak(utterance);
+}
+
+function updateQuickStats(text) {
+  const words = text.split(/\s+/).filter(w => w).length;
+  const chars = text.length;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim()).length;
+  
+  let html = '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Words</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + words + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Sentences</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + sentences + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Paragraphs</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + paragraphs + '</div></div>';
+  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Avg Sent Length</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + Math.round(words / sentences) + '</div></div>';
+  document.getElementById('quickStats').innerHTML = html;
+}
+
+function generateSmartSummary(text, level) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  if (sentences.length === 0) return "No content to summarize.";
+  
+  const scoredSentences = sentences.map((sent, idx) => {
+    let score = 0;
+    
+    if (idx === 0) score += 10;
+    if (idx === sentences.length - 1) score += 5;
+    
+    const words = sent.toLowerCase().split(/\s+/);
+    const importantWords = ['argue', 'claim', 'demonstrate', 'reveal', 'suggest', 'important', 'significant', 'central', 'key', 'primarily', 'essential', 'critical', 'main', 'fundamental'];
+    importantWords.forEach(w => {
+      if (words.includes(w)) score += 3;
+    });
+    
+    if (/however|but|although|despite|yet|nevertheless/i.test(sent)) score += 4;
+    
+    if (/therefore|thus|consequently|as a result|in conclusion/i.test(sent)) score += 4;
+    
+    const sentLength = words.length;
+    if (sentLength >= 15 && sentLength <= 30) score += 2;
+    
+    return { text: sent, score, index: idx };
+  });
+  
+  scoredSentences.sort((a, b) => b.score - a.score);
+  
+  let numSentences;
+  if (level === 'brief') numSentences = Math.min(3, sentences.length);
+  else if (level === 'comprehensive') numSentences = Math.min(8, sentences.length);
+  else numSentences = Math.min(5, sentences.length);
+  
+  const selectedSentences = scoredSentences
+    .slice(0, numSentences)
+    .sort((a, b) => a.index - b.index)
+    .map(s => s.text.trim());
+  
+  return selectedSentences.join(' ');
+}
+
+function extractKeyArguments(text) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  const arguments = [];
+  
+  sentences.forEach((sent, idx) => {
+    const lower = sent.toLowerCase();
+    
+    if (/\b(argue|claim|assert|maintain|contend|propose|suggest)\b/i.test(sent)) {
+      arguments.push({
+        type: 'Main Claim',
+        text: sent.trim(),
+        position: idx === 0 ? 'Opening' : idx === sentences.length - 1 ? 'Conclusion' : 'Body'
+      });
+    }
+    
+    else if (/\b(evidence|data|research|studies|shows|demonstrates|proves)\b/i.test(sent)) {
+      arguments.push({
+        type: 'Evidence',
+        text: sent.trim(),
+        position: idx === 0 ? 'Opening' : idx === sentences.length - 1 ? 'Conclusion' : 'Body'
+      });
+    }
+    
+    else if (/\b(however|but|although|despite|yet|nevertheless|on the other hand)\b/i.test(sent)) {
+      arguments.push({
+        type: 'Counter-argument',
+        text: sent.trim(),
+        position: idx === 0 ? 'Opening' : idx === sentences.length - 1 ? 'Conclusion' : 'Body'
+      });
+    }
+    
+    else if (/\b(therefore|thus|consequently|as a result|in conclusion|ultimately)\b/i.test(sent)) {
+      arguments.push({
+        type: 'Conclusion',
+        text: sent.trim(),
+        position: idx === 0 ? 'Opening' : idx === sentences.length - 1 ? 'Conclusion' : 'Body'
+      });
+    }
+  });
+  
+  return arguments.slice(0, 8);
+}
+
+function analyzeRhetoric(text) {
+  const strategies = [];
+  
+  const ethos = /\b(expert|authority|credible|research|studies|professor|doctor)\b/gi;
+  const ethosMatches = (text.match(ethos) || []).length;
+  if (ethosMatches > 0) {
+    strategies.push({
+      strategy: 'Ethos (Credibility)',
+      description: 'Appeals to expertise and authority to establish trustworthiness',
+      examples: ethosMatches + ' instance(s) of credibility markers found',
+      strength: ethosMatches >= 3 ? 'Strong' : 'Moderate'
+    });
+  }
+  
+  const pathos = /\b(feel|emotion|heart|fear|hope|dream|suffer|joy|pain|tragedy|triumph)\b/gi;
+  const pathosMatches = (text.match(pathos) || []).length;
+  if (pathosMatches > 0) {
+    strategies.push({
+      strategy: 'Pathos (Emotion)',
+      description: 'Appeals to emotions to persuade and engage the audience',
+      examples: pathosMatches + ' emotional appeal(s) detected',
+      strength: pathosMatches >= 4 ? 'Strong' : 'Moderate'
+    });
+  }
+  
+  const logos = /\b(data|statistics|fact|evidence|study|research|therefore|thus|because|logic|reason)\b/gi;
+  const logosMatches = (text.match(logos) || []).length;
+  if (logosMatches > 0) {
+    strategies.push({
+      strategy: 'Logos (Logic)',
+      description: 'Uses logical reasoning and evidence to support arguments',
+      examples: logosMatches + ' logical marker(s) identified',
+      strength: logosMatches >= 5 ? 'Strong' : 'Moderate'
+    });
+  }
+  
+  if (/\b(we|us|our|together|community|society)\b/gi.test(text)) {
+    strategies.push({
+      strategy: 'Inclusive Language',
+      description: 'Creates connection with audience through collective pronouns',
+      examples: 'Uses "we," "us," "our" to build rapport',
+      strength: 'Moderate'
+    });
+  }
+  
+  const metaphors = text.match(/\b(like|as)\b.*?\b(like|as)\b/gi) || [];
+  if (metaphors.length > 0 || /\b(metaphor|symbolize|represent)\b/i.test(text)) {
+    strategies.push({
+      strategy: 'Figurative Language',
+      description: 'Employs metaphors and symbols to convey meaning',
+      examples: 'Figurative devices enhance rhetorical impact',
+      strength: 'Moderate'
+    });
+  }
+  
+  const repetition = {};
+  text.toLowerCase().split(/\s+/).forEach(word => {
+    if (word.length > 6) {
+      repetition[word] = (repetition[word] || 0) + 1;
+    }
+  });
+  const repeated = Object.entries(repetition).filter(([w, count]) => count >= 3);
+  if (repeated.length > 0) {
+    strategies.push({
+      strategy: 'Repetition for Emphasis',
+      description: 'Repeats key terms to reinforce central ideas',
+      examples: 'Key terms: ' + repeated.slice(0, 3).map(([w]) => w).join(', '),
+      strength: 'Moderate'
+    });
+  }
+  
+  return strategies;
+}
+
+function generateTextOutline(text) {
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+  if (paragraphs.length === 0) return '<p style="color: var(--muted);">No outline available</p>';
+  
+  let html = '<div style="line-height: 2;">';
+  
+  paragraphs.forEach((para, idx) => {
+    const firstSentence = (para.match(/[^.!?]+[.!?]+/) || [para.substring(0, 100)])[0].trim();
+    const preview = firstSentence.substring(0, 80) + (firstSentence.length > 80 ? '...' : '');
+    
+    let label = 'Body Paragraph';
+    if (idx === 0) label = 'Introduction';
+    else if (idx === paragraphs.length - 1) label = 'Conclusion';
+    
+    html += `
+      <div style="padding: 10px; margin: 8px 0; background: var(--surface); border-left: 3px solid var(--primary); border-radius: 6px;">
+        <div style="font-weight: 700; color: var(--primary); font-size: 0.85rem; margin-bottom: 4px;">${label} ${idx > 0 && idx < paragraphs.length - 1 ? idx : ''}</div>
+        <div style="font-size: 0.85rem; color: var(--text);">${preview}</div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function generateAnalysis() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) {
+    showToast('Please enter text to analyze', 'error');
+    return;
+  }
+  
+  state.currentText = text;
+  
+  const toolbarBtn = document.getElementById('toolbarGenerateBtn');
+  const mainBtn = document.getElementById('mainGenerateBtn');
+  [toolbarBtn, mainBtn].forEach(function(b) {
+    if (b) {
+      b.disabled = true;
+      b.dataset.orig = b.innerHTML;
+      b.innerHTML = b.dataset.orig + ' <span class="spinner-mini" style="display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite;"></span>';
+    }
+  });
+  
+  updateQuickStats(text);
+  document.getElementById('analysisResults').classList.remove('hidden');
+  
+  setTimeout(function() {
+    try {
+      const level = document.getElementById('summaryLevel').value;
+      const summary = generateSmartSummary(text, level);
+      const compressionRatio = Math.round((summary.length / text.length) * 100);
+      
+      document.getElementById('summaryContainer').innerHTML = `
+        <div class="card" style="padding: 20px; line-height: 1.8;">
+          <div class="summary-card" style="font-size: 1.05rem; margin-bottom: 16px;">${summary}</div>
+          <div style="display: flex; gap: 16px; font-size: 0.9rem; color: var(--muted);">
+            <span><strong>Compression:</strong> ${compressionRatio}%</span>
+            <span><strong>Words:</strong> ${summary.split(/\s+/).length}</span>
+            <span><strong>Reading Time:</strong> ${Math.ceil(summary.split(/\s+/).length / 200)}min</span>
+          </div>
+        </div>
+      `;
+      
+      const arguments = extractKeyArguments(text);
+      let argsHtml = '';
+      if (arguments.length === 0) {
+        argsHtml = '<p class="muted">No explicit arguments detected in this text.</p>';
+      } else {
+        arguments.forEach(arg => {
+          const color = arg.type === 'Main Claim' ? 'var(--primary)' : 
+                       arg.type === 'Evidence' ? 'var(--mint)' : 
+                       arg.type === 'Counter-argument' ? 'var(--accent)' : 'var(--teal)';
+          argsHtml += `
+            <div class="card" style="padding: 16px; margin: 12px 0; border-left: 4px solid ${color};">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: ${color}; font-size: 0.9rem;">${arg.type}</strong>
+                <span style="font-size: 0.75rem; color: var(--muted); font-weight: 600;">${arg.position}</span>
+              </div>
+              <p style="margin: 0; line-height: 1.7; font-size: 0.95rem;">${arg.text}</p>
+            </div>
+          `;
+        });
+      }
+      document.getElementById('argumentsContainer').innerHTML = argsHtml;
+      
+      const rhetoric = analyzeRhetoric(text);
+      let rhetoricHtml = '';
+      if (rhetoric.length === 0) {
+        rhetoricHtml = '<p class="muted">No prominent rhetorical strategies detected.</p>';
+      } else {
+        rhetoric.forEach(strat => {
+          const strengthColor = strat.strength === 'Strong' ? 'var(--mint)' : 'var(--sun)';
+          rhetoricHtml += `
+            <div class="card" style="padding: 16px; margin: 12px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: var(--primary); font-size: 1rem;">${strat.strategy}</strong>
+                <span style="font-size: 0.75rem; color: ${strengthColor}; font-weight: 700; padding: 4px 8px; background: var(--surface); border-radius: 4px;">${strat.strength}</span>
+              </div>
+              <p style="margin: 0 0 8px 0; line-height: 1.6; color: var(--muted);">${strat.description}</p>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--text); font-style: italic;">→ ${strat.examples}</p>
+            </div>
+          `;
+        });
+      }
+      document.getElementById('rhetoricContainer').innerHTML = rhetoricHtml;
+      
+      document.getElementById('outlineContent').innerHTML = generateTextOutline(text);
+      
+      showToast('Analysis complete', 'info', 2500);
+      
+      setTimeout(function() {
+        document.getElementById('analysisResults').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
+    } catch (e) {
+      showToast('Analysis failed: ' + (e.message || e), 'error', 5000);
+    } finally {
+      [toolbarBtn, mainBtn].forEach(function(b) {
+        if (b) {
+          b.disabled = false;
+          if (b.dataset.orig) b.innerHTML = b.dataset.orig;
+        }
+      });
+    }
+  }, 80);
+}
+
+function generateThesis() {
+  if (!state.currentText) {
+    showToast('Generate analysis first', 'error');
+    return;
+  }
+  
+  const text = state.currentText;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  const firstSentence = sentences[0] || '';
+  const excerpt = firstSentence.substring(0, 60);
+  
+  const thesisStatements = [
+    {
+      type: 'Analytical',
+      statement: `Through careful examination of language and structure, the text reveals how ${excerpt.toLowerCase()}... operates as a central mechanism for developing the author's broader thematic concerns about meaning, interpretation, and rhetorical effect.`
+    },
+    {
+      type: 'Argumentative',
+      statement: `The author's strategic use of rhetorical devices and structural choices demonstrates that effective communication requires not merely clarity of expression, but a nuanced understanding of how language shapes reader perception and response.`
+    },
+    {
+      type: 'Comparative',
+      statement: `While the text initially appears to focus on surface-level observations, deeper analysis reveals complex layers of meaning that challenge conventional interpretations and invite readers to reconsider their assumptions about the subject matter.`
+    },
+    {
+      type: 'Interpretive',
+      statement: `The passage's rhetorical power emerges from the tension between explicit statements and implicit suggestions, creating a dynamic reading experience that positions the audience as active participants in meaning-making rather than passive recipients of information.`
+    }
+  ];
+  
+  let html = '<p class="muted" style="margin-bottom: 16px;">Use these as starting points and customize for your specific essay:</p>';
+  
+  thesisStatements.forEach(thesis => {
+    html += `
+      <div class="card" style="padding: 16px; margin: 12px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="color: var(--primary); font-size: 0.95rem;">${thesis.type} Thesis</strong>
+          <button class="btn" style="padding: 6px 12px; font-size: 0.85rem;" onclick="copyToClipboard(\`${thesis.statement.replace(/`/g, '\\`')}\`)">Copy</button>
+        </div>
+        <p style="margin: 0; line-height: 1.8; font-size: 0.95rem; font-style: italic;">${thesis.statement}</p>
+      </div>
+    `;
+  });
+  
+  document.getElementById('thesisContainer').innerHTML = html;
+  showToast('Thesis statements generated', 'info');
+}
+
+function generateCitations() {
+  const author = document.getElementById('authorName').value.trim();
+  const title = document.getElementById('workTitle').value.trim();
+  const year = document.getElementById('pubYear').value.trim();
+  
+  if (!author || !title) {
+    showToast('Please enter at least author and title', 'error');
+    return;
+  }
+  
+  const citations = {
+    'MLA': `${author}. <em>${title}</em>${year ? '. ' + year : ''}.`,
+    'APA': `${author} ${year ? '(' + year + ')' : '(n.d.)'}. <em>${title}</em>.`,
+    'Chicago': `${author}. <em>${title}</em>${year ? '. ' + year : ''}.`,
+    'Harvard': `${author}${year ? ' ' + year : ''}, <em>${title}</em>.`
+  };
+  
+  let html = '<p class="muted" style="margin-bottom: 16px;">Citations generated in multiple formats:</p>';
+  
+  Object.entries(citations).forEach(([format, citation]) => {
+    html += `
+      <div class="card" style="padding: 16px; margin: 12px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="color: var(--primary); font-size: 0.95rem;">${format} Format</strong>
+          <button class="btn" style="padding: 6px 12px; font-size: 0.85rem;" onclick="copyToClipboard(\`${citation.replace(/<[^>]*>/g, '').replace(/`/g, '\\`')}\`)">Copy</button>
+        </div>
+        <p style="margin: 0; line-height: 1.6; font-size: 0.95rem;">${citation}</p>
+      </div>
+    `;
+  });
+  
+  document.getElementById('citationsContainer').innerHTML = html;
+  showToast('Citations generated', 'info');
+}
+
+function copyToClipboard(text) {
+  const clean = text.replace(/<[^>]*>/g, '');
+  navigator.clipboard.writeText(clean).then(function() {
+    showToast('Copied to clipboard', 'info');
+  }).catch(function() {
+    showToast('Failed to copy', 'error');
+  });
+}
+
+function copySummary() {
+  const summaryEl = document.querySelector('#summaryContainer .summary-card');
+  if (!summaryEl) {
+    showToast('Generate analysis first', 'error');
+    return;
+  }
+  copyToClipboard(summaryEl.textContent);
+}
+
+function pasteFromClipboard() {
+  navigator.clipboard.readText()
+    .then(function(text) {
+      document.getElementById('inputText').value = text;
+      showToast('Pasted from clipboard', 'info');
+    })
+    .catch(function() {
+      showToast('Unable to paste from clipboard', 'error');
+    });
+}
+
+function loadFromAnalyzer() {
+  try {
+    const text = localStorage.getItem('ls_current_text');
+    if (text) {
+      document.getElementById('inputText').value = text;
+      showToast('Loaded from sentiment analyzer', 'info');
+    } else {
+      showToast('No text found in analyzer', 'error');
+    }
+  } catch (e) {
+    showToast('Failed to load text', 'error');
+  }
+}
+
+function exportAnalysis() {
+  if (!state.currentText) {
+    showToast('Generate analysis first', 'error');
+    return;
+  }
+  
+  try {
+    const summary = document.querySelector('#summaryContainer .summary-card')?.textContent || 'No summary';
+    const level = document.getElementById('summaryLevel').value;
+    
+    const exportData = {
+      text: state.currentText,
+      summary: summary,
+      level: level,
+      timestamp: new Date().toISOString(),
+      wordCount: state.currentText.split(/\s+/).length
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'analysis-' + Date.now() + '.json';
+    a.click();
+    
+    showToast('Analysis exported', 'info');
+  } catch (e) {
+    showToast('Export failed', 'error');
+  }
+}
+
+function clearAll() {
+  if (confirm('Clear all content?')) {
+    document.getElementById('inputText').value = '';
+    document.getElementById('analysisResults').classList.add('hidden');
+    document.getElementById('quickStats').innerHTML = '';
+    document.getElementById('outlineContent').innerHTML = '<p style="color: var(--muted); font-style: italic;">Generate analysis to see text outline</p>';
+    state.currentText = '';
+    showToast('Cleared', 'info');
+  }
+}
+
+function switchTab(tabName, el) {
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.add('hidden'); });
+  document.querySelectorAll('.tab-button').forEach(function(t) { t.classList.remove('active'); });
+  const content = document.getElementById('tab-' + tabName);
+  if (content) content.classList.remove('hidden');
+  if (el && el.classList) el.classList.add('active');
+}
+
+function enableShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      generateAnalysis();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+      e.preventDefault();
+      loadFromAnalyzer();
+    }
+  });
+}
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .hidden { display: none !important; }
+  .intro-card {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+  }
+  .summary-card {
+    line-height: 1.8;
+  }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (state.darkMode) {
+    document.body.classList.add('dark-mode');
+  }
+  
+  try { enableShortcuts(); } catch (e) { console.warn('shortcuts', e); }
+  
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const textParam = urlParams.get('text');
+    if (textParam) {
+      document.getElementById('inputText').value = decodeURIComponent(textParam);
+      showToast('Text loaded from URL', 'info');
+    }
+  } catch (e) { console.warn('URL params', e); }
+});
+</script>
 
 </body>
 </html>

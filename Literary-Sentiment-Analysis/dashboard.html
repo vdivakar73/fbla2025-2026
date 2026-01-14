@@ -153,126 +153,169 @@
         }
 
         // Compare texts
-        function dashCompare() {
-            const a = document.getElementById('dashA').value.trim();
-            const b = document.getElementById('dashB').value.trim();
-            
-            if (!a || !b) {
-                notify('Paste both texts to compare', 'error');
-                return;
-            }
-            
-            const ana = typeof performAnalysis === 'function' 
-                ? performAnalysis(a) 
-                : { wordCount: a.split(/\s+/).length, sentiment: 'unknown' };
-            const anb = typeof performAnalysis === 'function' 
-                ? performAnalysis(b) 
-                : { wordCount: b.split(/\s+/).length, sentiment: 'unknown' };
-            
-            const results = '<div style="display:flex;gap:12px;">' +
-                '<div style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;">A: ' + ana.wordCount + ' words • ' + ana.sentiment + '</div>' +
-                '<div style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px;">B: ' + anb.wordCount + ' words • ' + anb.sentiment + '</div>' +
-                '</div>';
-            
-            document.getElementById('dashCompareResults').innerHTML = results;
-        }
+        // Compare texts — academic, structural, non-BS
+function splitSentences(text) {
+  return text
+    .replace(/\s+/g, ' ')
+    .match(/[^.!?]+[.!?]+/g) || [];
+}
 
-        // Clear compare
-        function clearCompare() {
-            document.getElementById('dashA').value = '';
-            document.getElementById('dashB').value = '';
-            document.getElementById('dashCompareResults').innerHTML = '';
-        }
+function detectThesis(sentences) {
+  const firstThird = sentences.slice(0, Math.max(3, Math.floor(sentences.length / 3)));
 
-        // Text to speech
-        function speakCurrentText() {
-            const text = document.getElementById('dashA').value || document.getElementById('dashB').value || '';
-            if (!text.trim()) {
-                notify('No text to read', 'info');
-                return;
-            }
-            if (!window.speechSynthesis) {
-                notify('Text-to-speech not available', 'error');
-                return;
-            }
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        }
+  return firstThird.find(s =>
+    s.length > 80 &&
+    /should|must|cannot|reveals|demonstrates|suggests|ultimately|therefore/i.test(s)
+  ) || null;
+}
 
-        // Font size controls
-        function increaseFontSize() {
-            const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-            document.documentElement.style.fontSize = Math.min(currentSize + 2, 24) + 'px';
-        }
+function detectEvidence(sentences) {
+  return sentences.filter(s =>
+    /for example|for instance|such as|according to|historically|in .*?\d{4}|the author|the text|this event/i.test(s) ||
+    s.match(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/) // proper nouns
+  );
+}
 
-        function decreaseFontSize() {
-            const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-            document.documentElement.style.fontSize = Math.max(currentSize - 2, 12) + 'px';
-        }
+function detectCommentary(sentences) {
+  return sentences.filter(s =>
+    /because|therefore|this means|this suggests|as a result|which leads|consequently|thus/i.test(s)
+  );
+}
 
-        function resetFontSize() {
-            document.documentElement.style.fontSize = '16px';
-        }
+function detectCounter(sentences) {
+  return sentences.filter(s =>
+    /however|although|while it may seem|some argue|critics|on the other hand/i.test(s)
+  );
+}
 
-        // Dark mode toggle
-        function toggleDarkMode() {
-            const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            const btn = document.querySelector('.theme-toggle');
-            if (btn) btn.setAttribute('aria-pressed', isDark);
-        }
+function profileAPEssay(text) {
+  const sentences = splitSentences(text);
 
-        // Feedback modal
-        function openFeedbackModal() {
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10003;';
-            modal.innerHTML = '<div style="background:white;width:90%;max-width:600px;padding:18px;border-radius:10px;">' +
-                '<h3 style="margin-top:0;">Send Feedback</h3>' +
-                '<textarea id="feedbackText" placeholder="Your feedback..." style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;"></textarea>' +
-                '<div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end;">' +
-                '<button class="btn btn-primary" onclick="submitFeedback()">Send</button>' +
-                '<button class="btn btn-secondary" onclick="this.closest(\'div\').parentElement.remove()">Cancel</button>' +
-                '</div></div>';
-            document.body.appendChild(modal);
-        }
+  const thesis = detectThesis(sentences);
+  const evidence = detectEvidence(sentences);
+  const commentary = detectCommentary(sentences);
+  const counter = detectCounter(sentences);
 
-        function submitFeedback() {
-            const text = document.getElementById('feedbackText').value.trim();
-            if (!text) {
-                notify('Please enter feedback', 'error');
-                return;
-            }
-            try {
-                const fb = JSON.parse(localStorage.getItem('localFeedback') || '[]');
-                fb.unshift({ id: Date.now(), text: text, timestamp: new Date().toISOString() });
-                while (fb.length > 200) fb.pop();
-                localStorage.setItem('localFeedback', JSON.stringify(fb));
-                notify('Feedback saved locally', 'success');
-                document.querySelector('div[style*="z-index:10003"]').remove();
-            } catch (e) {
-                console.error('Feedback error:', e);
-            }
-        }
+  return {
+    sentences,
+    thesis,
+    evidence,
+    commentary,
+    counter
+  };
+}
 
-        // Simple analysis function
-        function performAnalysis(text) {
-            const words = text.toLowerCase().split(/\s+/).filter(function(w) { return w; });
-            const sentences = text.split(/[.!?]+/).filter(function(s) { return s.trim(); });
-            const positiveWords = ['good', 'great', 'excellent', 'beautiful', 'wonderful', 'amazing', 'love', 'happy', 'joy'];
-            const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'sad', 'angry', 'fear', 'dark'];
-            const positiveCount = words.filter(function(w) { return positiveWords.includes(w); }).length;
-            const negativeCount = words.filter(function(w) { return negativeWords.includes(w); }).length;
-            
-            let sentiment = 'neutral';
-            if (positiveCount > negativeCount) sentiment = 'positive';
-            if (negativeCount > positiveCount) sentiment = 'negative';
-            
-            return {
-                wordCount: words.length,
-                sentenceCount: sentences.length,
-                sentiment: sentiment
-            };
-        }
+function writeAPComparison(A, B) {
+  const lines = [];
+
+  // THESIS
+  if (A.thesis && !B.thesis) {
+    lines.push(
+      `Text A establishes a defensible thesis early, as seen in “${A.thesis}.” 
+      Text B’s position is more implicit, which may weaken clarity for the reader.`
+    );
+  } else if (B.thesis && !A.thesis) {
+    lines.push(
+      `Text B presents a clearer thesis, evident in “${B.thesis},” 
+      while Text A relies more on implied argument rather than direct articulation.`
+    );
+  } else {
+    lines.push(
+      `Both texts articulate their central claims implicitly rather than through direct thesis statements, 
+      a common AP strategy that can be effective if reinforced consistently.`
+    );
+  }
+
+  // EVIDENCE
+  if (A.evidence.length > B.evidence.length + 1) {
+    lines.push(
+      `Text A develops its argument through more frequent and specific evidence, such as “${A.evidence[0]},” 
+      whereas Text B relies on fewer concrete references.`
+    );
+  } else if (B.evidence.length > A.evidence.length + 1) {
+    lines.push(
+      `Text B incorporates more concrete evidence, for example “${B.evidence[0]},” 
+      giving its claims greater credibility than Text A.`
+    );
+  } else {
+    lines.push(
+      `Both essays use evidence at a comparable rate, though neither consistently integrates evidence into every major claim.`
+    );
+  }
+
+  // COMMENTARY (THIS IS THE BIG ONE)
+  if (A.commentary.length > B.commentary.length + 1) {
+    lines.push(
+      `Text A more frequently explains *why* its evidence matters. 
+      Commentary such as “${A.commentary[0]}” demonstrates causal reasoning rather than summary.`
+    );
+  } else if (B.commentary.length > A.commentary.length + 1) {
+    lines.push(
+      `Text B shows stronger line-of-reasoning development, particularly in commentary like “${B.commentary[0]},” 
+      which clarifies the significance of the evidence.`
+    );
+  } else {
+    lines.push(
+      `Both texts rely heavily on evidence but often move on without fully unpacking its significance, 
+      a common limitation that caps the Evidence & Commentary score.`
+    );
+  }
+
+  // COUNTERARGUMENTS
+  if (A.counter.length && !B.counter.length) {
+    lines.push(
+      `Text A acknowledges alternative perspectives, as seen in “${A.counter[0]},” 
+      which adds rhetorical sophistication. Text B does not meaningfully engage opposing views.`
+    );
+  } else if (B.counter.length && !A.counter.length) {
+    lines.push(
+      `Text B engages counterarguments, demonstrated by “${B.counter[0]},” 
+      strengthening its credibility. Text A remains largely one-sided.`
+    );
+  } else {
+    lines.push(
+      `Neither essay meaningfully develops counterarguments, limiting their complexity under AP scoring standards.`
+    );
+  }
+
+  // AP JUDGMENT
+  lines.push(
+    `From an AP Language perspective, the stronger essay is the one that more consistently 
+    connects evidence to claims through explicit reasoning. The weaker essay would benefit most from 
+    expanding commentary rather than adding more examples.`
+  );
+
+  return lines;
+}
+
+function dashCompare() {
+  const a = document.getElementById('dashA').value.trim();
+  const b = document.getElementById('dashB').value.trim();
+
+  if (!a || !b) {
+    notify('Paste both texts to compare', 'error');
+    return;
+  }
+
+  const A = profileAPEssay(a);
+  const B = profileAPEssay(b);
+
+  const feedback = writeAPComparison(A, B);
+
+  document.getElementById('dashCompareResults').innerHTML = `
+    <div style="padding:16px;border:1px solid var(--border);border-radius:12px;">
+      <strong>AP Language Comparative Analysis</strong>
+      ${feedback.map(f => `<p style="margin-top:10px;line-height:1.65;">${f}</p>`).join('')}
+    </div>
+  `;
+}
+//STOP HERE FOR ANALYSIS FUNCIONS
+
+
+
+
+
+
 
         // Show toast notification
         function showToast(message, type, duration) {
