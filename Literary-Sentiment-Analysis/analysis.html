@@ -5,6 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Analysis — Literary Sentiment Analyzer</title>
 <link rel="stylesheet" href="styles.css">
+<!-- Global Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  html, body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+
+  .icon-btn {
+    font-family: inherit;
+  }
+  .icon-btn {
+  font-size: 1rem;
+  line-height: 1;
+}
+.intro-card .intro-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Intro card text colors */
+.intro-card h1 {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.intro-card .intro-subtitle {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Dark mode override */
+.dark-mode .intro-card h1,
+.dark-mode .intro-card .intro-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+</style>
+
 </head>
 
 <body>
@@ -37,15 +80,17 @@
         Generate Analysis
       </button>
       
-      <nav class="header-nav" role="navigation">
-        <a href="study-guide.html">Study Guide</a>
-      </nav>
+
+      
+        <nav class="header-nav" role="navigation"><a href="study-guide.html">Study Guide</a></nav>
+
+      
     </div>
   </header>
 
   <section class="card intro-card" style="margin: 20px 0;">
     <h1 style="margin: 0 0 10px 0; font-weight: 900; font-size: 2rem;">Advanced Text Analysis</h1>
-    <p class="intro-subtitle" style="margin: 0; font-size: 1.1rem; opacity: 0.9;">
+    <p class="intro-subtitle" style="margin: 0; font-size: 1.1rem;">
       Generate comprehensive summaries, extract key arguments, identify rhetorical strategies, and analyze text structure with AI-powered insights.
     </p>
   </section>
@@ -94,9 +139,10 @@
     <main class="card">
       <h2>Input Text</h2>
 
-      <textarea
-        id="inputText"
-        style="width: 100%; min-height: 400px; padding: 16px; font-size: 1rem; resize: vertical;"
+     <textarea
+  id="inputText"
+  style="width: 100%; min-height: 400px; padding: 16px; font-size: 1rem; resize: vertical; font-family: inherit;"
+
         placeholder="Paste or type your text here for comprehensive analysis..."
         aria-label="Text to analyze"></textarea>
 
@@ -256,7 +302,8 @@ function updateQuickStats(text) {
   let html = '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Words</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + words + '</div></div>';
   html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Sentences</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + sentences + '</div></div>';
   html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Paragraphs</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + paragraphs + '</div></div>';
-  html += '<div class="metric-card"><div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Avg Sent Length</div><div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + Math.round(words / sentences) + '</div></div>';
+  html += '<div class="metric-card">' + '<div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 4px;">Avg Sent Length</div>' +
+  '<div style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">' + (sentences > 0 ? Math.round(words / sentences) : 0) + '</div></div>';
   document.getElementById('quickStats').innerHTML = html;
 }
 
